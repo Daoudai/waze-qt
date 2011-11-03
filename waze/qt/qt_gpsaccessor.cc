@@ -22,6 +22,11 @@
  */
 
 #include "qt_gpsaccessor.h"
+
+extern "C" {
+#include "roadmap_gpsqtm.h"
+}
+
 #include <QGeoPositionInfoSource>
 #include <QGeoSatelliteInfoSource>
 #include <QGeoPositionInfo>
@@ -44,14 +49,17 @@ QtGpsAccessor::QtGpsAccessor(QObject *parent) :
      // QGeoPositionInfoSource
      m_location = QGeoPositionInfoSource::createDefaultSource(this);
 
+     m_location->setUpdateInterval(1000);
+     m_location->startUpdates();
+
      // Listen gps position changes
      connect(m_location, SIGNAL(positionUpdated(QGeoPositionInfo)),
              this, SLOT(positionUpdated(QGeoPositionInfo)));
+}
 
-     // QGeoSatelliteInfoSource
-     m_satellite = QGeoSatelliteInfoSource::createDefaultSource(this);
-     connect(m_satellite, SIGNAL(satellitesInViewUpdated(const QList<QGeoSatelliteInfo>&)),
-              this, SLOT(satellitesInViewUpdated(const QList<QGeoSatelliteInfo>&)));
+QtGpsAccessor::~QtGpsAccessor() {
+    m_location->stopUpdates();
+    delete m_location;
 }
 
 void QtGpsAccessor::positionUpdated(const QGeoPositionInfo &gpsPos)
@@ -59,33 +67,41 @@ void QtGpsAccessor::positionUpdated(const QGeoPositionInfo &gpsPos)
     QGeoCoordinate coord = gpsPos.coordinate();
     double latitude = coord.latitude()*1000000;
     double longitude = coord.longitude()*1000000;
+    int altitude = (int) coord.altitude();
 
-    if (coord.isValid())
-    {
-        QList<roadmap_fix_listener>::iterator i;
-        for (i = m_positionMonitors.begin(); i != m_positionMonitors.end(); ++i) {
-            (*i) (longitude, latitude);
-        }
+    // translate QDateTime to time_t
+    QDateTime epoch;
+    epoch.setTime_t(0);
+    time_t translatedTime = epoch.secsTo(gpsPos.timestamp());
+
+    int speed = (int) gpsPos.attribute(QGeoPositionInfo::GroundSpeed);
+    if (speed == -1) {
+        speed = ROADMAP_NO_VALID_DATA;
+    }
+
+    int azymuth = (int) gpsPos.attribute(QGeoPositionInfo::Direction);
+    if (azymuth == -1) {
+        azymuth = ROADMAP_NO_VALID_DATA;
+    }
+
+    char status = gpsPos.coordinate().isValid()? 'A' : 'V';
+
+    QList<RoadMapGpsdNavigation>::iterator i;
+    for (i = m_callbacks.begin(); i != m_callbacks.end(); ++i) {
+        (*i) (  status,
+                translatedTime,
+                latitude,
+                longitude,
+                altitude,
+                speed,
+                azymuth);
     }
 }
 
-void QtGpsAccessor::satellitesInViewUpdated(const QList<QGeoSatelliteInfo> &satellites)
-{
-    /* TODO */
+void QtGpsAccessor::registerChangeListener(RoadMapGpsdNavigation callback) {
+    m_callbacks.append(callback);
 }
 
-void QtGpsAccessor::registerSatelliteChangeListener(roadmap_gps_monitor monitor) {
-    m_satelliteMonitors.append(monitor);
-}
-
-void QtGpsAccessor::unregisterSatelliteChangeListener(roadmap_gps_monitor monitor) {
-    m_satelliteMonitors.removeOne(monitor);
-}
-
-void QtGpsAccessor::registerLocationChangeListener(roadmap_fix_listener monitor) {
-    m_positionMonitors.append(monitor);
-}
-
-void QtGpsAccessor::unregisterLocationChangeListener(roadmap_fix_listener monitor) {
-    m_positionMonitors.removeOne(monitor);
+QGeoPositionInfo QtGpsAccessor::lastKnownPosition() {
+    return m_location->lastKnownPosition();
 }

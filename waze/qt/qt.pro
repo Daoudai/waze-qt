@@ -34,14 +34,18 @@ SOURCES += \
     roadmap_device.cc \
     roadmap_tile_storage_qtsql.cc \
     roadmap_native_keyboard.cc \
-    roadmap_gpsqtm.cc
+    roadmap_gpsqtm.cc \
+    qt/qt_gpsaccessor.cc
 
 HEADERS += \
     qt_progress.h \
     qt_main.h \
     qt_dialog.h \
     qt_canvas.h \
-    roadmap_gpsqtm.h
+    roadmap_gpsqtm.h \
+    qt/qt_gpsaccessor.h
+
+
 
 
 

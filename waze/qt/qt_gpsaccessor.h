@@ -27,34 +27,21 @@
 #include <QObject>
 #include <QList>
 #include <QGeoPositionInfoSource>
-#include <QGeoSatelliteInfo>
-#include <QGeoSatelliteInfoSource>
 QTM_USE_NAMESPACE
 
 extern "C" {
     #include "roadmap_gps.h"
 }
 
-/******
-
-  to be used just in case...
-
-  **********/
-
-
 class QtGpsAccessor : public QObject
 {
     Q_OBJECT
 public:
     explicit QtGpsAccessor(QObject *parent = 0);
+    ~QtGpsAccessor();
+    void registerChangeListener(RoadMapGpsdNavigation callback);
 
-    void registerSatelliteChangeListener(roadmap_gps_monitor);
-    void unregisterSatelliteChangeListener(roadmap_gps_monitor);
-
-    void registerLocationChangeListener(roadmap_fix_listener);
-    void unregisterLocationChangeListener(roadmap_fix_listener);
-
-    RoadMapGpsPosition* getPosition();
+    QGeoPositionInfo lastKnownPosition();
 
 signals:
 
@@ -62,15 +49,10 @@ public slots:
     // QGeoPositionInfoSource
     void positionUpdated(const QGeoPositionInfo &gpsPos);
 
-    // QGeoSatelliteInfoSource
-    void satellitesInViewUpdated(const QList<QGeoSatelliteInfo>&);
-
 private:
     QGeoPositionInfoSource* m_location;
-    QGeoSatelliteInfoSource* m_satellite;
 
-    QList<roadmap_gps_monitor> m_satelliteMonitors;
-    QList<roadmap_fix_listener> m_positionMonitors; //only valid fix
+    QList<RoadMapGpsdNavigation> m_callbacks;
 };
 
 #endif // QT_GPSACCESSOR_H

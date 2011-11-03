@@ -39,25 +39,21 @@ extern "C" {
 #include "roadmap_gpsqtm.h"
 }
 
+#include "qt_gpsaccessor.h"
 #include <QGeoPositionInfoSource>
 #include <QGeoPositionInfo>
 QTM_USE_NAMESPACE
 
-static RoadMapGpsdNavigation RoadmapGpsQtmNavigationListener = NULL;
-
-static QGeoPositionInfoSource* GpsPositionSource = NULL;
+static QtGpsAccessor* GpsPositionSource = NULL;
 
 void roadmap_gpsqtm_initialize (void) {
     if (GpsPositionSource == NULL) {
-        GpsPositionSource = QGeoPositionInfoSource::createDefaultSource(0);
-        GpsPositionSource->setUpdateInterval(1000);
-        GpsPositionSource->startUpdates();
+        GpsPositionSource = new QtGpsAccessor();
     }
 }
 
 void roadmap_gpsqtm_shutdown (void) {
     if (GpsPositionSource != NULL) {
-        GpsPositionSource->stopUpdates();
         delete GpsPositionSource;
     }
 }
@@ -78,37 +74,14 @@ int roadmap_gpsqtm_input (RoadMapInputContext *context) {
 
 void roadmap_gpsqtm_subscribe_to_navigation (RoadMapGpsdNavigation navigation) {
 
-   RoadmapGpsQtmNavigationListener = navigation;
+   GpsPositionSource->registerChangeListener(navigation);
 }
 
 int roadmap_gpsqtm_decode (void *user_context,
                             void *decoder_context, char *data, int length) {
 
    QGeoPositionInfo *d = (QGeoPositionInfo *) data;
-
-   // translate QDateTime to time_t
-   QDateTime epoch;
-   epoch.setTime_t(0);
-   time_t translatedTime = epoch.secsTo(d->timestamp());
-
-   int longitude = d->coordinate().longitude()*1000000;
-   int latitude = d->coordinate().latitude()*1000000;
-   int altitude = (int) d->coordinate().altitude();
-   int speed = (int) d->attribute(QGeoPositionInfo::GroundSpeed);
-   if (speed == -1) {
-       speed = ROADMAP_NO_VALID_DATA;
-   }
-
-   int azymuth = (int) d->attribute(QGeoPositionInfo::Direction);
-   if (azymuth == -1) {
-       azymuth = ROADMAP_NO_VALID_DATA;
-   }
-
-   char status = d->coordinate().isValid()? 'A' : 'V';
-
-   //roadmap_log (ROADMAP_DEBUG, "GPS data: %d, %d, %d\n", d->status, d->speed, d->azymuth);
-   RoadmapGpsQtmNavigationListener
-         (status, translatedTime, latitude, longitude, altitude, speed, azymuth);
+   GpsPositionSource->positionUpdated(*d);
 
    return length;
 }

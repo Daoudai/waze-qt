@@ -287,7 +287,7 @@ void roadmap_main_remove_input(RoadMapIO *io) {
    }
 
    for (i = 0; i < ROADMAP_MAX_IO; ++i) {
-      if (RoadMapMainIo[i].io.os.file == fd) {
+      if (GET_FD(RoadMapMainIo[i].io) == fd) {
          RoadMapMainIo[i].io.subsystem = ROADMAP_IO_INVALID;
          RoadMapMainIo[i].io.os.file = -1;
          RoadMapMainIo[i].start_time = 0;
