@@ -101,11 +101,6 @@ static void roadmap_main_output (int fd) {
           {
             (*RoadMapMainIo[i].callback) (&RoadMapMainIo[i].io);
           }
-          roadmap_io_invalidate(&RoadMapMainIo[i].io);
-          RoadMapMainIo[i].io_type = _IO_DIR_UNDEFINED;
-          RoadMapMainIo[i].callback = NULL;
-          RoadMapMainIo[i].start_time = 0;
-          mainWindow->removeFd(fd);
           break;
       }
    }
@@ -289,8 +284,8 @@ void roadmap_main_remove_input(RoadMapIO *io) {
    for (i = 0; i < ROADMAP_MAX_IO; ++i) {
       if (GET_FD(RoadMapMainIo[i].io) == fd) {
          RoadMapMainIo[i].io.subsystem = ROADMAP_IO_INVALID;
-         RoadMapMainIo[i].io.os.file = -1;
          RoadMapMainIo[i].start_time = 0;
+         roadmap_io_invalidate( &RoadMapMainIo[i].io );
          break;
       }
    }
