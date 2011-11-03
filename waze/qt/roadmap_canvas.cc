@@ -130,7 +130,7 @@ void roadmap_canvas_erase (void) {
 }
 
 void roadmap_canvas_erase_area (const RoadMapGuiRect *rect) {
-    /* TODO */
+    roadMapCanvas->clearArea(rect);
 }
 
 #if defined(ROADMAP_ADVANCED_STYLE)

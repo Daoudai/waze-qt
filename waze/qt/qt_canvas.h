@@ -100,7 +100,7 @@ public:
    void setFontBufferSize(int size);
    int getFontBufferSize(RoadMapPen pen);
 #endif /* ROADMAP_ADVANCED_STYLE */
-
+   void clearArea(const RoadMapGuiRect *rect);
    void erase(void);
    void setupPainterPen(QPainter &p);
    void drawString(RoadMapGuiPoint* position, int corner,

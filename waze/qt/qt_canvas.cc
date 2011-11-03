@@ -301,6 +301,17 @@ int RMapCanvas::getFontBufferSize(RoadMapPen pen) {
 }
 #endif /* ROADMAP_ADVANCED_STYLE */
 
+void RMapCanvas::clearArea(const RoadMapGuiRect *rect) {
+    if (pixmap) {
+        QRect visualRectangle(rect->minx, rect->miny, rect->maxx - rect->minx, rect->maxy - rect->miny);
+        QPainter p(pixmap);
+        QBrush b(currentPen->pen->color());
+        p.setBackgroundMode(Qt::OpaqueMode);
+        p.setBrush(b);
+        p.drawRect(visualRectangle);
+    }
+}
+
 void RMapCanvas::erase() {
    if (pixmap) {
       pixmap->fill(currentPen->pen->color());
@@ -699,6 +710,7 @@ void RMapCanvas::initColors() {
 void RMapCanvas::drawImage(const RoadMapGuiPoint* pos, const RoadMapImage image, int opacity)
 {
     QPainter p(pixmap);
+    setupPainterPen(p);
     p.setOpacity(opacity/100);
     p.drawImage(pos->x, pos->y, *(image->image), 0, 0, image->image->width(), image->image->height());
 }
