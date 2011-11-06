@@ -286,7 +286,7 @@ int roadmap_canvas_get_label_buffer_size(RoadMapPen pen) {
 #endif /* ROADMAP_ADVANCED_STYLE */
 
 void roadmap_canvas_draw_string(RoadMapGuiPoint *position, int corner, const char *text) {
-    roadmap_canvas_draw_formated_string_size(position, corner, 18, FONT_TYPE_BOLD, text);
+    roadmap_canvas_draw_formated_string_size(position, corner, -1, FONT_TYPE_BOLD, text);
 }
 
 void roadmap_canvas_draw_string_size (RoadMapGuiPoint *position,

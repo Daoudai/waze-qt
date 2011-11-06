@@ -140,7 +140,7 @@ void RMapCanvas::setPenThickness(int thickness) {
 
 void RMapCanvas::setFontSize(int size) {
   if (currentPen != 0) {
-      size = (size == -1)? 18 : size;
+      size = (size == -1)? 14 : size;
     currentPen->font->setPointSize(size);
   }
 }
