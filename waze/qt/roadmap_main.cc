@@ -44,6 +44,7 @@ extern "C" {
 }
 
 #include <QApplication>
+#include <QMutex>
 
 #include "qt_main.h"
 
@@ -237,9 +238,6 @@ void roadmap_main_set_input(RoadMapIO *io, RoadMapInput callback) {
 
       int i;
 
-      /* All the same on UNIX except socket */
-      mainWindow->addInput(GET_FD(*io), roadmap_main_input);
-
       for (i = 0; i < ROADMAP_MAX_IO; ++i) {
          if (RoadMapMainIo[i].io.subsystem == ROADMAP_IO_INVALID) {
             RoadMapMainIo[i].io = *io;
@@ -249,6 +247,9 @@ void roadmap_main_set_input(RoadMapIO *io, RoadMapInput callback) {
             break;
          }
       }
+
+      /* All the same on UNIX except socket */
+      mainWindow->addInput(GET_FD(*io), roadmap_main_input);
    }
 }
 
@@ -256,9 +257,6 @@ void roadmap_main_set_output   (RoadMapIO *io, RoadMapInput callback) {
     if (mainWindow) {
 
        int i;
-
-       /* All the same on UNIX except socket */
-       mainWindow->addOutput(GET_FD(*io), roadmap_main_output);
 
        for (i = 0; i < ROADMAP_MAX_IO; ++i) {
           if (RoadMapMainIo[i].io.subsystem == ROADMAP_IO_INVALID) {
@@ -269,6 +267,9 @@ void roadmap_main_set_output   (RoadMapIO *io, RoadMapInput callback) {
              break;
           }
        }
+
+       /* All the same on UNIX except socket */
+       mainWindow->addOutput(GET_FD(*io), roadmap_main_output);
     }
 }
 
@@ -277,17 +278,19 @@ void roadmap_main_remove_input(RoadMapIO *io) {
    int i;
    int fd = GET_FD(*io);
 
-   if (mainWindow) {
-      mainWindow->removeFd(fd);
-   }
-
    for (i = 0; i < ROADMAP_MAX_IO; ++i) {
       if (GET_FD(RoadMapMainIo[i].io) == fd) {
-         RoadMapMainIo[i].io.subsystem = ROADMAP_IO_INVALID;
          RoadMapMainIo[i].start_time = 0;
+         if (mainWindow) {
+            mainWindow->stopFd(fd);
+         }
          roadmap_io_invalidate( &RoadMapMainIo[i].io );
          break;
       }
+   }
+
+   if (mainWindow) {
+      mainWindow->removeFd(fd);
    }
 }
 

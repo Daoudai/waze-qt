@@ -36,8 +36,11 @@
 #include <QEvent>
 #include <QIcon>
 #include <QEventLoop>
+#include <QThread>
+#include <QTcpSocket>
+#include <QMutex>
 
-#define ROADMAP_MAX_TIMER 16
+#define ROADMAP_MAX_TIMER 64
 
 extern "C" {
 
@@ -63,21 +66,26 @@ typedef enum
         _IO_DIR_READWRITE
 } io_direction_type;
 
-class RMapFD : public QObject {
+class RMapFD : public QThread {
 
 Q_OBJECT
 
 public:
    RMapFD(int fd1, RoadMapQtInput cb, io_direction_type direction);
    ~RMapFD();
+   void run();
+   bool isInterrupted();
+   void setInterrupted(bool value);
 
 protected:
    int fd;
    RoadMapQtInput callback;
-   QSocketNotifier* nf;
+   io_direction_type direction;
+   bool interrupted;
+   QMutex interruptedLock;
 
 protected slots:
-   void fire(int);
+   void fire();
 };
 
 class RMapCallback : public QObject {
@@ -158,6 +166,7 @@ public:
    void addInput(int fd, RoadMapQtInput callback);
    void removeFd(int fd);
    void addOutput(int fd, RoadMapQtInput callback);
+   void stopFd(int fd);
    void setStatus(const char* text);
 
    void toggleFullScreen();
