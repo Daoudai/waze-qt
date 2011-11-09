@@ -54,6 +54,7 @@ extern "C" {
 typedef void (*RoadMapQtInput) (int fd);
 
 BOOL roadmap_horizontal_screen_orientation();
+void roadmap_main_message_dispatcher( int aMsg );
 }
 
 #include "qt_canvas.h"
@@ -66,27 +67,13 @@ typedef enum
         _IO_DIR_READWRITE
 } io_direction_type;
 
-class RMapFD : public QThread {
+#define MSG_CATEGORY_IO_CALLBACK	0x010000
+#define MSG_CATEGORY_IO_CLOSE		0x020000
+#define MSG_CATEGORY_TIMER			0x040000
+#define MSG_CATEGORY_MENU			0x080000
+#define MSG_CATEGORY_RENDER			0x100000
 
-Q_OBJECT
-
-public:
-   RMapFD(int fd1, RoadMapQtInput cb, io_direction_type direction);
-   ~RMapFD();
-   void run();
-   bool isInterrupted();
-   void setInterrupted(bool value);
-
-protected:
-   int fd;
-   RoadMapQtInput callback;
-   io_direction_type direction;
-   bool interrupted;
-   QMutex interruptedLock;
-
-protected slots:
-   void fire();
-};
+#define MSG_ID_MASK			0xFFFF
 
 class RMapCallback : public QObject {
 
@@ -163,11 +150,8 @@ public:
 
    void addToolSpace(void);
    void addCanvas(void);
-   void addInput(int fd, RoadMapQtInput callback);
-   void removeFd(int fd);
-   void addOutput(int fd, RoadMapQtInput callback);
-   void stopFd(int fd);
    void setStatus(const char* text);
+   void dispatchMessage(int message);
 
    void toggleFullScreen();
 
@@ -176,12 +160,18 @@ public:
 public slots:
    void handleSignal();
 
+
+private slots:
+   void onRecievedMessage(int message);
+
+signals:
+   void recievedMessage(int message);
+
 private:
    QSocketNotifier *snSignal;
 
 protected:
    RoadMapKeyInput keyCallback;
-   QMap<int, RMapFD*> inputMap;
    QToolBar* toolBar;
    RMapCanvas* canvas;
 

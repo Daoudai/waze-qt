@@ -31,7 +31,7 @@ TEMPLATE = app
 TARGET = waze
 CONFIG -= staticlib
 
-LIBS += -lz -ldl
+LIBS += -lz -ldl -lrt
 
 QMAKE_CFLAGS += -Wno-unused-result -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable
 

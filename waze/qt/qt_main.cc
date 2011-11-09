@@ -41,105 +41,6 @@
 
 static int signalFd[2];
 
-const struct timeval SOCKET_READ_SELECT_TIMEOUT = {30, 0}; // {sec, u sec}
-const struct timeval SOCKET_WRITE_SELECT_TIMEOUT = {30, 0}; // {sec, u sec}
-
-// Implementation of RMapFD class
-RMapFD::RMapFD(int fd1, RoadMapQtInput cb, io_direction_type ioDirection) {
-   fd = fd1;
-   callback = cb;
-   interrupted = false;
-
-   direction = ioDirection;
-
-   connect(this, SIGNAL(finished()), this, SLOT(fire()));
-   start();
-}
-
-RMapFD::~RMapFD() {
-
-}
-
-bool RMapFD::isInterrupted()
-{
-    bool value;
-    interruptedLock.lock();
-    value = interrupted;
-    interruptedLock.unlock();
-    return value;
-}
-
-void RMapFD::setInterrupted(bool value)
-{
-    interruptedLock.lock();
-    interrupted = value;
-    interruptedLock.unlock();
-}
-
-void RMapFD::run() {
-    fd_set fdSet;
-    struct timeval selectReadTO = SOCKET_READ_SELECT_TIMEOUT;
-    struct timeval selectWriteTO = SOCKET_WRITE_SELECT_TIMEOUT;
-    int retVal, ioMsg;
-    const char *handler_dir;
-
-    // Empty the set
-    FD_ZERO( &fdSet );
-
-    handler_dir = ( direction == _IO_DIR_WRITE ) ? "WRITE" : "READ";
-    while( !isInterrupted() )
-    {
-        // Add the file descriptor to the set if necessary
-        if ( !FD_ISSET( fd, &fdSet ) )
-        {
-//			roadmap_log( ROADMAP_DEBUG, "Thread %d. Calling FD_SET for FD: %d", pthread_self(), fd );
-                FD_SET( fd, &fdSet );
-        }
-        //selectTO = (struct timeval) SOCKET_SELECT_TIMEOUT;
-        // Try to read or write from the file descriptor. fd + 1 is the max + 1 of the fd-s set!
-        if ( direction == _IO_DIR_WRITE )
-        {
-           selectWriteTO = SOCKET_WRITE_SELECT_TIMEOUT;
-                retVal = select( fd+1, NULL, &fdSet, NULL, &selectWriteTO );
-//			roadmap_log( ROADMAP_DEBUG, "Thread %d. IO %d WRITE : %d. FD: %d", pthread_self(), data->io_id, retVal, fd );
-        }
-        else
-        {
-           selectReadTO = SOCKET_READ_SELECT_TIMEOUT;
-                retVal = select( fd+1, &fdSet, NULL, NULL, &selectReadTO );
-//			roadmap_log( ROADMAP_DEBUG, "Thread %d. IO %d READ : %d. FD: %d", pthread_self(), data->io_id, retVal, fd );
-        }
-            // Cancellation point - if IO is marked for invalidation - thread has to be closed
-            if ( isInterrupted() )
-            {
-//			roadmap_log( ROADMAP_INFO, "IO %d invalidated. Thread %d going to exit...", io_id, pthread_self() );
-                    break;
-            }
-
-        if ( retVal == 0 )
-        {
-                roadmap_log( ROADMAP_ERROR, "Socket %d timeout", fd );
-        }
-        if( retVal  < 0 )
-        {
-                // Error in file descriptor polling
-                roadmap_log( ROADMAP_ERROR, "Socket %d error for thread %d: Error # %d, %s", fd, currentThreadId(), errno, strerror( errno ) );
-                break;
-        }
-        if (retVal)
-        {
-            break;
-        }
-    }
-
-}
-
-void RMapFD::fire() {
-   if (callback != 0) {
-      callback(fd);
-   }
-}
-
 // Implementation of RMapCallback class
 RMapCallback::RMapCallback(RoadMapCallback cb) {
    callback = cb;
@@ -181,15 +82,13 @@ RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) : QMainWindow(par
         qFatal("Couldn't create Signal socketpair");
    snSignal = new QSocketNotifier(signalFd[1], QSocketNotifier::Read, this);
    connect(snSignal, SIGNAL(activated(int)), this, SLOT(handleSignal()));
+   connect(this, SIGNAL(recievedMessage(int)), this, SLOT(onRecievedMessage(int)));
+
+   roadmap_log(ROADMAP_INFO, "main thread id: %d ", this->thread()->currentThreadId());
 }
 
 RMapMainWindow::~RMapMainWindow() {
-   QMap<int, RMapFD*>::Iterator it;
 
-   for(it = inputMap.begin(); it != inputMap.end(); ++it) {
-      //delete it.data();
-      inputMap.remove(it.key());
-   }
 }
 
 void RMapMainWindow::setKeyboardCallback(RoadMapKeyInput c) {
@@ -317,31 +216,14 @@ void RMapMainWindow::addCanvas(void) {
    adjustSize();
 }
 
-void RMapMainWindow::addInput(int fd, RoadMapQtInput callback) {
-   RMapFD* rmi = new RMapFD(fd, callback, _IO_DIR_READ);
-   inputMap.insert(fd, rmi);
+void RMapMainWindow::dispatchMessage(int message) {
+    roadmap_log(ROADMAP_INFO, "dispatch thread id: %d ", this->thread()->currentThreadId());
+    emit recievedMessage(message);
 }
 
-void RMapMainWindow::addOutput(int fd, RoadMapQtInput callback) {
-   RMapFD* rmi = new RMapFD(fd, callback, _IO_DIR_WRITE);
-   inputMap.insert(fd, rmi);
-}
-
-void RMapMainWindow::removeFd(int fd) {
-   RMapFD* rmi = inputMap[fd];
-
-   if (rmi != 0) {
-      inputMap.remove(fd);
-      delete rmi;
-   }
-}
-
-void RMapMainWindow::stopFd(int fd) {
-   RMapFD* rmi = inputMap[fd];
-
-   if (rmi != 0) {
-        rmi->setInterrupted(true);
-   }
+void RMapMainWindow::onRecievedMessage(int message) {
+    roadmap_log(ROADMAP_INFO, "dispatcher receiver thread id: %d ", this->thread()->currentThreadId());
+    roadmap_main_message_dispatcher(message);
 }
 
 void RMapMainWindow::setStatus(const char* text) {
