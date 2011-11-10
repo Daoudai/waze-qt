@@ -33,7 +33,9 @@ CONFIG -= staticlib
 
 LIBS += -lz -ldl -lrt
 
-QMAKE_CFLAGS += -Wno-unused-result -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable
+!maemo5 {
+    QMAKE_CFLAGS += -Wno-unused-result -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable
+}
 
 SOURCES += \
     roadmap_tile.c \

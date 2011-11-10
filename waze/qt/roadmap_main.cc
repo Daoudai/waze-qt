@@ -342,7 +342,11 @@ void roadmap_main_new(const char* title, int width, int height) {
 
    mainWindow = new RMapMainWindow(0,0);
 
-  mainWindow->showFullScreen();
+#ifdef Q_WS_MAEMO_5
+   mainWindow->showMaximized();
+#else
+   mainWindow->showFullScreen();
+#endif
 
   editor_main_set(1);
 }
@@ -921,7 +925,7 @@ static void roadmap_main_close_IO()
 static void on_auto_hide_dialog_close( int exit_code, void* context )
 {
 }
-/*************************************************************************************************
+/*************************************************************************************************/
 
 
 /*************************************************************************************************

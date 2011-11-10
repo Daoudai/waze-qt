@@ -38,8 +38,11 @@ int roadmap_device_initialize( void ) {
 }
 
 void roadmap_device_set_backlight( int alwaysOn ) {
+#ifndef Q_WS_MAEMO_5
+    /* TODO */ // maemo5
     QSystemScreenSaver scrSaver;
     scrSaver.setScreenSaverInhibited(alwaysOn);
+#endif
 }
 
 int roadmap_device_get_battery_level( void ) {
@@ -52,8 +55,13 @@ void roadmap_device_call_start_callback( void ) {
 }
 
 BOOL roadmap_horizontal_screen_orientation() {
+#ifdef Q_WS_MAEMO_5
+    /* TODO */ // maemo5
+    return true;
+#else
     QSystemDisplayInfo dispInfo;
     return dispInfo.orientation(0) == QSystemDisplayInfo::Landscape;
+#endif
 }
 
 BOOL roadmap_camera_take_picture( CameraImageFile* image_file, CameraImageBuf* image_thumbnail ) {

@@ -28,10 +28,15 @@ extern "C" {
 QTM_USE_NAMESPACE
 
 BOOL roadmap_native_keyboard_enabled( void ) {
+#ifndef Q_WS_MAEMO_5
     QSystemDeviceInfo info;
     return (info.inputMethodType() & QSystemDeviceInfo::Keyboard) &&
             (info.keyboardTypes() & QSystemDeviceInfo::FullQwertyKeyboard) &&
             info.isKeyboardFlippedOpen();
+#else
+    /* TODO */ //maemo5
+    return false;
+#endif
 }
 
 BOOL roadmap_native_keyboard_visible( void ) {
