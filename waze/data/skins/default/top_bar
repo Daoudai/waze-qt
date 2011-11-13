@@ -1,0 +1,148 @@
+N logo
+I TS_top_logo
+P 15 8
+B -15 -8 85 50
+A about
+
+N Seperator
+I Topbar_Sep
+P 100 10
+
+N alerts 
+I top_alerts
+I top_alerts
+I top_alerts
+I top_alerts
+I top_alerts
+P 120 12
+B -20 -12 70 46
+S alerts_state
+C real_time_state 1
+A real_time_alerts_list
+
+N num_alerts
+T num_alerts
+P 141 5
+F 15
+S alerts_state
+C real_time_state 1
+A real_time_alerts_list
+
+N Seperator
+I Topbar_Sep
+P 190 10
+
+N alerts_group 
+I TS_top_bar_groups
+I TS_top_bar_groups
+I TS_top_bar_groups_new
+P 200 5
+B -10 -5 80 53
+S groups_state
+C real_time_state 1
+A real_time_alerts_list_group
+
+
+N num_alerts_group
+T group_num_alerts
+P 255 5
+F 15
+S alerts_state
+C real_time_state 1
+A real_time_alerts_list_group
+
+N Seperator
+I Topbar_Sep
+P 280 10
+
+N moods
+S mood_state
+A mood_dialog
+B -20 -5 70 53
+I TS_top_mood_disabled
+I TS_top_mood_happy
+I TS_top_mood_sad
+I TS_top_mood_mad
+I TS_top_mood_bored
+I TS_top_mood_speedy
+I TS_top_mood_starving
+I TS_top_mood_sleepy
+I TS_top_mood_cool
+I TS_top_mood_inlove
+I TS_top_mood_LOL
+I TS_top_mood_peaceful2
+I TS_top_mood_singing
+I TS_top_mood_wondering
+I TS_top_mood_happy
+I TS_top_mood_sad
+I TS_top_mood_mad
+I TS_top_mood_bored
+I TS_top_mood_speedy
+I TS_top_mood_starving
+I TS_top_mood_sleepy
+I TS_top_mood_cool
+I TS_top_mood_inlove
+I TS_top_mood_LOL
+I TS_top_mood_peaceful
+I TS_top_mood_singing
+I TS_top_mood_wondering
+I TS_top_mood_bronze
+I TS_top_mood_silver
+I TS_top_mood_gold
+I TS_top_mood_busy
+I TS_top_mood_busy
+I TS_top_mood_in_a_hurry
+I TS_top_mood_in_a_hurry
+I TS_top_mood_baby
+P 296 5
+
+N GroupWazer
+G group_wazer
+C real_time_state 1
+P 295 5
+
+N crown
+S user_addon_state
+I TS_top_mood_crown
+I TS_top_mood_sword
+I TS_top_mood_shield
+I TS_top_mood_edit
+I TS_top_mood_beta
+I TS_top_mood_halo
+P 296 5
+
+N Seperator
+I Topbar_Sep
+P -115 10
+
+N gps_reception
+I TS_top_satellite_off
+I TS_top_satellite_off
+I TS_top_satellite_poor
+I TS_top_satellite_on
+P -95 7
+S GPS_reception
+A gps_net_stat
+B -20 -7 50 51
+
+N on_line
+I TS_top_not_connected
+I TS_top_connected
+P -50 9
+S real_time_state
+A gps_net_stat
+B -4 -9 50 49
+
+N Seperator
+I Topbar_Sep
+P -50 10
+C top_bar_exit_state 1
+
+N exit
+P -50 14
+I exit_button
+A minimize
+B -4 -18 50 28
+C top_bar_exit_state 1
+
+Y 1
