@@ -64,6 +64,3 @@ BOOL roadmap_horizontal_screen_orientation() {
 #endif
 }
 
-BOOL roadmap_camera_take_picture( CameraImageFile* image_file, CameraImageBuf* image_thumbnail ) {
-    /* TODO */
-}

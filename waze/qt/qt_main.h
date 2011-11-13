@@ -61,10 +61,10 @@ void roadmap_main_message_dispatcher( int aMsg );
 
 typedef enum
 {
-        _IO_DIR_UNDEFINED = 0,
-        _IO_DIR_READ,
-        _IO_DIR_WRITE,
-        _IO_DIR_READWRITE
+    _IO_DIR_UNDEFINED = 0x0,
+    _IO_DIR_CONNECT = 0x1,
+    _IO_DIR_READ = 0x2,
+    _IO_DIR_WRITE = 0x4
 } io_direction_type;
 
 #define MSG_CATEGORY_IO_CALLBACK	0x010000
@@ -72,6 +72,7 @@ typedef enum
 #define MSG_CATEGORY_TIMER			0x040000
 #define MSG_CATEGORY_MENU			0x080000
 #define MSG_CATEGORY_RENDER			0x100000
+#define MSG_CATEGORY_RESOLVER			0x200000
 
 #define MSG_ID_MASK			0xFFFF
 
