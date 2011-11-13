@@ -131,6 +131,8 @@ public:
    void configure();
 
 protected:
+   QColor translateColor(const char* color);
+
    QMap<QString, QColor*> colors;
    QMap<QString, RoadMapPen> pens;
    RoadMapPen currentPen;

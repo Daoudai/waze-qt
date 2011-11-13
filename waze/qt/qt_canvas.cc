@@ -85,11 +85,11 @@ RoadMapPen RMapCanvas::createPen(const char* name) {
       p->font = new QFont("Arial",12);
 #if defined(ROADMAP_ADVANCED_STYLE)
       p->brush = new QBrush();
-      p->fontcolor = new QColor("#000000");
+      p->fontcolor = new QColor(getColor("#000000"));
       p->capitalize = 0;
       p->background = 0;
       p->buffersize = 0;
-      p->buffercolor = new QColor("#ffffff");
+      p->buffercolor = new QColor(getColor("#ffffff"));
       p->pen->setJoinStyle(Qt::RoundJoin);
       p->pen->setCapStyle(Qt::RoundCap);
 #endif
@@ -194,15 +194,29 @@ void RMapCanvas::setPenLineJoinStyle(int join) {
   }
 }
 
-void RMapCanvas::setBrushColor(const char *color) {
-  if (currentPen != 0) {
-    int opacity = currentPen->brush->color().alpha();
-    QColor c(color);
+QColor RMapCanvas::translateColor(const char *color) {
+    QString colorString(color);
+    int opacity = 255;
+    if (colorString.length() == 9)
+    {
+        opacity = colorString.left(2).toInt(NULL, 16);
+        colorString.chop(2);
+    }
+
+    QColor c(colorString);
     c.setAlpha(opacity);
-    currentPen->brush->setColor(color);
-    if (currentPen->brush->style()==Qt::NoBrush)
-      currentPen->brush->setStyle(Qt::SolidPattern);
-  }
+
+    return color;
+}
+
+void RMapCanvas::setBrushColor(const char *color) {
+    if (currentPen != 0) {
+        currentPen->brush->setColor(getColor(color));
+        if (currentPen->brush->style()==Qt::NoBrush)
+        {
+            currentPen->brush->setStyle(Qt::SolidPattern);
+        }
+    }
 }
 
 void RMapCanvas::setBrushStyle(int style) {
@@ -232,7 +246,7 @@ void RMapCanvas::setFontName(const char *name) {
 
 void RMapCanvas::setFontColor(const char *color) {
   if (currentPen != 0) {
-    currentPen->fontcolor = new QColor(color);
+    currentPen->fontcolor = new QColor(getColor(color));
   }
 }
 
@@ -286,7 +300,7 @@ void RMapCanvas::setBrushAsBackground(int background) {
 
 void RMapCanvas::setFontBufferColor(const char *color) {
   if (currentPen != 0) {
-    currentPen->buffercolor = new QColor(color);
+    currentPen->buffercolor = new QColor(getColor(color));
   }
 }
 
@@ -695,7 +709,7 @@ QColor RMapCanvas::getColor(const char* color) {
    QColor *c = colors[color];
 
    if (c == 0) {
-      c = new QColor(color);
+      c = new QColor(translateColor(color));
       colors.insert(color, c);
    }
 
@@ -711,6 +725,6 @@ void RMapCanvas::drawImage(const RoadMapGuiPoint* pos, const RoadMapImage image,
 {
     QPainter p(pixmap);
     setupPainterPen(p);
-    p.setOpacity(opacity/100);
+    p.setOpacity(opacity/255);
     p.drawImage(pos->x, pos->y, *(image->image), 0, 0, image->image->width(), image->image->height());
 }
