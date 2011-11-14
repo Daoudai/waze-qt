@@ -293,8 +293,7 @@ BOOL tts_db_sqlite_get_info( const TtsDbEntry* entry, TtsTextType* text_type, Tt
    /*
     * Evaluate
     */
-   bool found_results = true;
-   if ( query.exec() && (found_results = query.next()))
+   if ( query.exec() && query.next())
    {
       // Storage type
       if ( storage_type )
@@ -320,7 +319,7 @@ BOOL tts_db_sqlite_get_info( const TtsDbEntry* entry, TtsTextType* text_type, Tt
    else
    {
       res = FALSE;
-      check_sqlite_error( "select evaluation", found_results );
+      check_sqlite_error( "select evaluation", query.lastError().type() == QSqlError::NoError );
    }
 
    /*
@@ -382,8 +381,7 @@ BOOL tts_db_sqlite_get( const TtsDbEntry* entry, TtsDbDataStorageType* storage_t
    /*
     * Evaluate
     */
-   bool found_results = true;
-   if ( query.exec() && (found_results = query.next()))
+   if ( query.exec() && query.next())
    {
       const char* path_data;
       QByteArray dataVar = query.value(0).toByteArray();
@@ -417,7 +415,7 @@ BOOL tts_db_sqlite_get( const TtsDbEntry* entry, TtsDbDataStorageType* storage_t
    else
    {
       res = FALSE;
-      check_sqlite_error( "select evaluation", found_results );
+      check_sqlite_error( "select evaluation", query.lastError().type() == QSqlError::NoError );
    }
 
    /*
@@ -479,15 +477,14 @@ BOOL tts_db_sqlite_exists( const TtsDbEntry* entry )
    /*
     * Evaluate
     */
-   bool found_results = true;
-   if ( query.exec() && (found_results = query.next()))
+   if ( query.exec() && query.next())
    {
       res = query.value(0).toInt();
    }
    else
    {
       res = FALSE;
-      check_sqlite_error( "select evaluation", found_results );
+      check_sqlite_error( "select evaluation", query.lastError().type() == QSqlError::NoError );
    }
 
    /*

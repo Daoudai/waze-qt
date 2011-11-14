@@ -534,8 +534,7 @@ int roadmap_tile_load (int fips, int tile_index, void **data, size_t *size)
 	/*
 	 * Evaluate
          */
-        bool found_results = true;
-        if ( query.exec() && (found_results = query.next()))
+        if ( query.exec() && query.next())
 	{
                 QByteArray dataVar = query.value(0).toByteArray();
                 *size = dataVar.length();
@@ -547,7 +546,7 @@ int roadmap_tile_load (int fips, int tile_index, void **data, size_t *size)
 	else
 	{
 		res = -1;
-                check_sqlite_error( "select evaluation error", found_results );
+                check_sqlite_error( "select evaluation error", query.lastError().type() == QSqlError::NoError );
 	}
 
 	/*
