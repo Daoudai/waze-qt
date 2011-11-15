@@ -41,10 +41,9 @@ int roadmap_label_add_place (const RoadMapGuiPoint *point, int angle,
 void roadmap_label_activate (void);
 int roadmap_label_initialize (void);
 
-int roadmap_label_draw_cache (int angles, int full);
+int roadmap_label_draw_cache (int angles);
 
 void roadmap_label_start (void);
 void roadmap_label_clear (int square);
-void roadmap_label_clear_all (void);
 
 #endif // __ROADMAP_LABEL__H

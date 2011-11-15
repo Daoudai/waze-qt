@@ -753,26 +753,6 @@ int roadmap_config_get_integer(RoadMapConfigDescriptor *descriptor) {
     return 0;
 }
 
-int roadmap_config_get_list (RoadMapConfigDescriptor *descriptor, const char* delimiters, const char* list_out[], int list_size ) {
-
-   int count = 0;
-   const char* value = roadmap_config_get( descriptor );
-   char* list_copy = strdup( value );
-   const char* pCh;
-
-   pCh  = strtok( list_copy, delimiters );
-   while ( pCh != NULL && *pCh != 0 && count < list_size )
-   {
-      list_out[count] = strdup( pCh );
-      pCh = strtok( NULL, delimiters );
-      count++;
-   }
-   free( list_copy );
-
-   return count;
-}
-
-
 
 void  roadmap_config_set (RoadMapConfigDescriptor *descriptor, const char *value) {
 
@@ -808,13 +788,12 @@ int   roadmap_config_match
  * session items. The reason is only that I am anal: I don't see any reason
  * for having a position in the schema or preferences.
  */
-BOOL roadmap_config_get_position
+void roadmap_config_get_position
         (RoadMapConfigDescriptor *descriptor, RoadMapPosition *position) {
 
    const char *center;
    RoadMapConfig *file;
    RoadMapConfigItem *item;
-   BOOL found = TRUE;
 
    file = roadmap_config_search_file ("session");
    if (file == NULL) {
@@ -826,7 +805,6 @@ BOOL roadmap_config_get_position
       center = item->value;
    } else {
       center = item->default_value;
-      found = FALSE;
    }
 
    if (center != NULL && center[0] != 0) {
@@ -852,10 +830,7 @@ BOOL roadmap_config_get_position
 
       position->longitude = 0;
       position->latitude  = 0;
-      found = FALSE;
    }
-   
-   return found;
 }
 
 void  roadmap_config_set_position

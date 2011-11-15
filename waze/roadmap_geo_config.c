@@ -52,11 +52,9 @@
 #endif //IPHONE
 
 #define SYSTEM_DEFAULT_ID ("-1")
-#define COMPLETED_CB_MAXNUM   8
+
 #define REQUEST_TIMEOUT     120000
 #define RETRY_TIMEOUT       5000
-#define GEO_CONFIG_DEFAULT_WS_ADDR        "http://rt.waze.com/rtserver"
-
 /* TODO:: Check if 3 retries are enough for all the platforms *** AGA *** */
 #if defined(ANDROID) || defined(__SYMBIAN32__) || defined (_WIN32)
 #define MAX_LOCATION_RETIES 3
@@ -87,9 +85,6 @@ static BOOL initialized = FALSE;
 static void lang_dlg(void);
 static void lang_loaded (void);
 static BOOL request_geo_config (void);
-static void run_completed_cb( void );
-static void init_completed_cb( void );
-
 void roadmap_geo_config_fixed_location(RoadMapPosition *gpsPosition, const char *name, RoadMapCallback callback);
 
 
@@ -101,11 +96,9 @@ typedef struct {
    char lang[6];
    int  version;
    RoadMapCallback callback;
-   GeoConfigCompletedCb completed_cb[COMPLETED_CB_MAXNUM];
-   void* completed_cb_ctx[COMPLETED_CB_MAXNUM];
 } NavigateRoutingContext;
 
-static NavigateRoutingContext GeoConfigContext = {0};
+static NavigateRoutingContext GeoConfigContext;
 
 
 ////////////////////////////////////////////////////////////////////
@@ -195,7 +188,7 @@ void GeoConfigTimer (void) {
 }
 
 
-   
+
 ////////////////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////////////
@@ -232,7 +225,7 @@ static void on_lang_conf_downloaded(void){
 static void on_user_lang_downloaded(void){
    clean_up();
    ssd_progress_msg_dialog_hide();
-   roadmap_screen_redraw();
+   roadmap_screen_refresh();
 
    if (GeoConfigContext.callback)
        (*GeoConfigContext.callback)();
@@ -283,7 +276,7 @@ static void on_recieved_completed (void) {
    }
 
    if ((user_lang[0] == 0) && (newServerId == 2)){
-      roadmap_lang_set_system_lang(GeoConfigContext.lang, FALSE);
+      roadmap_lang_set_system_lang(GeoConfigContext.lang);
    }
 
    if ((oldServerId==-1)){
@@ -305,9 +298,6 @@ static void on_recieved_completed (void) {
       (*GeoConfigContext.callback)();
 
    GeoConfigContext.callback = NULL;
-
-   run_completed_cb();
-
    if ((oldServerId!=newServerId)&&(oldServerId!=-1)){
       roadmap_lang_set_update_time("");
       roadmap_lang_set_lang_file_update_time("heb","");
@@ -724,7 +714,7 @@ static int lang_callback (SsdWidget widget, const char *new_value) {
    if (!value)
       return 0;
 
-   roadmap_lang_set_system_lang(value, FALSE);
+   roadmap_lang_set_system_lang(value);
    ssd_dialog_set_focus(widget);
    roadmap_screen_redraw ();
    roadmap_main_set_periodic (300, lang_selected);
@@ -896,7 +886,7 @@ static void roadmap_geo_config_init (void) {
       //   Web-service address
       roadmap_config_declare( "preferences",
                               &RoadMapConfigWebServiceName,
-                              GEO_CONFIG_DEFAULT_WS_ADDR,
+                              "",
                               NULL);
       roadmap_config_declare ("preferences",
                               &RoadMapConfigSystemServerId,
@@ -913,23 +903,12 @@ static void roadmap_geo_config_init (void) {
       roadmap_config_declare ("session",
                               &RoadMapConfigLastPosition,
                               "", NULL);
-
-      /*
-       * Fail safe. Ensure we have the geo-config address
-       * AGA
-       */
-      address = get_webservice_address();
-      if ( !address || !address[0] ) {
-         roadmap_config_set( &RoadMapConfigWebServiceName, GEO_CONFIG_DEFAULT_WS_ADDR );
-         roadmap_config_set( &RoadMapConfigSystemServerId, SYSTEM_DEFAULT_ID );
-      }
-
       initialized = TRUE;
    }
 
    address = get_webservice_address();
    if (INVALID_WEBSVC_HANDLE == s_websvc)
-      s_websvc = wst_init(address, NULL, NULL, NULL, "application/x-www-form-urlencoded; charset=utf-8");
+      s_websvc = wst_init(address , "application/x-www-form-urlencoded; charset=utf-8");
 
    if( INVALID_WEBSVC_HANDLE != s_websvc)
    {
@@ -1016,39 +995,6 @@ static void completed(void){
 ////////////////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////////////
-static void run_completed_cb( void )
-{
-   int i;
-   GeoConfigCompletedCb cb;
-   void* ctx;
-   for ( i = 0; i<COMPLETED_CB_MAXNUM; ++i )
-   {
-      if ( GeoConfigContext.completed_cb[i] != NULL )
-      {
-         cb = GeoConfigContext.completed_cb[i];
-         ctx = GeoConfigContext.completed_cb_ctx[i];
-         cb( ctx );
-         GeoConfigContext.completed_cb[i] = NULL;
-      }
-   }
-}
-
-////////////////////////////////////////////////////////////////////
-//
-///////////////////////////////////////////////////////////////////
-static void init_completed_cb( void )
-{
-   int i;
-   for ( i = 0; i<COMPLETED_CB_MAXNUM; ++i )
-   {
-      GeoConfigContext.completed_cb[i] = NULL;
-      GeoConfigContext.completed_cb_ctx[i] = NULL;
-   }
-}
-
-////////////////////////////////////////////////////////////////////
-//
-///////////////////////////////////////////////////////////////////
 void roadmap_geo_config_fixed_location(RoadMapPosition *gpsPosition, const char *name, RoadMapCallback callback){
    roadmap_geo_config_init ();
    GeoConfigContext.callback = callback;
@@ -1107,17 +1053,6 @@ void roadmap_geo_config_stg(RoadMapCallback callback){
 ////////////////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////////////
-void roadmap_geo_config_generic(char * name){
-    RoadMapPosition gpsPosition;
-    ssd_dialog_hide_all(dec_close);
-    ssd_progress_msg_dialog_show("Initializing, please wait...");
-    gpsPosition.latitude = 0;
-    gpsPosition.longitude = 0;
-    roadmap_geo_config_fixed_location(&gpsPosition, name, completed);
-}
-////////////////////////////////////////////////////////////////////
-//
-///////////////////////////////////////////////////////////////////
 void roadmap_geo_config_other(RoadMapCallback callback){
     RoadMapPosition gpsPosition;
     ssd_dialog_hide_all(dec_close);
@@ -1128,24 +1063,7 @@ void roadmap_geo_config_other(RoadMapCallback callback){
        callback = completed;
     roadmap_geo_config_fixed_location(&gpsPosition, "world", callback);
 }
-////////////////////////////////////////////////////////////////////
-//
-///////////////////////////////////////////////////////////////////
-int roadmap_geo_register_completed_cb( GeoConfigCompletedCb cb, void* cb_context )
-{
-   int i;
 
-   for ( i = 0; i<COMPLETED_CB_MAXNUM; ++i )
-   {
-      if ( GeoConfigContext.completed_cb[i] == NULL )
-      {
-         GeoConfigContext.completed_cb[i] = cb;
-         GeoConfigContext.completed_cb_ctx[i] = cb_context;
-         break;
-      }
-   }
-   return ( i < COMPLETED_CB_MAXNUM );
-}
 ////////////////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////////////

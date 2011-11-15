@@ -220,7 +220,7 @@ static int roadmap_voice_expand (const char *input, char *output, int size) {
     struct voice_translation *cursor_found;
 
     if (!featureEnabled)
-       return 0;
+       return;
 
     if (size <= 0) {
         return 0;

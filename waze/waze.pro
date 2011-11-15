@@ -31,7 +31,7 @@ TEMPLATE = app
 TARGET = waze
 CONFIG -= staticlib
 
-LIBS += -lz -ldl -lrt -lssl -lcrypto
+LIBS += -lz -ldl -lrt
 
 !maemo5 {
     QMAKE_CFLAGS += -Wno-unused-result -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable
@@ -281,27 +281,7 @@ SOURCES += \
     Realtime/RealtimeExternalPoi.c \
     address_search/single_search_dlg.c \
     address_search/single_search.c \
-    roadmap_groups_settings.c \
-    tts/tts_voices.c \
-    tts/tts_utils.c \
-    tts/tts_ui.c \
-    tts/tts_queue.c \
-    tts/tts_db_files.c \
-    tts/tts_db.c \
-    tts/tts_cache.c \
-    tts/tts.c \
-    unix/resolver.c \
-    unix/roadmap_ssl.c \
-    ssd/ssd_segmented_control.c \
-    Realtime/RealtimeTrafficDetection.c \
-    Realtime/RealtimePopUp.c \
-    tts_was_provider.c \
-    tts_apptext.c \
-    roadmap_recorder_dlg.c \
-    roadmap_recorder.c \
-    navigate/navigate_tts.c \
-    roadmap_base64.c \
-    navigate/navigate_route_events.c
+    roadmap_groups_settings.c
 
 HEADERS += \
     roadmap_types.h \
@@ -596,31 +576,25 @@ HEADERS += \
     Realtime/RealtimeExternalPoi.h \
     address_search/single_search_dlg.h \
     address_search/single_search.h \
-    roadmap_groups_settings.h \
-    tts/tts_voices.h \
-    tts/tts_utils.h \
-    tts/tts_ui.h \
-    tts/tts_queue.h \
-    tts/tts_provider.h \
-    tts/tts_defs.h \
-    tts/tts_db_sqlite.h \
-    tts/tts_db_files.h \
-    tts/tts_db.h \
-    tts/tts_cache.h \
-    tts/tts.h \
-    unix/resolver.h \
-    ssd/ssd_segmented_control.h \
-    Realtime/RealtimeTrafficDetection.h \
-    Realtime/RealtimePopUp.h \
-    tts_was_provider.h \
-    tts_apptext_defs.h \
-    tts_apptext.h \
-    roadmap_tts.h \
-    roadmap_recorder.h \
-    navigate/navigate_tts_defs.h \
-    navigate/navigate_tts.h \
-    roadmap_base64.h \
-    navigate/navigate_route_events.h
+    roadmap_groups_settings.h
+
+OTHER_FILES += \
+    qtc_packaging/debian_fremantle/README \
+    qtc_packaging/debian_fremantle/changelog \
+    qtc_packaging/debian_fremantle/compat \
+    qtc_packaging/debian_fremantle/control \
+    qtc_packaging/debian_fremantle/copyright \
+    qtc_packaging/debian_fremantle/rules \
+    qtc_packaging/debian_fremantle/postinst \
+    qtc_packaging/debian_harmattan/README \
+    qtc_packaging/debian_harmattan/changelog \
+    qtc_packaging/debian_harmattan/compat \
+    qtc_packaging/debian_harmattan/control \
+    qtc_packaging/debian_harmattan/copyright \
+    qtc_packaging/debian_harmattan/manifest.aegis \
+    qtc_packaging/debian_harmattan/rules \
+    qtc_packaging/debian_harmattan/postinst
+
 
 # Please do not modify the following two lines. Required for deployment.
 include(deployment.pri)
@@ -632,12 +606,6 @@ INCLUDEPATH += $$PWD/qt
 DEPENDPATH += $$PWD/qt
 
 #unix:!macx:!symbian: PRE_TARGETDEPS += $$PWD/qt/libwazeqt.a
-
-
-
-
-
-
 
 
 

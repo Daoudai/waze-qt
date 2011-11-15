@@ -44,9 +44,6 @@
 #include "Realtime/RealtimeAlertsList.h"
 #include "roadmap_start.h"
 #include "ssd/ssd_list.h"
-#include "roadmap_analytics.h"
-
-extern void convert_int_coordinate_to_float_string(char* buffer, int value);
 
 #define MAX_GROUPS 200
 
@@ -77,7 +74,6 @@ static char *g_FollowingGroupIcons[MAX_GROUPS];
 
 static char *g_SelectedGroupName;
 static char *g_SelectedGroupIcon;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 int roadmap_groups_get_popup_config(void){
@@ -408,8 +404,6 @@ void roadmap_groups_show(void){
    if (!roadmap_groups_feature_enabled())
       return;
 
-   roadmap_analytics_log_event(ANALYTICS_EVENT_GROUPS, NULL, NULL);
-
    flags = BROWSER_FLAG_TITLE_BTN_LEFT1|BROWSER_FLAG_TITLE_BTN_LEFT2|BROWSER_FLAG_TITLE_BTN_RIGHT2;
 
    attrs.on_close_cb = on_close_cb;
@@ -430,8 +424,6 @@ void roadmap_groups_show_group(const char *group_name){
 
    if (!(group_name && *group_name))
       return;
-
-   roadmap_analytics_log_event(ANALYTICS_EVENT_GROUPS, NULL, NULL);
 
    flags = BROWSER_FLAG_TITLE_BTN_LEFT1|BROWSER_FLAG_TITLE_BTN_LEFT2|BROWSER_FLAG_TITLE_BTN_RIGHT2;
    attrs.on_close_cb = on_close_cb;
@@ -506,7 +498,7 @@ static int groups_callback (SsdWidget widget, const char *new_value, const void 
          g_SelectedGroupIcon = g_ActiveGroupIcon;
       }
       else{
-         for (i = 0; i < roadmap_groups_get_num_following(); i++){
+         for (i = 0; i < roadmap_groups_get_num_following()-1; i++){
             if (!strcmp(g_FollowingGroupNames[i], Groupname)){
                g_SelectedGroupIcon = g_FollowingGroupIcons[i];
                break;

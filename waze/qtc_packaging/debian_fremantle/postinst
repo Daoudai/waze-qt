@@ -1,0 +1,8 @@
+#!/bin/sh
+SOURCE_DIR=/opt/waze/data
+TARGET_DIR=/home/user/MyDocs/.waze
+echo Deploying Waze data to ${TARGET_DIR}
+
+mkdir -p ${TARGET_DIR}
+
+cp -r ${SOURCE_DIR}/* ${TARGET_DIR} 2> /dev/null

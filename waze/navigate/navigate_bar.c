@@ -96,7 +96,7 @@ static NavigateBarPanel *NavigatePanel = NULL;
 static RoadMapScreenSubscriber navigate_prev_after_refresh = NULL;
 
 
-static const char NAVIGATE_DIR_IMG[][40] = {
+const char NAVIGATE_DIR_IMG[][40] = {
    "nav_turn_left",
    "nav_turn_right",
    "nav_keep_left",
@@ -112,32 +112,9 @@ static const char NAVIGATE_DIR_IMG[][40] = {
    "nav_roundabout_r",
    "nav_roundabout_u",
    "nav_roundabout_u",
-   "nav_approaching",
-   "nav_exit_left",
-   "nav_exit_right"
+   "nav_approaching"
 };
 
-static const char NAVIGATE_UK_DIR_IMG[][40] = {
-   "nav_turn_left",
-   "nav_turn_right",
-   "nav_keep_left",
-   "nav_keep_right",
-   "nav_continue",
-   "nav_roundabout_UK_e",
-   "nav_roundabout_UK_e",
-   "nav_roundabout_UK_l",
-   "nav_roundabout_UK_l",
-   "nav_roundabout_UK_s",
-   "nav_roundabout_UK_s",
-   "nav_roundabout_UK_r",
-   "nav_roundabout_UK_r",
-   "nav_roundabout_UK_u",
-   "nav_roundabout_UK_u",
-   "nav_approaching",
-   "nav_exit_left",
-   "nav_exit_right"
-
-};
 static RoadMapImage NavigateBarStretchedAddressImage;
 static RoadMapImage NavigateBarAddressImage;
 static RoadMapImage NavigateBarEtaImage;
@@ -242,6 +219,9 @@ static int get_TallDirectionsBoxHeight(void){
    return roadmap_canvas_image_height(NavigateBarDirectionTallImage);
 }
 
+static int get_TallDirectionsBoxWidth(void){
+   return roadmap_canvas_image_width(NavigateBarDirectionTallImage);
+}
 static int get_NavBarHeight(void){
    return (get_AddressBarHeight() + get_DirectionsBoxHeight());
 }
@@ -545,14 +525,6 @@ void navigate_bar_set_next_instruction (enum NavigateInstr instr){
   NavigateBarNextInstr = instr;
 }
 
-const char *navigate_image(int inst){
-
-   if (navigate_main_drive_on_left())
-      return NAVIGATE_UK_DIR_IMG[(int) inst];
-   else
-      return NAVIGATE_DIR_IMG[(int) inst];
-}
-
 static void navigate_bar_draw_instruction (enum NavigateInstr instr, int offset) {
 
 
@@ -570,7 +542,7 @@ static void navigate_bar_draw_instruction (enum NavigateInstr instr, int offset)
    if (instr == LAST_DIRECTION)
       return;
 
-   direction_image =(RoadMapImage) roadmap_res_get( RES_BITMAP, RES_SKIN, navigate_image((int) instr) );
+   direction_image =(RoadMapImage) roadmap_res_get( RES_BITMAP, RES_SKIN, NAVIGATE_DIR_IMG[(int) instr] );
 
    if ( direction_image )
    {
@@ -644,9 +616,6 @@ static void navigate_bar_draw_distance (int distance, int offset) {
    if (distance < 0)
       return;
 
-   if (NavigateBarCurrentInstr == LAST_DIRECTION)
-      return;
-
    distance_far =
       roadmap_math_to_trip_distance(distance);
 
@@ -672,7 +641,7 @@ static void navigate_bar_draw_distance (int distance, int offset) {
          }
       }
       else{
-         snprintf (str, sizeof(str), "%d", (roadmap_math_distance_to_current(distance)/10)*10);
+         snprintf (str, sizeof(str), "%d", roadmap_math_distance_to_current(distance));
          snprintf (unit_str, sizeof(unit_str), "%s",
                   roadmap_lang_get(roadmap_math_distance_unit()));
       }
@@ -774,7 +743,6 @@ static void navigate_bar_draw_street (const char *street) {
 
    if ((num_lines < 0)  || ((num_lines>1) && (NavigatePanel->street_line2_pos == -1))){
       /* Try again with a smaller font size */
-      free(text);//AR- memory leak
 	   text = strdup(street);
       size = font_size_small;
       num_lines = navigate_bar_align_text (text, &line1, &line2, size);
@@ -786,10 +754,8 @@ static void navigate_bar_draw_street (const char *street) {
    	   size = ( 7 * font_size_normal ) / 10;
    }
 
-   if ((num_lines < 0) || ((num_lines > 1) && (NavigatePanel->street_line2_pos == -1))) {
-      free(text);//AR- memory leak
+   if ((num_lines < 0) || ((num_lines > 1) && (NavigatePanel->street_line2_pos == -1)))
       text = strdup(street);
-   }
    /* Cut some text until it fits */
    while ((num_lines < 0) || ((num_lines > 1) && (NavigatePanel->street_line2_pos == -1))) {
 
@@ -861,10 +827,7 @@ void navigate_bar_set_mode (int mode) {
 }
 
 void navigate_bar_draw (void){
-
-#ifdef OPENGL
    RoadMapGuiPoint AddressBottomRightPoint;
-#endif
    RoadMapGuiPoint BarLocation;
    int arrow_offset = 0;
 
@@ -888,18 +851,16 @@ void navigate_bar_draw (void){
 #endif
 
 
-   if (NavigateBarCurrentInstr != LAST_DIRECTION){
-         // Direction Box
-         if (NavigateBarNextInstr == LAST_DIRECTION){
-               BarLocation.y = NavigateBarLocation.y  + NAV_BAR_PIXELS( 2 );
-               BarLocation.x = 0;
-               roadmap_canvas_draw_image ( NavigateBarDirectionImage, &BarLocation, 0,  IMAGE_NORMAL );
-         }
-         else{
-               BarLocation.y = NavigateBarLocation.y - (get_TallDirectionsBoxHeight() - get_DirectionsBoxHeight()) + NAV_BAR_PIXELS( 2 );
-               BarLocation.x = 0;
-               roadmap_canvas_draw_image ( NavigateBarDirectionTallImage, &BarLocation, 0,  IMAGE_NORMAL );
-         }
+   // Direction Box
+   if (NavigateBarNextInstr == LAST_DIRECTION){
+      BarLocation.y = NavigateBarLocation.y  + NAV_BAR_PIXELS( 2 );
+      BarLocation.x = 0;
+      roadmap_canvas_draw_image ( NavigateBarDirectionImage, &BarLocation, 0,  IMAGE_NORMAL );
+   }
+   else{
+      BarLocation.y = NavigateBarLocation.y - (get_TallDirectionsBoxHeight() - get_DirectionsBoxHeight()) + NAV_BAR_PIXELS( 2 );
+      BarLocation.x = 0;
+      roadmap_canvas_draw_image ( NavigateBarDirectionTallImage, &BarLocation, 0,  IMAGE_NORMAL );
    }
 
    //ETA box

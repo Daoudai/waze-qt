@@ -310,7 +310,8 @@ static int roadmap_message_ticker_short_click(RoadMapGuiPoint *point) {
    if (!gTickerOn)
       return 0;
 
-   if (point->y >= (OpenIconRct.miny)) /* &&(point->y <= (OpenIconRct.maxy+40)))*/ {
+   if ((point->y >= (OpenIconRct.miny)) &&
+       (point->y <= (OpenIconRct.maxy))) {
           gTickerOn = FALSE;
           if(g_callback)
              g_callback();

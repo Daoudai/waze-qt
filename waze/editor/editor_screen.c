@@ -69,11 +69,9 @@
 #include "track/editor_track_main.h"
 #include "editor_main.h"
 
-#include "ssd/ssd_popup.h"
 #include "Realtime/RealtimeAlerts.h"
 #include "Realtime/RealtimeAlertCommentsList.h"
 #include "Realtime/Realtime.h"
-#include "roadmap_time.h"
 
 #include "static/editor_dialog.h"
 #include "track/editor_track_main.h"
@@ -113,7 +111,6 @@ static RoadMapConfigDescriptor WazzyImage =
                   ROADMAP_CONFIG_ITEM("Editor", "wazzy");
 
 static   RoadMapPosition position;
-static   PluginLine g_line;
 
 static editor_pen EditorPens[MAX_LAYERS][MAX_PEN_LAYERS][MAX_ROAD_STATES];
 static editor_pen EditorTrackPens[MAX_PEN_LAYERS];
@@ -123,7 +120,7 @@ SelectedLine SelectedLines[MAX_LINE_SELECTIONS];
 static int select_count;
 
 #ifdef SSD
-static char *PopupMenuItems[] = {
+static char const *PopupMenuItems[] = {
 
 #if EDITOR_ALLOW_LINE_DELETION
    "deleteroads",
@@ -219,7 +216,7 @@ void report_accident_at_screen_point(void){
    gpsPos.steering = roadmap_math_azymuth (&lineFrom, &lineTo);
 
    if (gpsPos.steering < 0) gpsPos.steering += 360;
-   Realtime_Alert_ReportAtLocation(RT_ALERT_TYPE_ACCIDENT, -1, "", iDirection,
+   Realtime_Alert_ReportAtLocation(RT_ALERT_TYPE_ACCIDENT, "", iDirection,
                                    gpsPos,"" );
 }
 
@@ -249,7 +246,7 @@ void report_accident_opposite_side_at_screen_point(void){
 
 
    if (gpsPos.steering < 0) gpsPos.steering += 360;
-   Realtime_Alert_ReportAtLocation(RT_ALERT_TYPE_ACCIDENT, -1, "", iDirection,
+   Realtime_Alert_ReportAtLocation(RT_ALERT_TYPE_ACCIDENT, "", iDirection,
                                    gpsPos,"" );
 
 }
@@ -258,11 +255,9 @@ void report_accident_opposite_side_at_screen_point(void){
 
 
 #ifdef SSD
-static void popup_menu_callback (int exit_code, void* context) {
-   if (exit_code != dec_ok){
-      roadmap_trip_remove_point("Selection");
-      editor_screen_reset_selected ();
-   }
+static void popup_menu_callback (int ret, void *context) {
+   roadmap_trip_remove_point("Selection");
+   editor_screen_reset_selected ();
 }
 #endif
 
@@ -326,187 +321,79 @@ static int editor_screen_short_click (RoadMapGuiPoint *point) {
    return 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-static int on_next (SsdWidget widget, const char *new_value){
-   ssd_dialog_hide_current(dec_ok);
-#ifdef IPHONE
-   if (select_count == 0){
-      PopupMenuItems[3] = NULL;
-      roadmap_start_popup_menu ("Editor Menu - No Properties", PopupMenuItems,
-                                popup_menu_callback, NULL,DIALOG_ANIMATION_FROM_RIGHT);
-   }
-   else{
-      PopupMenuItems[3] = "properties";
-      roadmap_start_popup_menu ("Editor Menu", PopupMenuItems,
-                                popup_menu_callback, NULL,DIALOG_ANIMATION_FROM_RIGHT);
-   }
-#else
-   roadmap_start_popup_menu ("Editor Menu", PopupMenuItems,
-                             popup_menu_callback, NULL,DIALOG_ANIMATION_FROM_RIGHT);
-#endif
-   return 1;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-static void screen_selection_popup(void){
-   int number;
-   int layers[128];
-   int layers_count;
-   RoadMapNeighbour neighbours[2];
-   PluginStreetProperties properties;
-   char title[250];
-   RoadMapPosition context_save_pos;
-   zoom_t context_save_zoom;
-
-#ifdef OPENGL
-   roadmap_main_remove_periodic(screen_selection_popup);
-#endif
-
-
-   if (g_line.plugin_id == INVALID_PLUGIN_ID){
-      layers_count = roadmap_layer_all_roads(layers, 128);
-      roadmap_math_get_context (&context_save_pos, &context_save_zoom);
-      roadmap_math_set_context(&position, 20);
-      number = roadmap_street_get_closest(&position, 0, layers, layers_count,
-                     1, &neighbours[0], 1);
-      roadmap_math_set_context (&context_save_pos, context_save_zoom);
-      if (number <= 0)
-         return;
-      roadmap_plugin_get_street_properties (&neighbours[0].line, &properties, 0);
-   }
-   else{
-      roadmap_plugin_get_street_properties (&g_line, &properties, 0);
-   }
-   if (properties.street[0] != 0){
-      if (ssd_widget_rtl(NULL)){
-         snprintf (title, sizeof(title), "%s %s", properties.street, properties.address);
-      }else{
-         snprintf (title, sizeof(title), "%s %s", properties.address, properties.street);
-      }
-   }
-   else{
-      snprintf (title, sizeof(title), "%s", roadmap_lang_get("Street/road without a name"));
-   }
-   ssd_popup_show_float("SelectDlg",
-                        properties.city,
-                             NULL,
-                             title,
-                             NULL,
-                             "marked_location",
-                             &position,
-                             ADJ_SCALE(-18),
-                             popup_menu_callback,
-                             on_next,
-                             "Options",
-                             NULL);
-
-}
-
-void editor_screen_selection_menu(void){
-   int distance;
-   const RoadMapPosition * temp_pos;
-   temp_pos = roadmap_trip_get_position("Selection");
-   if (temp_pos)
-      position = *temp_pos;
-   g_line.plugin_id = INVALID_PLUGIN_ID;
- #ifdef OPENGL
-        roadmap_main_set_periodic(500, screen_selection_popup);
- #else
-        screen_selection_popup();
- #endif
-        roadmap_screen_redraw ();
-        return ;
-}
-
-
-void editor_screen_menu(char *name){
-   const RoadMapPosition * temp_pos;
-   temp_pos = roadmap_trip_get_position("Selection");
-
-   ssd_popup_show_float("SelectDlg",
-                             name,
-                             NULL,
-                             NULL,
-                             NULL,
-                             "marked_location",
-                             temp_pos,
-                             ADJ_SCALE(-18),
-                             popup_menu_callback,
-                             on_next,
-                             "Options",
-                             NULL);
-}
-
-
 static int editor_screen_long_click (RoadMapGuiPoint *point) {
 //   PluginStreet street;
+   PluginLine line;
    int distance;
    int scale;
-   int curr_scale;
    int orig_square;
    RoadMapPosition from;
    RoadMapPosition to;
-   g_line.plugin_id = INVALID_PLUGIN_ID;
+
    roadmap_math_to_position (point, &position, 1);
 
-//   scale = roadmap_math_get_scale(0)/500;
+   scale = roadmap_math_get_scale(0)/200;
 
    if (roadmap_navigate_retrieve_line
-          (&position, 0, 7, &g_line, &distance, LAYER_ALL_ROADS) == -1) {
+         (&position, 0, 7, &line, &distance, LAYER_ALL_ROADS) == -1) {
 
-       roadmap_display_hide ("Selected Street");
-       roadmap_trip_set_point ("Selection", &position);
-       roadmap_trip_set_animation("Selection", OBJECT_ANIMATION_DROP_IN|OBJECT_ANIMATION_POP_OUT|OBJECT_ANIMATION_WHEN_VISIBLE);
-       roadmap_start_hide_menu ("Editor Menu");
-       editor_screen_reset_selected ();
-#ifdef OPENGL
-       roadmap_main_set_periodic(500, screen_selection_popup);
-#else
-       screen_selection_popup();
+      roadmap_display_hide ("Selected Street");
+      roadmap_trip_set_point ("Selection", &position);
+#ifdef SSD
+      roadmap_start_hide_menu ("Editor Menu");
 #endif
-
-       roadmap_screen_redraw ();
-       return 1;
-    }
-//   else{
-//      for (curr_scale = roadmap_square_get_num_scales () - 1; curr_scale > 0; curr_scale--) {
-//         if (roadmap_navigate_retrieve_line
-//                           (&position, curr_scale, scale, &line, &distance, LAYER_ALL_ROADS) == -1) {
-//
-//              roadmap_display_hide ("Selected Street");
-//              roadmap_trip_set_point ("Selection", &position);
-//              roadmap_start_hide_menu ("Editor Menu");
-//              editor_screen_reset_selected ();
-//              roadmap_screen_redraw ();
-//              break;
-//         }
-//      }
-//   }
+      editor_screen_reset_selected ();
+      roadmap_screen_redraw ();
+      return 1;
+   }
 
    roadmap_trip_set_point ("Selection", &position);
-   roadmap_trip_set_animation("Selection", OBJECT_ANIMATION_DROP_IN|OBJECT_ANIMATION_POP_OUT|OBJECT_ANIMATION_WHEN_VISIBLE);
+
    //roadmap_display_activate ("Selected Street", &line, &position, &street);
 
-   editor_screen_select_line (&g_line);
+   editor_screen_select_line (&line);
 
-   if (g_line.plugin_id == ROADMAP_PLUGIN_ID) {
+   if (line.plugin_id == ROADMAP_PLUGIN_ID) {
 		orig_square = roadmap_square_active ();
 
-		roadmap_street_extend_line_ends (&g_line, &from, &to, FLAG_EXTEND_BOTH, editor_screen_line_iter_cb, NULL);
+		roadmap_street_extend_line_ends (&line, &from, &to, FLAG_EXTEND_BOTH, editor_screen_line_iter_cb, NULL);
 		roadmap_display_update_points ("Selected Street", &from, &to);
 
+#if 0
+{
+		int curr_scale;
+   	RoadMapStreetProperties props;
+   	char name[512];
 
+		/*
+		 * select the same line in other scales
+		 */
+		roadmap_square_set_current (orig_square);
+	   roadmap_street_get_properties (line.line_id, &props);
+	   strncpy_safe (name, roadmap_street_get_full_name (&props), 512);
+		for (curr_scale = roadmap_square_get_num_scales () - 1; curr_scale > 0; curr_scale--) {
+
+			if (roadmap_navigate_retrieve_line_force_name
+				 (&position, curr_scale, 7, &line, &distance, LAYER_ALL_ROADS, orig_square, name,
+				  roadmap_line_route_get_direction (line.line_id, ROUTE_DIRECTION_ANY),
+				  0, 0, &from, &to) != -1) {
+
+				editor_screen_select_line (&line);
+				roadmap_street_extend_line_ends (&line, &from, &to, FLAG_EXTEND_BOTH, editor_screen_line_iter_cb, NULL);
+			}
+		}
+}
+#endif
 
 	}
+#ifdef SSD
 //   if (!roadmap_reminder_feature_enabled())
 //      PopupMenuItems[3] = NULL;
-
-#ifdef OPENGL
-   roadmap_main_set_periodic(500, screen_selection_popup);
-#else
-   screen_selection_popup();
+   roadmap_start_popup_menu ("Editor Menu", PopupMenuItems,
+                             popup_menu_callback, point);
 #endif
    roadmap_screen_redraw ();
+
    return 1;
 }
 
@@ -713,7 +600,7 @@ int editor_screen_override_pen (int line,
       roadmap_screen_draw_line_direction
             (&from, &to, &from, first_shape, last_shape,
              NULL,
-             pen->thickness, direction, "#000000",0);
+             pen->thickness, direction, "#000000");
 
       return 1;
    }
@@ -920,7 +807,7 @@ static int editor_screen_draw_lines
                   (&from, &to, &trk_from_pos, first_shape, last_shape,
                    editor_shape_position,
                    EditorPens[cfcc][pen_type][0].thickness,
-                   direction, "#000000",0);
+                   direction, "#000000");
             }
          }
       }
@@ -960,10 +847,7 @@ void editor_screen_repaint (int max_pen) {
    int k;
    int fips = roadmap_locator_active ();
    int drawn = 0;
-#ifdef VIEW_MODE_3D_OGL
-    int OGL_2Dmode= FALSE;
-    int OGL_3Dmode= (roadmap_screen_get_view_mode()== VIEW_MODE_3D);
-#endif
+
    if (editor_db_activate(fips) != -1) {
 
       for (k = 0; k <= max_pen; k++) {
@@ -1019,19 +903,13 @@ void editor_screen_repaint (int max_pen) {
 		editor_track_draw_new_direction_roads ();
    }
 
-#ifdef VIEW_MODE_3D_OGL
-    roadmap_canvas3_set3DMode(OGL_2Dmode);
-#endif// VIEW_MODE_3D_OGL
-    drawn += editor_screen_draw_markers ();
-#ifdef VIEW_MODE_3D_OGL
-    roadmap_canvas3_set3DMode(OGL_3Dmode);
-#endif// VIEW_MODE_3D_OGL
+   drawn += editor_screen_draw_markers ();
 
    if (drawn) {
 
    	// force update tiles with editor lines
    	roadmap_square_force_next_update ();
-   	roadmap_square_view (NULL, NULL, 0);
+   	roadmap_square_view (NULL, 0);
    }
 
 }
@@ -1149,8 +1027,6 @@ char *editor_screen_overide_car(){
 	static int road_roller = 1;
    static BOOL center_set = FALSE;
 	RoadMapGpsPosition pos;
-   static uint32_t last_toggle = 0;
-   uint32_t now;
 
 	if (!editor_screen_gray_scale()){
       roadmap_screen_move_center(0);
@@ -1161,14 +1037,10 @@ char *editor_screen_overide_car(){
 	   return g_forced_car;
 
    if (editor_track_is_new_road()) {
-      now = roadmap_time_get_millis();
-      if (now - last_toggle >= 300) {
-         if (road_roller == 3)
-            road_roller = 1;
-         else
-            road_roller++;
-         last_toggle = now;
-      }
+      if (road_roller == 3)
+         road_roller = 1;
+      else
+         road_roller++;
       sprintf(car_name,"road_roller0%d", road_roller);
       return &car_name[0];
    }
@@ -1188,22 +1060,16 @@ char *editor_screen_overide_car(){
 
 	if (pacman == -1) pacman = 3;
 
-   //roadmap_screen_move_center(40);
-   //center_set = TRUE;
+   roadmap_screen_move_center(40);
+   center_set = TRUE;
 	roadmap_navigate_get_current(&pos, NULL, NULL);
 	if (pos.speed == 0)
 		sprintf(car_name,"%s%d", editor_screen_wazzy_name(), 1);
 	else
 		sprintf(car_name,"%s%d", editor_screen_wazzy_name(), pacman);
-   
-   now = roadmap_time_get_millis();
-   if (now - last_toggle >= 300) {
-      if (pacman == 4)
-         pacman = 3;
-      else
-         pacman++;
-      
-      last_toggle = now;
-   }
+	if (pacman == 4)
+		pacman = 3;
+	else
+		pacman++;
 	return &car_name[0];
 }
