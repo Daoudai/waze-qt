@@ -111,11 +111,10 @@ const char *roadmap_lang_get_user_lang(){
       return lang;
 }
 //////////////////////////////////////////////////////////////////
-void roadmap_lang_set_system_lang(const char *lang, BOOL download){
+void roadmap_lang_set_system_lang(const char *lang){
    if (!initialized)
       roadmap_lang_initialize_params();
-   if (download)
-      roadmap_lang_download_lang_file( lang, NULL );
+   roadmap_lang_download_lang_file( lang, NULL );
    roadmap_config_set(&RoadMapConfigSystemLanguage, lang);
    roadmap_config_save(TRUE);
 }
@@ -215,7 +214,7 @@ static void roadmap_lang_new_item (const char *name, const char *value) {
 
    RoadMapLangCount++;
 
-#if !defined( _WIN32) && !defined(ANDROID)
+#ifndef _WIN32
    {
       //cache characters
       int width, ascent, descent, can_tilt=1;
@@ -394,8 +393,7 @@ void on_conf_file_downloaded (const char* res_name, int success, void *context, 
       roadmap_lang_conf_load(roadmap_path_downloads());
       if (callback)
          (*callback)();
-      else
-         download_lang_files();
+      download_lang_files();
 
    }
    else{

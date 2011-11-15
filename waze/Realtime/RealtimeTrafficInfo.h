@@ -49,7 +49,6 @@
 #define HEAVY_TRAFFIC       2
 #define STAND_STILL_TRAFFIC 3
 
-
 //////////////////////////////////////////////////////////////////////////////
 //
 
@@ -94,8 +93,6 @@ struct _RTTrafficInfo
 
 	char sDescription[RT_TRAFFIC_INFO_MAX_DESCRIPTION+1];
 	BOOL bIsOnRoute;
-	BOOL bIsAlertable;
-	BOOL bUpdated;
 };
 
 

@@ -113,10 +113,6 @@ RoadMapPen roadmap_canvas_select_pen (RoadMapPen pen) {
    return old_pen;
 }
 
-void roadmap_canvas_set_background (const char *color) {
-    /* TODO */
-}
-
 void roadmap_canvas_set_foreground (const char *color) {
    roadMapCanvas->setPenColor(color);
 }

@@ -1,10 +1,10 @@
 Source: waze
 Section: user/other
 Priority: optional
-Maintainer: unknown <>
+Maintainer: Assaf Paz <damagedspline@gmail.com>
 Build-Depends: debhelper (>= 5), libqt4-dev
 Standards-Version: 3.7.3
-Homepage: <insert the upstream URL, if relevant>
+Homepage: http://code.google.com/p/waze-qt
 
 Package: waze
 Architecture: any

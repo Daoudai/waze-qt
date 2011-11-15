@@ -197,8 +197,6 @@ void RMapCanvas::setPenLineJoinStyle(int join) {
 QColor RMapCanvas::translateColor(const char *color) {
     QString colorString(color);
     int opacity = 255;
-    colorString = colorString.replace(" ", "");
-
     if (colorString.length() == 9)
     {
         opacity = colorString.left(2).toInt(NULL, 16);

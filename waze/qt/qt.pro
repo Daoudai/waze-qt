@@ -21,8 +21,7 @@ INCLUDEPATH += \
     ../navigate \
     ../Realtime \
     ../ssd \
-    ../websvc_trans \
-    ../tts
+    ../websvc_trans
 
 SOURCES += \
     roadmap_main.cc \
@@ -36,9 +35,7 @@ SOURCES += \
     roadmap_tile_storage_qtsql.cc \
     roadmap_native_keyboard.cc \
     roadmap_gpsqtm.cc \
-    qt/qt_gpsaccessor.cc \
-    qt/tts_db_qtsqlite.cc \
-    qt/roadmap_camera.cc
+    qt/qt_gpsaccessor.cc
 
 HEADERS += \
     qt_progress.h \
@@ -47,20 +44,3 @@ HEADERS += \
     qt_canvas.h \
     roadmap_gpsqtm.h \
     qt/qt_gpsaccessor.h
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

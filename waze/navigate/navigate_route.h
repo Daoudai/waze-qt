@@ -29,14 +29,11 @@
 
 
 // input flags
-#define NAV_ROUTE_FLAGS_NONE        0
-#define NEW_ROUTE 					   1
-#define RECALC_ROUTE 				   2
-#define USE_LAST_RESULTS 			   4
-#define ALLOW_DESTINATION_CHANGE    8
-#define ALLOW_ALTERNATE_SOURCE	   16
-#define DISMISS_RESULT_MESSAGE      32
-#define RETRY_ROUTE_REQUEST         64
+#define NEW_ROUTE 					1
+#define RECALC_ROUTE 				2
+#define USE_LAST_RESULTS 			4
+#define ALLOW_DESTINATION_CHANGE 8
+#define ALLOW_ALTERNATE_SOURCE	16
 
 // output flags
 #define CHANGED_DEPARTURE			256			

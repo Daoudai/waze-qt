@@ -155,11 +155,6 @@ RoadMapConfigDescriptor FACEBOOK_CFG_PRM_URL_Var = ROADMAP_CONFIG_ITEM(
       FACEBOOK_CONFIG_TAB,
       FACEBOOK_CFG_PRM_URL_Name);
 
-//    URL - Facebook Share
-RoadMapConfigDescriptor FACEBOOK_CFG_PRM_ShareURL_Var = ROADMAP_CONFIG_ITEM(
-      FACEBOOK_CONFIG_TAB,
-      FACEBOOK_CFG_PRM_ShareURL_Name);
-
 
 
 enum {
@@ -195,7 +190,7 @@ BOOL roadmap_social_initialize(void) {
    // Road reports - Twitter
    roadmap_config_declare_enumeration(SOCIAL_CONFIG_TYPE,
          &TWITTER_CFG_PRM_SEND_REPORTS_Var, NULL,
-         SOCIAL_CFG_PRM_SEND_REPORTS_Disabled, SOCIAL_CFG_PRM_SEND_REPORTS_Enabled, NULL);
+         SOCIAL_CFG_PRM_SEND_REPORTS_Enabled, SOCIAL_CFG_PRM_SEND_REPORTS_Disabled, NULL);
 
    // Destination - Twitter
    roadmap_config_declare_enumeration(SOCIAL_CONFIG_TYPE,
@@ -210,17 +205,17 @@ BOOL roadmap_social_initialize(void) {
    roadmap_config_declare_enumeration(SOCIAL_CONFIG_PREF_TYPE,
             &TWITTER_CFG_PRM_SHOW_MUNCHING_Var, NULL,
             SOCIAL_CFG_PRM_SHOW_MUNCHING_No, SOCIAL_CFG_PRM_SHOW_MUNCHING_Yes, NULL);
-
+   
    // Show user profile - Twitter
    roadmap_config_declare_enumeration(SOCIAL_CONFIG_TYPE,
             &TWITTER_CFG_PRM_SHOW_PROFILE_Var, NULL,
             SOCIAL_CFG_PRM_SHOW_PROFILE_Disabled, SOCIAL_CFG_PRM_SHOW_PROFILE_Friends, SOCIAL_CFG_PRM_SHOW_PROFILE_Enabled, NULL);
-
+   
 
    // Sign up - Twitter
    roadmap_config_declare_enumeration(SOCIAL_CONFIG_TYPE,
          &TWITTER_CFG_PRM_SEND_SIGNUP_Var, NULL,
-         SOCIAL_CFG_PRM_SEND_SIGNUP_Disabled, SOCIAL_CFG_PRM_SEND_SIGNUP_Enabled, NULL);
+         SOCIAL_CFG_PRM_SEND_SIGNUP_Enabled, SOCIAL_CFG_PRM_SEND_SIGNUP_Disabled, NULL);
 
    // Logged in status - Twitter
    roadmap_config_declare_enumeration(SOCIAL_CONFIG_TYPE,
@@ -236,7 +231,7 @@ BOOL roadmap_social_initialize(void) {
    roadmap_config_declare_enumeration(SOCIAL_CONFIG_TYPE,
             &FACEBOOK_CFG_PRM_SHOW_PICTURE_Var, NULL,
             SOCIAL_CFG_PRM_SHOW_PICTURE_Disabled, SOCIAL_CFG_PRM_SHOW_PICTURE_Friends, SOCIAL_CFG_PRM_SHOW_PICTURE_Enabled, NULL);
-
+   
    // Show user profile - Facebook
    roadmap_config_declare_enumeration(SOCIAL_CONFIG_TYPE,
             &FACEBOOK_CFG_PRM_SHOW_PROFILE_Var, NULL,
@@ -245,7 +240,7 @@ BOOL roadmap_social_initialize(void) {
    // Road reports - Facebook
    roadmap_config_declare_enumeration(SOCIAL_CONFIG_TYPE,
          &FACEBOOK_CFG_PRM_SEND_REPORTS_Var, NULL,
-         SOCIAL_CFG_PRM_SEND_REPORTS_Disabled, SOCIAL_CFG_PRM_SEND_REPORTS_Enabled, NULL);
+         SOCIAL_CFG_PRM_SEND_REPORTS_Enabled, SOCIAL_CFG_PRM_SEND_REPORTS_Disabled, NULL);
 
    // Destination - Facebook
    roadmap_config_declare_enumeration(SOCIAL_CONFIG_TYPE,
@@ -270,11 +265,6 @@ BOOL roadmap_social_initialize(void) {
    roadmap_config_declare_enumeration(SOCIAL_CONFIG_PREF_TYPE,
             &FACEBOOK_CFG_PRM_URL_Var, NULL,
             FACEBOOK_CFG_PRM_URL_Default, NULL);
-   
-   // URL - Facebook Share
-   roadmap_config_declare_enumeration(SOCIAL_CONFIG_PREF_TYPE,
-            &FACEBOOK_CFG_PRM_ShareURL_Var, NULL,
-            FACEBOOK_CFG_PRM_ShareURL_Default, NULL);
 
 
 
@@ -333,10 +323,6 @@ static void on_check_login_completed( void* ctx, roadmap_result res) {
 void roadmap_facebook_check_login(void) {
    char url[256];
    char query[256];
-   static int type = WEBSVC_NO_TYPE;
-   
-   if (type == WEBSVC_NO_TYPE)
-      type = wst_get_unique_type();
 
    roadmap_log (ROADMAP_DEBUG, "check login");
 
@@ -350,7 +336,7 @@ void roadmap_facebook_check_login(void) {
    if (INVALID_WEBSVC_HANDLE != s_websvc)
       wst_term (s_websvc);
 
-   s_websvc = wst_init( url, NULL, NULL, NULL, "application/x-www-form-urlencoded; charset=utf-8");
+   s_websvc = wst_init( url, "application/x-www-form-urlencoded; charset=utf-8");
 
    if (INVALID_WEBSVC_HANDLE == s_websvc) {
       roadmap_log (ROADMAP_ERROR, "roadmap_facebook_check_login() - invalid websvc handle");
@@ -358,9 +344,7 @@ void roadmap_facebook_check_login(void) {
    }
 
    wst_start_trans( s_websvc,
-                    0,
                    "external_facebook",
-                   type,
                    data_parser,
                    sizeof(data_parser)/sizeof(wst_parser),
                    on_check_login_completed,
@@ -388,10 +372,10 @@ void roadmap_facebook_connect(BOOL preload) {
             BROWSER_WEB_VERSION,
             roadmap_lang_get_system_lang());
    if (!preload)
-      roadmap_browser_show("Connect to Facebook", url, after_facebook_connect, NULL, NULL, BROWSER_BAR_NORMAL);
+      roadmap_browser_show("Connect to Facebook", url, after_facebook_connect, BROWSER_BAR_NORMAL);
 #ifdef IPHONE
    else
-      roadmap_browser_iphone_preload("Connect to Facebook", url, after_facebook_connect, NULL, NULL, BROWSER_BAR_NORMAL, 0);
+      roadmap_browser_preload("Connect to Facebook", url, after_facebook_connect, BROWSER_BAR_NORMAL);
 #endif //IPHONE
 }
 
@@ -405,10 +389,6 @@ static void on_disconnect_completed( void* ctx, roadmap_result res) {
 static void facebook_disconnect_confirmed_cb(int exit_code, void *context){
    char url[256];
    char query[256];
-   static int type = WEBSVC_NO_TYPE;
-   
-   if (type == WEBSVC_NO_TYPE)
-      type = wst_get_unique_type();
 
    if (exit_code != dec_yes)
       return;
@@ -425,12 +405,10 @@ static void facebook_disconnect_confirmed_cb(int exit_code, void *context){
    if (INVALID_WEBSVC_HANDLE != s_websvc)
       wst_term (s_websvc);
 
-   s_websvc = wst_init( url, NULL, NULL, NULL, "application/x-www-form-urlencoded; charset=utf-8");
+   s_websvc = wst_init( url, "application/x-www-form-urlencoded; charset=utf-8");
 
    wst_start_trans( s_websvc,
-                   0,
                    "external_facebook",
-                   type,
                    data_parser,
                    sizeof(data_parser)/sizeof(wst_parser),
                    on_disconnect_completed,
@@ -445,20 +423,12 @@ void roadmap_facebook_disconnect(void) {
 
 /////////////////////////////////////////////////////////////////////////////////////
 void roadmap_facebook_invite(void) {
-   //Not implemented server side
    char url[256];
 
    snprintf(url, sizeof(url), "%s%s?sessionid=%d&cookie=%s", roadmap_facebook_url(), FACEBOOK_SHARE_SUFFIX,
             Realtime_GetServerId(),
             Realtime_GetServerCookie());
-   roadmap_browser_show("Invite friends", url, NULL, NULL, NULL, BROWSER_BAR_NORMAL);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////
-void roadmap_facebook_share(void) {
-   const char *url = roadmap_config_get(&FACEBOOK_CFG_PRM_ShareURL_Var);
-   
-   roadmap_browser_show("Share on Facebook", url, NULL, NULL, NULL, BROWSER_BAR_NORMAL);
+   roadmap_browser_show("Invite friends", url, NULL, BROWSER_BAR_NORMAL);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -803,7 +773,7 @@ static void roadmap_social_set_show_profile(RoadMapConfigDescriptor *config, int
                             SOCIAL_CFG_PRM_SHOW_PROFILE_Disabled);
          break;
    }
-
+   
    roadmap_config_save(FALSE);
 }
 
@@ -982,11 +952,11 @@ static int on_ok_softkey(SsdWidget widget, const char *new_value, void *context)
 #endif
 /////////////////////////////////////////////////////////////////////
 static SsdWidget space(int height) {
-   SsdWidget space_widget;
-   space_widget = ssd_container_new("spacer", NULL, SSD_MAX_SIZE, height,
+   SsdWidget space;
+   space = ssd_container_new("spacer", NULL, SSD_MAX_SIZE, height,
          SSD_WIDGET_SPACE | SSD_END_ROW);
-   ssd_widget_set_color(space_widget, NULL, NULL);
-   return space_widget;
+   ssd_widget_set_color(space, NULL, NULL);
+   return space;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -1063,17 +1033,16 @@ static void create_dialog(int dlg_type) {
 #endif
 
    box = ssd_container_new("UN/PW group", NULL, total_width, SSD_MIN_SIZE,
-         SSD_WIDGET_SPACE | SSD_END_ROW | SSD_CONTAINER_FLAGS | SSD_POINTER_NONE | SSD_CONTAINER_BORDER | SSD_ALIGN_CENTER);
+         SSD_WIDGET_SPACE | SSD_END_ROW | SSD_ROUNDED_CORNERS
+               | SSD_ROUNDED_WHITE | SSD_POINTER_NONE | SSD_CONTAINER_BORDER | SSD_ALIGN_CENTER);
 
    //Accound details header
    if (isTwitter) {
       group = ssd_container_new("Twitter Account Header group", NULL, SSD_MAX_SIZE,row_height,
                                 SSD_WIDGET_SPACE | SSD_END_ROW);
-      ssd_widget_set_color(group, NULL, NULL);;
-      text = ssd_text_new("Label", roadmap_lang_get("Account details"),
-            SSD_MAIN_TEXT_SIZE ,SSD_TEXT_NORMAL_FONT | SSD_TEXT_LABEL | SSD_ALIGN_VCENTER);
-      ssd_text_set_color(text, SSD_CONTAINER_TEXT_COLOR);
-      ssd_widget_add(group, text);
+      ssd_widget_set_color(group, "#000000", "#ffffff");
+      ssd_widget_add(group, ssd_text_new("Label", roadmap_lang_get("Account details"),
+                                         SSD_MAIN_TEXT_SIZE ,SSD_TEXT_NORMAL_FONT | SSD_TEXT_LABEL | SSD_ALIGN_VCENTER));
       bitmap = ssd_bitmap_new ("twitter_icon", "Tweeter-logo",SSD_ALIGN_RIGHT);
       ssd_widget_add(group, bitmap);
       ssd_widget_add(box, group);
@@ -1083,27 +1052,24 @@ static void create_dialog(int dlg_type) {
    if (isTwitter) {
       group = ssd_container_new("Twitter Account Login group", NULL, SSD_MAX_SIZE,row_height,
                                 SSD_WIDGET_SPACE | SSD_END_ROW);
-      ssd_widget_set_color(group, NULL, NULL);
+      ssd_widget_set_color(group, "#000000", "#ffffff");
    } else {
       group = ssd_container_new("Facebook Account Login group", NULL, SSD_MAX_SIZE,row_height,
                                 SSD_WIDGET_SPACE | SSD_END_ROW| tab_flag);
       group->callback = login_button_callback_facebook;
-      ssd_widget_set_color(group, NULL, NULL);
+      ssd_widget_set_color(group, "#000000", "#ffffff");
 
       bitmap = ssd_bitmap_new ("Login Status Icon", "facebook_connect",SSD_ALIGN_RIGHT | SSD_ALIGN_VCENTER);
       ssd_widget_add(group, bitmap);
    }
-   text = ssd_text_new("Login Status Label", "",
-         SSD_MAIN_TEXT_SIZE ,SSD_TEXT_NORMAL_FONT | SSD_TEXT_LABEL | SSD_ALIGN_VCENTER);
-   ssd_text_set_color(text, SSD_CONTAINER_TEXT_COLOR);
-   ssd_widget_add(group, text);
+   ssd_widget_add(group, ssd_text_new("Login Status Label", "",
+         SSD_MAIN_TEXT_SIZE ,SSD_TEXT_NORMAL_FONT | SSD_TEXT_LABEL | SSD_ALIGN_VCENTER));
    ssd_widget_add(box, group);
    if (isTwitter) {
       ssd_widget_add (box, ssd_separator_new ("separator", SSD_END_ROW));
       //User name
       group = ssd_container_new("Twitter Name group", NULL, SSD_MAX_SIZE, row_height,
             SSD_WIDGET_SPACE | SSD_END_ROW);
-      ssd_widget_set_color(group, NULL, NULL);
       entry_label = ssd_entry_label_new( "TwitterUserName", roadmap_lang_get("User name"), SSD_MAIN_TEXT_SIZE, 160 /* Half of the SD canvas width. Scaled internally */,
                                                 SSD_ROW_HEIGHT/2, SSD_ALIGN_VCENTER | SSD_WS_TABSTOP, roadmap_lang_get("User name") );
       ssd_widget_add( group, entry_label );
@@ -1114,7 +1080,7 @@ static void create_dialog(int dlg_type) {
       //Password
       group = ssd_container_new("Twitter PW group", NULL, SSD_MAX_SIZE, row_height,
             SSD_WIDGET_SPACE | SSD_END_ROW);
-      ssd_widget_set_color(group, NULL, NULL);
+      ssd_widget_set_color(group, "#000000", "#ffffff");
       entry_label = ssd_entry_label_new( "TwitterPassword", roadmap_lang_get("Password"), SSD_MAIN_TEXT_SIZE, 160 /* Half of the SD canvas width. Scaled internally */,
                                                 SSD_ROW_HEIGHT/2, SSD_ALIGN_VCENTER | SSD_WS_TABSTOP, roadmap_lang_get("Password") );
       ssd_entry_label_set_text_flags( entry_label, SSD_TEXT_PASSWORD );
@@ -1134,16 +1100,14 @@ static void create_dialog(int dlg_type) {
       //Use FB name
       group = ssd_container_new("Show_name group", NULL, SSD_MAX_SIZE, row_height,
             SSD_START_NEW_ROW | SSD_WIDGET_SPACE | SSD_END_ROW | tab_flag);
-      ssd_widget_set_color(group, NULL, NULL);
+      ssd_widget_set_color(group, "#000000", "#ffffff");
 
       group2 = ssd_container_new ("group2", NULL, 2*roadmap_canvas_width()/3, SSD_MIN_SIZE,
                                  SSD_ALIGN_VCENTER);
       ssd_widget_set_color(group2, NULL, NULL);
-      text = ssd_text_new("Show_name_label", roadmap_lang_get(
-            "Show my Facebook name (on app & web)"), SSD_MAIN_TEXT_SIZE, SSD_TEXT_NORMAL_FONT | SSD_TEXT_LABEL
-            | SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE);
-      ssd_text_set_color(text, SSD_CONTAINER_TEXT_COLOR);
-      ssd_widget_add(group2, text);
+      ssd_widget_add(group2, ssd_text_new("Show_name_label", roadmap_lang_get(
+                  "Show my Facebook name (on app & web)"), SSD_MAIN_TEXT_SIZE, SSD_TEXT_NORMAL_FONT | SSD_TEXT_LABEL
+                  | SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE));
       ssd_widget_add(group, group2);
 
       ssd_widget_add (group,
@@ -1159,16 +1123,14 @@ static void create_dialog(int dlg_type) {
       //Use FB picture
       group = ssd_container_new("Show_pic group", NULL, SSD_MAX_SIZE, row_height,
             SSD_START_NEW_ROW | SSD_WIDGET_SPACE | SSD_END_ROW | tab_flag);
-      ssd_widget_set_color(group, NULL, NULL);
+      ssd_widget_set_color(group, "#000000", "#ffffff");
 
       group2 = ssd_container_new ("group2", NULL, 2*roadmap_canvas_width()/3, SSD_MIN_SIZE,
                                  SSD_ALIGN_VCENTER);
       ssd_widget_set_color(group2, NULL, NULL);
-      text = ssd_text_new("Show_pic_label", roadmap_lang_get(
-            "Show my Facebook pic (on app & web)"), SSD_MAIN_TEXT_SIZE, SSD_TEXT_NORMAL_FONT | SSD_TEXT_LABEL
-            | SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE);
-      ssd_text_set_color(text, SSD_CONTAINER_TEXT_COLOR);
-      ssd_widget_add(group2, text);
+      ssd_widget_add(group2, ssd_text_new("Show_pic_label", roadmap_lang_get(
+               "Show my Facebook pic (on app & web)"), SSD_MAIN_TEXT_SIZE, SSD_TEXT_NORMAL_FONT | SSD_TEXT_LABEL
+               | SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE));
       ssd_widget_add(group, group2);
 
       ssd_widget_add (group,
@@ -1189,13 +1151,11 @@ static void create_dialog(int dlg_type) {
             SSD_WIDGET_SPACE | SSD_END_ROW);
 
    if (isTwitter)
-      text = ssd_text_new ("tweeter_auto_settings_header",
-            roadmap_lang_get ("Automatically tweet to my followers:"), SSD_HEADER_TEXT_SIZE, SSD_TEXT_NORMAL_FONT | SSD_TEXT_LABEL | SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE);
+      ssd_widget_add (box, ssd_text_new ("tweeter_auto_settings_header",
+            roadmap_lang_get ("Automatically tweet to my followers:"), SSD_HEADER_TEXT_SIZE, SSD_TEXT_NORMAL_FONT | SSD_TEXT_LABEL | SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE));
    else
-      text =  ssd_text_new ("tweeter_auto_settings_header",
-            roadmap_lang_get ("Automatically post to Facebook:"), SSD_HEADER_TEXT_SIZE, SSD_TEXT_NORMAL_FONT | SSD_TEXT_LABEL | SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE);
-
-   ssd_widget_add (box, text);
+      ssd_widget_add (box, ssd_text_new ("tweeter_auto_settings_header",
+            roadmap_lang_get ("Automatically post to Facebook:"), SSD_HEADER_TEXT_SIZE, SSD_TEXT_NORMAL_FONT | SSD_TEXT_LABEL | SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE));
    ssd_widget_set_color (box, NULL, NULL);
    ssd_widget_add (dialog, box);
    ssd_widget_add(dialog, space(5));
@@ -1203,8 +1163,9 @@ static void create_dialog(int dlg_type) {
    //Send Reports Yes/No
    box = ssd_container_new("Send_Reports box", NULL, total_width, SSD_MIN_SIZE,
          SSD_START_NEW_ROW | SSD_WIDGET_SPACE | SSD_END_ROW
-                              | SSD_CONTAINER_FLAGS | SSD_POINTER_NONE | SSD_CONTAINER_BORDER | SSD_ALIGN_CENTER);
-   ssd_widget_set_color(box, NULL, NULL);
+                              | SSD_ROUNDED_CORNERS | SSD_ROUNDED_WHITE
+                              | SSD_POINTER_NONE | SSD_CONTAINER_BORDER | SSD_ALIGN_CENTER);
+   ssd_widget_set_color(box, "#000000", "#ffffff");
 
    group = ssd_checkbox_row_new("TwitterSendTwitts", roadmap_lang_get ("My road reports"),
                                  TRUE, NULL,NULL,NULL,CHECKBOX_STYLE_ON_OFF);
@@ -1217,7 +1178,6 @@ static void create_dialog(int dlg_type) {
    text = ssd_text_new ("report_example_text_cont",
       roadmap_lang_get ("e.g:  Just reported a traffic jam on Geary St. SF, CA using @waze Social GPS."),
                            SSD_FOOTER_TEXT_SIZE, SSD_TEXT_NORMAL_FONT | SSD_TEXT_LABEL | SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE);
-
    ssd_text_set_color(text,notesColor);
    ssd_widget_add (box,text );
    ssd_widget_set_color (box, NULL, NULL);
@@ -1227,14 +1187,13 @@ static void create_dialog(int dlg_type) {
    ssd_widget_add(dialog, space(5));
    destination = ssd_container_new("Send_Destination group", NULL, total_width, SSD_MIN_SIZE,
             SSD_START_NEW_ROW | SSD_WIDGET_SPACE | SSD_END_ROW
-                                 | SSD_CONTAINER_FLAGS | SSD_POINTER_NONE | SSD_CONTAINER_BORDER | SSD_ALIGN_CENTER);
+                                 | SSD_ROUNDED_CORNERS | SSD_ROUNDED_WHITE
+                                 | SSD_POINTER_NONE | SSD_CONTAINER_BORDER | SSD_ALIGN_CENTER);
    box = ssd_container_new ("Destination Heading group", NULL, SSD_MAX_SIZE,row_height,
          SSD_WIDGET_SPACE | SSD_END_ROW);
-   text = ssd_text_new ("destination_heading_label",
-               roadmap_lang_get ("My destination and ETA"), SSD_MAIN_TEXT_SIZE, SSD_TEXT_NORMAL_FONT |SSD_TEXT_LABEL
-                        | SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE | SSD_END_ROW);
-   ssd_text_set_color(text, SSD_CONTAINER_TEXT_COLOR);
-   ssd_widget_add (box, text);
+   ssd_widget_add (box, ssd_text_new ("destination_heading_label",
+            roadmap_lang_get ("My destination and ETA"), SSD_MAIN_TEXT_SIZE, SSD_TEXT_NORMAL_FONT |SSD_TEXT_LABEL
+                     | SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE | SSD_END_ROW));
 
    ssd_widget_add (box, ssd_separator_new ("separator", SSD_ALIGN_BOTTOM));
    ssd_widget_set_color (box, NULL, NULL);
@@ -1256,11 +1215,9 @@ static void create_dialog(int dlg_type) {
 //   ssd_widget_set_color (hor_space, NULL, NULL);
 //   ssd_widget_add (box, hor_space);
 
-   text = ssd_text_new ("Destination disabled", roadmap_lang_get (
-         "Disabled"), SSD_MAIN_TEXT_SIZE, SSD_TEXT_NORMAL_FONT |SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE
-         | SSD_END_ROW);
-   ssd_text_set_color(text, SSD_CONTAINER_TEXT_COLOR);
-   ssd_widget_add (box, text);
+   ssd_widget_add (box, ssd_text_new ("Destination disabled", roadmap_lang_get (
+            "Disabled"), SSD_MAIN_TEXT_SIZE, SSD_TEXT_NORMAL_FONT |SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE
+            | SSD_END_ROW));
 
    ssd_widget_set_color (box, NULL, NULL);
    ssd_widget_add (destination, box);
@@ -1283,11 +1240,9 @@ static void create_dialog(int dlg_type) {
 //   ssd_widget_set_color (hor_space, NULL, NULL);
 //   ssd_widget_add (box, hor_space);
 
-   text = ssd_text_new ("Destination city", roadmap_lang_get (
-               "City & state only"), SSD_MAIN_TEXT_SIZE, SSD_TEXT_NORMAL_FONT |SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE
-               | SSD_END_ROW);
-   ssd_text_set_color(text, SSD_CONTAINER_TEXT_COLOR);
-   ssd_widget_add (box, text);
+   ssd_widget_add (box, ssd_text_new ("Destination city", roadmap_lang_get (
+            "City & state only"), SSD_MAIN_TEXT_SIZE, SSD_TEXT_NORMAL_FONT |SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE
+            | SSD_END_ROW));
 
    ssd_widget_set_color (box, NULL, NULL);
    ssd_widget_add (destination, box);
@@ -1314,7 +1269,7 @@ static void create_dialog(int dlg_type) {
    ssd_widget_add (box, ssd_text_new ("Destination street", roadmap_lang_get (
             "Street, City & State"), SSD_MAIN_TEXT_SIZE, SSD_TEXT_NORMAL_FONT | SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE
             | SSD_END_ROW));
-   ssd_text_set_color(text, SSD_CONTAINER_TEXT_COLOR);
+
    ssd_widget_add (box, ssd_separator_new ("separator", SSD_ALIGN_BOTTOM));
    ssd_widget_set_color (box, NULL, NULL);
    ssd_widget_add (destination, box);
@@ -1337,11 +1292,10 @@ static void create_dialog(int dlg_type) {
 //   hor_space = ssd_container_new ("spacer1", NULL, 10, 14, 0);
 //   ssd_widget_set_color (hor_space, NULL, NULL);
 //   ssd_widget_add (box, hor_space);
-   text = ssd_text_new ("Destination full", roadmap_lang_get (
-         "House #, Street, City, State"), SSD_MAIN_TEXT_SIZE, SSD_TEXT_NORMAL_FONT | SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE
-         | SSD_END_ROW);
-   ssd_text_set_color(text, SSD_CONTAINER_TEXT_COLOR);
-   ssd_widget_add (box, text);
+
+   ssd_widget_add (box, ssd_text_new ("Destination full", roadmap_lang_get (
+            "House #, Street, City, State"), SSD_MAIN_TEXT_SIZE, SSD_TEXT_NORMAL_FONT | SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE
+            | SSD_END_ROW));
 
    ssd_widget_set_color (box, NULL, NULL);
    ssd_widget_add (destination, box);
@@ -1354,7 +1308,6 @@ static void create_dialog(int dlg_type) {
    text = ssd_text_new ("destination_example_text_cont",
       roadmap_lang_get ("e.g:  Driving to Greary St. SF, using @waze social GPS. ETA 2:32pm."),
                         SSD_FOOTER_TEXT_SIZE, SSD_TEXT_NORMAL_FONT | SSD_TEXT_LABEL | SSD_ALIGN_VCENTER | SSD_WIDGET_SPACE);
-   ssd_text_set_color(text, SSD_CONTAINER_TEXT_COLOR);
    ssd_text_set_color(text,notesColor);
    ssd_widget_add (box,text );
    ssd_widget_set_color (box, NULL, NULL);
@@ -1366,8 +1319,9 @@ static void create_dialog(int dlg_type) {
 
       box = ssd_container_new("Send_Reports box", NULL, total_width, SSD_MIN_SIZE,
                                  SSD_START_NEW_ROW | SSD_WIDGET_SPACE | SSD_END_ROW
-                                 | SSD_CONTAINER_FLAGS | SSD_POINTER_NONE | SSD_CONTAINER_BORDER | SSD_ALIGN_CENTER);
-      ssd_widget_set_color(box, NULL, NULL);
+                                 | SSD_ROUNDED_CORNERS | SSD_ROUNDED_WHITE
+                                 | SSD_POINTER_NONE | SSD_CONTAINER_BORDER | SSD_ALIGN_CENTER);
+      ssd_widget_set_color(box, "#000000", "#ffffff");
 
       group = ssd_checkbox_row_new("TwitterSendMunch", roadmap_lang_get ("My road munching"),
                                     TRUE, NULL,NULL,NULL,CHECKBOX_STYLE_ON_OFF);

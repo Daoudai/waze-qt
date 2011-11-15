@@ -775,7 +775,7 @@ void roadmap_square_force_next_update (void) {
 }
 
 
-int roadmap_square_view (int *square, RoadMapGuiRect *rect, int size) {
+int roadmap_square_view (int *square, int size) {
 
    RoadMapPosition origin;
    RoadMapPosition position;
@@ -790,12 +790,7 @@ int roadmap_square_view (int *square, RoadMapGuiRect *rect, int size) {
 
    if (RoadMapSquareActive == NULL) return 0;
 
-   if (!rect) {
-      roadmap_math_screen_edges (&screen);
-   } else {
-      roadmap_math_to_area(rect, &screen);
-   }
-
+   roadmap_math_screen_edges (&screen);
 
 	position.longitude = screen.west;
 	position.latitude = screen.south;
@@ -837,7 +832,6 @@ int roadmap_square_view (int *square, RoadMapGuiRect *rect, int size) {
 			roadmap_math_coordinate (&bottomright, points+1);
 			roadmap_math_coordinate (&topright, points+2);
 			roadmap_math_coordinate (&bottomleft, points+3);
-#ifndef OGL_TILE
 			for (i=0; i< 4; ++i) {
 				roadmap_math_rotate_project_coordinate(points+i);
 			}
@@ -847,21 +841,16 @@ int roadmap_square_view (int *square, RoadMapGuiRect *rect, int size) {
 				filter_count++;
 				continue;
 			}
-         
 			for (il=0; il< 4; ++il) {
-				if ((!rect && points[il].x>= 0) ||
-                (rect && points[il].x >= rect->minx))
+				if (points[il].x>= 0)
 					break;
 			}
 			if (il==4) {
 				filter_count++;
 				continue;
 			}
-#endif //OGL_TILE
-         
 			for (ir=0; ir< 4; ++ir) {
-				if ((!rect && points[ir].x<= roadmap_canvas_width()) ||
-                (rect && points[ir].x<= rect->maxx))
+				if (points[ir].x<= roadmap_canvas_width())
 					break;
 			}
 			if (ir==4) {
@@ -898,7 +887,7 @@ int roadmap_square_view (int *square, RoadMapGuiRect *rect, int size) {
 		}
 	}
 
-#if !defined(J2ME) && !defined(OGL_TILE)
+#ifndef J2ME
 	roadmap_square_get_tiles (&peripheral, RoadMapScaleCurrent);
 #endif
 	RoadMapSquareForceUpdateMode = 0;

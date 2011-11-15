@@ -35,13 +35,6 @@ typedef struct {
 } RoadMapGuiPoint;
 
 typedef struct {
-   
-   float x;
-   float y;
-   
-} RoadMapGuiPointF;
-
-typedef struct {
 
    int minx;
    int miny;

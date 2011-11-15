@@ -21,7 +21,7 @@
  *
  *
  */
-
+ 
 #ifndef INCLUDE__ROADMAP_ANIMATION__H
 #define INCLUDE__ROADMAP_ANIMATION__H
 
@@ -41,16 +41,7 @@ enum animation_property_type {
    ANIMATION_PROPERTY_SCALE,
    ANIMATION_PROPERTY_ROTATION,
    ANIMATION_PROPERTY_OPACITY,
-   ANIMATION_PROPERTY_FRAME,
-   ANIMATION_PROPERTY_SPEED,
-   ANIMATION_PROPERTY_SCALE_Y,
-   ANIMATION_PROPERTY_SCALE_X,
-};
-
-enum animation_priorities {
-   ANIMATION_PRIORITY_GPS = 0,
-   ANIMATION_PRIORITY_SCREEN,
-   ANIMATION_PRIORITIES_COUNT
+   ANIMATION_PROPERTY_FRAME
 };
 
 typedef void (*RoadMapAnimationCallbackSet)     (void *context);
@@ -62,12 +53,10 @@ typedef struct {
 } RoadMapAnimationCallbacks;
 
 typedef struct {
-   int      type;
-   int      from;
-   int      to;
-   int      current;
-   uint32_t start_time;
-   int      duration;
+   int   type;
+   int   from;
+   int   to;
+   int   current;
 } RoadMapAnimationProperty;
 
 typedef struct {
@@ -78,17 +67,15 @@ typedef struct {
    int                        loops;
    int                        delay; //msec
    RoadMapAnimationCallbacks  *callbacks;
-   int                        timing;
+   BOOL                       timing;
    // The following are set by the controller
    int                        status;
-   int                        priority;
-   //uint32_t                   start_time;
+   uint32_t                   start_time;
 } RoadMapAnimation;
 
 
 RoadMapAnimation *roadmap_animation_create (void);
 void roadmap_animation_register(RoadMapAnimation *animation);
-void roadmap_animation_cancel(RoadMapAnimation *animation);
 void roadmap_animation_initialize (void);
 void roadmap_animation_start_repaint (void);
 void roadmap_animation_end_repaint (void);

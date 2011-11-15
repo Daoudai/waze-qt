@@ -27,8 +27,7 @@
 #define RES_BITMAP         0
 #define RES_SOUND          1
 #define RES_NATIVE_IMAGE   2
-#define RES_PATTERN        3
-#define MAX_RESOURCES      4
+#define MAX_RESOURCES      3
 
 /* Flags */
 #define RES_SKIN      0x1

@@ -36,12 +36,13 @@
 BOOL  RTNet_Init();
 void  RTNet_Term();
 
+BOOL  RTNet_LoadParams ();
 int   RTNet_Send       ( RoadMapSocket socket, const char* szText);
 BOOL  RTNet_TransactionQueue_ProcessSingleItem( BOOL* pTransactionStarted);
 void  RTNet_TransactionQueue_Clear();
 
 ETransactionStatus   RTNet_GetTransactionState();
-void                 RTNet_AbortTransaction( ETransactionStatus* new_state, BOOL bStopNow);
+void                 RTNet_AbortTransaction( ETransactionStatus* new_state);
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -110,7 +111,6 @@ BOOL  RTNet_NavigateTo(    LPRTConnectionInfo   pCI,
 BOOL  RTNet_MapDisplyed ( LPRTConnectionInfo   pCI,
                            const RoadMapArea*   pRoadMapArea,
                            unsigned int         scale,
-                           RoadMapPosition      position[5],
                            CB_OnWSTCompleted pfnOnCompleted,
                            char*                packet_only);
 
@@ -153,11 +153,9 @@ BOOL  RTNet_ExternalPoiDisplayed(     LPRTConnectionInfo   pCI,
 
 BOOL  RTNet_ReportAlert(   LPRTConnectionInfo   pCI,
                            int                  iType,
-                           int                  iSubType,
                            const char*          szDescription,
                            int                  iDirection,
                            const char*          szImageId,
-                           const char*          szVoiceId,
                            BOOL						bForwardToTwitter,
                            BOOL                 bForwardToFacebook,
                            const char*          szGroup,
@@ -171,18 +169,15 @@ BOOL  RTNet_PinqWazer(     LPRTConnectionInfo   pCI,
                            int                iAlertType,
                            const char*        szDescription,
                            const char*        szImageId,
-                           const char*        szVoiceId,
                            BOOL               bForwardToTwitter,
                            CB_OnWSTCompleted pfnOnCompleted);
 
 BOOL  RTNet_ReportAlertAtPosition(
                         LPRTConnectionInfo         pCI,
                         int                        iType,
-                        int                        iSubType,
                         const char*                szDescription,
                         int                        iDirection,
                         const char*                szImageId,
-                        const char*                szVoiceId,
                         BOOL								bForwardToTwitter,
                         BOOL                       bForwardToFacebook,
                         const RoadMapGpsPosition*  MyLocation,
@@ -230,7 +225,6 @@ BOOL  RTNet_CreateAccount (LPRTConnectionInfo   pCI,
                            const char*          passWord,
                            const char*          email,
                            BOOL                 send_updates,
-                           int                  referrer,
                            CB_OnWSTCompleted pfnOnCompleted);
 
 BOOL  RTNet_UpdateProfile (LPRTConnectionInfo   pCI,
@@ -238,7 +232,6 @@ BOOL  RTNet_UpdateProfile (LPRTConnectionInfo   pCI,
                            const char*          passWord,
                            const char*          email,
                            BOOL                 send_updates,
-                           int                  referrer,
                            CB_OnWSTCompleted pfnOnCompleted);
 
 BOOL  RTNet_ReportOneSegment_Encode (char *packet, int iSegment);
@@ -258,8 +251,7 @@ void	RTNet_Auth_BuildCommand (	char*				Command,
 											const char*		ServerCookie,
 											const char*		UserName,
 											int				DeviceId,
-											const char*		Version,
-                                 int            Protocol);
+											const char*		Version);
 
 BOOL RTNet_RequestRoute(LPRTConnectionInfo   pCI,
 								int						iRoute,
@@ -288,8 +280,6 @@ BOOL RTNet_RequestRoute(LPRTConnectionInfo   pCI,
 								int                  iTwitterLevel,
 								int                  iFacebookLevel,
 								BOOL						bReRoute,
-                        NavigateLocationInfo locationInfo,
-                        BOOL                 bRetry,
                         CB_OnWSTCompleted		pfnOnCompleted);
 
 BOOL	RTNet_SelectRoute	(LPRTConnectionInfo   	pCI,
@@ -392,10 +382,6 @@ BOOL RTNet_ReportAbuse (
                   int                  iCommentID,
                   CB_OnWSTCompleted    pfnOnCompleted);
 
-BOOL RTNet_ThumbsUp (LPRTConnectionInfo   pCI,
-                     int                  iAlertID,
-                     CB_OnWSTCompleted    pfnOnCompleted);
-
 BOOL RTNet_SetPushNotifications( LPRTConnectionInfo  pCI,
                                 const char*          szToken,
                                 BOOL                 bScore,
@@ -418,17 +404,6 @@ BOOL  RTNet_FacebookPermissions (LPRTConnectionInfo   pCI,
 
 BOOL  RTNet_ExternalPoiNotifyOnPopUp (LPRTConnectionInfo   pCI,
                                   int                 iID,
-                                  int                 iPromotionID,
-                                  CB_OnWSTCompleted   pfnOnCompleted);
-
-BOOL  RTNet_ExternalPoiNotifyOnPromotionPopUp (LPRTConnectionInfo   pCI,
-                                  int                 iID,
-                                  int                 iPromotionID,
-                                  CB_OnWSTCompleted   pfnOnCompleted);
-
-BOOL  RTNet_ExternalPoiNotifyOnInfoPressed (LPRTConnectionInfo   pCI,
-                                  int                 iID,
-                                  int                 iPromotionID,
                                   CB_OnWSTCompleted   pfnOnCompleted);
 
 BOOL  RTNet_ExternalPoiNotifyOnNavigate (LPRTConnectionInfo   pCI,
@@ -438,18 +413,6 @@ BOOL  RTNet_ExternalPoiNotifyOnNavigate (LPRTConnectionInfo   pCI,
 BOOL  RTNet_NotifySplashUpdateTime (LPRTConnectionInfo pCI,
                                   const char *         update_time,
                                   CB_OnWSTCompleted    pfnOnCompleted);
-
-BOOL RTNet_ReportTraffic(  LPRTConnectionInfo   pCI,
-                           int traffic_value,
-                           CB_OnWSTCompleted pfnOnCompleted);
-
-BOOL  RTNet_Stats(  LPRTConnectionInfo   pCI,
-                    const char*          szEventName,
-                    int                  nParams,
-                    const char*          szParamKey[],
-                    const char*          szParamVal[],
-                    CB_OnWSTCompleted    pfnOnCompleted,
-                    char*                packet_only);
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 

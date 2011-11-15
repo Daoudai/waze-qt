@@ -119,7 +119,7 @@ void roadmap_recommend_register_launcher( RMRateLauncherCb launcher_cb )
  *  Returns     : void
  *  Notes       :
  */
-void roadmap_recommend_rate_us( RoadMapCallback on_close , int new_ver)
+void roadmap_recommend_rate_us( RoadMapCallback on_close )
 {
    static SsdWidget dialog = NULL;
    SsdWidget group, bitmap;
@@ -181,7 +181,7 @@ void roadmap_recommend_rate_us( RoadMapCallback on_close , int new_ver)
     group = ssd_container_new ( "Buttons group", NULL, SSD_MAX_SIZE, SSD_MIN_SIZE, SSD_ALIGN_CENTER | SSD_END_ROW );
     ssd_widget_set_color ( group, NULL, NULL );
     button = ssd_button_label_custom( "Skip", roadmap_lang_get( "Skip" ), SSD_ALIGN_CENTER | SSD_ALIGN_VCENTER,
-          (SsdCallback) on_recommend_dialog_skip, icons, 2, "#FFFFFF", "#FFFFFF",14 );
+          (SsdCallback) on_recommend_dialog_skip, icons, "#FFFFFF", "#FFFFFF" );
     text = ssd_widget_get( button, "label" );
     ssd_text_set_font_size( text, 14 );
     ssd_widget_add ( group, button );
@@ -190,7 +190,7 @@ void roadmap_recommend_rate_us( RoadMapCallback on_close , int new_ver)
     // Skip button
 
     button = ssd_button_label_custom( "Rate", roadmap_lang_get ( "Rate" ), SSD_ALIGN_CENTER | SSD_ALIGN_VCENTER,
-          (SsdCallback) on_recommend_dialog_rate, icons, 2, "#FFFFFF", "#FFFFFF",14 );
+          (SsdCallback) on_recommend_dialog_rate, icons, "#FFFFFF", "#FFFFFF" );
     text = ssd_widget_get( button, "label" );
     ssd_text_set_font_size( text, 14 );
     ssd_widget_add ( group, button );
