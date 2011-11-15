@@ -634,3 +634,9 @@ DEPENDPATH += $$PWD/qt
 
 
 
+
+maemo5 {
+    icon.files = waze.png
+    icon.path = /usr/share/icons/hicolor/64x64/apps
+    INSTALLS += icon
+}
