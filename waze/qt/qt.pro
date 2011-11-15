@@ -44,18 +44,3 @@ HEADERS += \
     qt_canvas.h \
     roadmap_gpsqtm.h \
     qt/qt_gpsaccessor.h
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
