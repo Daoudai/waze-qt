@@ -146,7 +146,7 @@ B -4 -18 50 28
 N exit
 P -50 14
 I exit_button
-A exit
+A quit
 B -4 -18 50 28
 C top_bar_exit_state 1
 
