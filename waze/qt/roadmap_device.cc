@@ -30,7 +30,6 @@ extern "C" {
 
 #include <QSystemScreenSaver>
 #include <QSystemDeviceInfo>
-#include <QSystemDisplayInfo>
 QTM_USE_NAMESPACE
 
 int roadmap_device_initialize( void ) {
@@ -55,13 +54,8 @@ void roadmap_device_call_start_callback( void ) {
 }
 
 BOOL roadmap_horizontal_screen_orientation() {
-#ifdef Q_WS_MAEMO_5
-    /* TODO */ // maemo5
+    /* TODO */
     return true;
-#else
-    QSystemDisplayInfo dispInfo;
-    return dispInfo.orientation(0) == QSystemDisplayInfo::Landscape;
-#endif
 }
 
 BOOL roadmap_camera_take_picture( CameraImageFile* image_file, CameraImageBuf* image_thumbnail ) {

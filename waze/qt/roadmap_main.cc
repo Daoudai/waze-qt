@@ -914,7 +914,7 @@ static void roadmap_main_close_IO()
         {
                 pthread_cond_destroy( &RoadMapMainIo[i].cond );
                 pthread_mutex_destroy( &RoadMapMainIo[i].mutex );
-    }
+        }
 }
 
 /*************************************************************************************************

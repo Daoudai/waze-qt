@@ -203,9 +203,14 @@ QColor RMapCanvas::translateColor(const char *color) {
         colorString = colorString.replace(" ", "");
     }
 
+    if (colorString.length() > 9)
+    {
+        colorString = colorString.left(9);
+    }
+
     if (colorString.length() == 9)
     {
-        opacity = colorString.left(2).toInt(NULL, 16);
+        opacity = colorString.right(2).toInt(NULL, 16);
         colorString.chop(2);
     }
 
