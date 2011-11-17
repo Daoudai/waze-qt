@@ -85,7 +85,6 @@ RoadMapPen RMapCanvas::createPen(const char* name) {
       p->font = new QFont("Arial",12);
 #if defined(ROADMAP_ADVANCED_STYLE)
       p->brush = new QBrush();
-      p->fontcolor = new QColor(getColor("#000000"));
       p->capitalize = 0;
       p->background = 0;
       p->buffersize = 0;
@@ -194,32 +193,6 @@ void RMapCanvas::setPenLineJoinStyle(int join) {
   }
 }
 
-QColor RMapCanvas::translateColor(const char *color) {
-    QString colorString(color);
-    int opacity = 255;
-
-    if (colorString.contains(" "))
-    {
-        colorString = colorString.replace(" ", "");
-    }
-
-    if (colorString.length() > 9)
-    {
-        colorString = colorString.left(9);
-    }
-
-    if (colorString.length() == 9)
-    {
-        opacity = colorString.right(2).toInt(NULL, 16);
-        colorString.chop(2);
-    }
-
-    QColor c(colorString);
-    c.setAlpha(opacity);
-
-    return color;
-}
-
 void RMapCanvas::setBrushColor(const char *color) {
     if (currentPen != 0) {
         currentPen->brush->setColor(getColor(color));
@@ -252,12 +225,6 @@ void RMapCanvas::setFontName(const char *name) {
     if (!f.exactMatch()) {
        qWarning("font family: <%s> match not found",f.family().trimmed().toUtf8().constData());  
     }
-  }
-}
-
-void RMapCanvas::setFontColor(const char *color) {
-  if (currentPen != 0) {
-    currentPen->fontcolor = new QColor(getColor(color));
   }
 }
 
@@ -330,7 +297,7 @@ void RMapCanvas::clearArea(const RoadMapGuiRect *rect) {
     if (pixmap) {
         QRect visualRectangle(rect->minx, rect->miny, rect->maxx - rect->minx, rect->maxy - rect->miny);
         QPainter p(pixmap);
-        QBrush b(currentPen->pen->color());
+        QBrush b(QColor(currentPen->pen->color().rgb()));
         p.setBackgroundMode(Qt::OpaqueMode);
         p.setBrush(b);
         p.drawRect(visualRectangle);
@@ -339,7 +306,7 @@ void RMapCanvas::clearArea(const RoadMapGuiRect *rect) {
 
 void RMapCanvas::erase() {
    if (pixmap) {
-      pixmap->fill(currentPen->pen->color());
+      pixmap->fill(QColor(currentPen->pen->color().rgb()));
    }
 }
 
@@ -419,7 +386,7 @@ void RMapCanvas::drawString(RoadMapGuiPoint* position,
             p.drawText(i, j, QString::fromUtf8(text));
      }
      QPen pen(p.pen());
-     pen.setColor(*currentPen->fontcolor);
+     pen.setColor(currentPen->pen->color());
      p.setPen(pen);
    }
 #endif
@@ -461,7 +428,7 @@ void RMapCanvas::drawStringAngle(const RoadMapGuiPoint* position,
            p.drawText(i-centerX, j-centerY, QString::fromUtf8(text));
      }
      QPen pen(p.pen());
-     pen.setColor(*currentPen->fontcolor);
+     pen.setColor(currentPen->pen->color());
      p.setPen(pen);
    }
 #endif /* ROADMAP_ADVANCED_STYLE */
@@ -717,12 +684,33 @@ void RMapCanvas::configure() {
 }
 
 QColor RMapCanvas::getColor(const char* color) {
-   QColor *c = colors[color];
+    QColor *c = colors[color];
 
-   if (c == 0) {
-      c = new QColor(translateColor(color));
-      colors.insert(color, c);
-   }
+    if (c == 0) {
+        if (color[0] == '#') {
+            QString colorString(color);
+
+            int red = colorString.left(3).right(2).toInt(0, 16);
+            int green = colorString.left(5).right(2).toInt(0, 16);
+            int blue = colorString.left(7).right(2).toInt(0, 16);
+
+            if (colorString.length() > 7)
+            {
+                int opacity = colorString.left(9).right(2).toInt(0, 16);
+                c = new QColor(red, green, blue, opacity);
+            }
+            else
+            {
+                c = new QColor(red, green, blue);
+            }
+        }
+        else
+        {
+            c = new QColor(color);
+        }
+
+        colors.insert(color, c);
+    }
 
    return *c;
 }
