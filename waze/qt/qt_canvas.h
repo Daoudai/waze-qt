@@ -48,7 +48,6 @@ extern "C" {
       QBrush* brush;
       int capitalize;
       int background;
-      QColor* fontcolor;
       QColor* buffercolor;
       int buffersize;
 #endif

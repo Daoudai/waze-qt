@@ -224,10 +224,6 @@ void roadmap_canvas_set_label_font_name(const char *name) {
   roadMapCanvas->setFontName(name);
 }
 
-void roadmap_canvas_set_label_font_color(const char *color) {
-  roadMapCanvas->setFontColor(color);
-}
-
 void roadmap_canvas_set_label_font_size(int size) {
   roadMapCanvas->setFontSize(size);
 }
