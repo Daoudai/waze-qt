@@ -43,7 +43,6 @@ SOURCES += \
     unix/roadmap_time.c \
     unix/roadmap_thread.c \
     unix/roadmap_spawn.c \
-    unix/roadmap_sound.c \
     unix/roadmap_serial.c \
     unix/roadmap_path.c \
     unix/roadmap_net.c \
@@ -640,3 +639,4 @@ maemo5 {
     icon.path = /usr/share/icons/hicolor/64x64/apps
     INSTALLS += icon
 }
+

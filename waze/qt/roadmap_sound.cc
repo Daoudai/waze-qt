@@ -1,9 +1,11 @@
+
 /* roadmap_library.c - a low level module to manage plugins for RoadMap.
  *
  * LICENSE:
  *
  *   Copyright 2002 Pascal F. Martin
  *   Copyright 2008 Ehud Shabtai
+ *   Copyright 2011 Assaf Paz
  *
  *   This file is part of RoadMap.
  *
@@ -28,14 +30,34 @@
 
 #include <stdlib.h>
 #include <string.h>
+
+#include <QMediaPlayer>
+#include <QMediaPlaylist>
+#include <QMediaResource>
+#include <QFile>
+#include <QUrl>
+#include "qt_sound.h"
+
+extern "C" {
 #include "roadmap.h"
+#include "roadmap_path.h"
 #include "roadmap_sound.h"
 #include "roadmap_lang.h"
+#include "roadmap_prompts.h"
+}
+
 
 #define SND_VOLUME_LVLS_COUNT 4
 const int SND_VOLUME_LVLS[] = {0, 1, 2, 3};
 const char* SND_VOLUME_LVLS_LABELS[SND_VOLUME_LVLS_COUNT];
 const char* SND_DEFAULT_VOLUME_LVL = "2";
+
+typedef struct roadmap_sound_st {
+    QMediaResource *media;
+} roadmap_sound_st;
+
+static QMediaPlaylist *playList = NULL;
+static QMediaPlayer *mediaPlayer = NULL;
 
 RoadMapSoundList roadmap_sound_list_create (int flags) {
 
@@ -79,45 +101,58 @@ void roadmap_sound_list_free (RoadMapSoundList list) {
 
 
 RoadMapSound roadmap_sound_load (const char *path, const char *file, int *mem) {
+    RoadMapSound sound = new roadmap_sound_st;
+    QString fullPath = QString(path).append("/").append(file);
+    sound->media = new QMediaResource(QUrl::fromLocalFile(fullPath));
 
-   return 0;
+    *mem = sound->media->dataSize();
+
+    return sound;
 }
 
 
 int roadmap_sound_free (RoadMapSound sound) {
+
+    delete sound->media;
+    delete sound;
 
    return 0;
 }
 
 
 int roadmap_sound_play      (RoadMapSound sound) {
+    /* never called */
 
    return 0;
 }
 
 
 int roadmap_sound_play_file (const char *file_name) {
-
+    /* TODO */
    return 0;
 }
 
 
 int roadmap_sound_play_list (const RoadMapSoundList list) {
 
-	int i;
-	char announce[2000];
-	
-	announce[0] = '\0';
-	for (i = 0; i < list->count; i++) {
-		strcat (announce, list->list[i]);
-		strcat (announce, " ");
-	}
-	if (*announce) roadmap_log (ROADMAP_DEBUG, "Voice announce: %s\n", announce);			
+    PlaylistWait waiter(mediaPlayer);
 
-   if (!(list->flags & SOUND_LIST_NO_FREE)) {
-      roadmap_sound_list_free  (list);
-   }
-   return 0;
+    QString path(roadmap_path_downloads());
+    path.append("sound").append(roadmap_prompts_get_name());
+
+    for (int i = 0; i < list->count; i++) {
+        QString full_path(path);
+        full_path.append(list->list[i]).append(".mp3");
+        playList->addMedia(QUrl::fromLocalFile(full_path));
+    }
+
+    mediaPlayer->play();
+
+    if (!(list->flags & SOUND_LIST_NO_FREE)) {
+        waiter.waitEnd();
+        roadmap_sound_list_free  (list);
+    }
+    return 0;
 }
 
 
@@ -127,21 +162,33 @@ int roadmap_sound_record (const char *file_name, int seconds) {
 }
 
 
-void roadmap_sound_initialize (void) 
+void roadmap_sound_initialize (void)
 {
-	// Initialize the volume labels for GUI
-	SND_VOLUME_LVLS_LABELS[0] = roadmap_lang_get( "Silent" );
-	SND_VOLUME_LVLS_LABELS[1] = roadmap_lang_get( "Low" );
-	SND_VOLUME_LVLS_LABELS[2] = roadmap_lang_get( "Medium" );
-	SND_VOLUME_LVLS_LABELS[3] = roadmap_lang_get( "High" );
+        // Initialize the volume labels for GUI
+        SND_VOLUME_LVLS_LABELS[0] = roadmap_lang_get( "Silent" );
+        SND_VOLUME_LVLS_LABELS[1] = roadmap_lang_get( "Low" );
+        SND_VOLUME_LVLS_LABELS[2] = roadmap_lang_get( "Medium" );
+        SND_VOLUME_LVLS_LABELS[3] = roadmap_lang_get( "High" );
+
+        playList = new QMediaPlaylist();
+        mediaPlayer = new QMediaPlayer();
+
+        mediaPlayer->setPlaylist(playList);
 }
-void roadmap_sound_shutdown   (void) {}
+
+void roadmap_sound_shutdown   (void) {
+    mediaPlayer->stop();
+
+    delete playList;
+    delete mediaPlayer;
+}
 
 /***********************************************************
  *      Name    : roadmap_sound_set_volume
- *      Purpose : Sets the user volume setting to the native sound object 
- *                with configuration update			 
+ *      Purpose : Sets the user volume setting to the native sound object
+ *                with configuration update
  */
-void roadmap_sound_set_volume ( int volLvl ) 
+void roadmap_sound_set_volume ( int volLvl )
 {
+    mediaPlayer->setVolume(100/volLvl);
 }
