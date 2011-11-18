@@ -111,6 +111,14 @@ I TS_top_mood_beta
 I TS_top_mood_halo
 P 296 5
 
+N view_points
+P -285 14
+I TickerIcon_open
+I TickerIcon_close
+A ticker_menu
+S ticker_state
+B -4 -18 50 28
+
 N Seperator
 I Topbar_Sep
 P -240 10
