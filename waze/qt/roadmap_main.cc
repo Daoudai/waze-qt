@@ -25,10 +25,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
 #include <ctype.h>
 #include <errno.h>
-#include <time.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -39,6 +37,8 @@
 #include <signal.h>
 
 #include <QApplication>
+#include <QMutex>
+#include <QWaitCondition>
 #include "qt_main.h"
 
 extern "C" {
@@ -70,8 +70,8 @@ typedef struct roadmap_main_io {
 
    int io_id;						// If is not valid < 0
    pthread_t handler_thread;
-   pthread_mutex_t mutex;			// Mutex for the condition variable
-   pthread_cond_t cond;				// Condition variable for the thread
+   QMutex mutex;			// Mutex for the condition variable
+   QWaitCondition cond;				// Condition variable for the thread
    io_direction_type io_type;
    int pending_close;				// Indicator for the IO to be closed
    time_t start_time;
@@ -79,7 +79,7 @@ typedef struct roadmap_main_io {
 
 const struct timeval SOCKET_READ_SELECT_TIMEOUT = {30, 0}; // {sec, u sec}
 const struct timeval SOCKET_WRITE_SELECT_TIMEOUT = {30, 0}; // {sec, u sec}
-#define MESSAGE_DISPATCHER_TIMEOUT {10, 0} // {sec, nano sec}
+#define MESSAGE_DISPATCHER_TIMEOUT 10000 // {10 sec}
 
 #define CRASH_DUMP_ADDR_NUM		200		/* The number of addresses to dump when crash is occured */
 #define CRASH_DUMP_ADDR_NUM_ON_SHUTDOWN      20      /* The number of addresses to dump when crash is occured on shutdown
@@ -88,7 +88,6 @@ const struct timeval SOCKET_WRITE_SELECT_TIMEOUT = {30, 0}; // {sec, u sec}
 #define ROADMAP_MAX_IO 64
 static struct roadmap_main_io RoadMapMainIo[ROADMAP_MAX_IO];
 
-static void roadmap_main_close_IO();
 static void roadmap_main_reset_IO( roadmap_main_io *data );
 static int roadmap_main_handler_post_wait( int ioMsg, roadmap_main_io *aIO );
 static void roadmap_start_event (int event);
@@ -143,22 +142,7 @@ int LogResult( int aVal, const char *aStrPrefix, int level, char *source, int li
  */
 static int roadmap_main_handler_post_wait( int ioMsg, roadmap_main_io *aIO )
 {
-        int waitRes, retVal = 0;
-        struct timespec sleepWaitFor;
-    struct timespec sleepTimeOut;
-
-        sleepTimeOut = ( struct timespec ) MESSAGE_DISPATCHER_TIMEOUT;
-
-    // Compute the timeout
-        clock_gettime( CLOCK_REALTIME, &sleepWaitFor );
-        sleepWaitFor.tv_sec += sleepTimeOut.tv_sec;
-        sleepWaitFor.tv_nsec += sleepTimeOut.tv_nsec;
-
-        retVal = pthread_mutex_lock( &aIO->mutex );
-        if ( LogResult( retVal, "Mutex lock failed", ROADMAP_WARNING ) )
-        {
-                return retVal;
-        }
+        aIO->mutex.lock();
 
         // POST THE MESSAGE TO THE MAIN LOOP
         // The main application thread has its message loop implemented
@@ -170,21 +154,11 @@ static int roadmap_main_handler_post_wait( int ioMsg, roadmap_main_io *aIO )
         mainWindow->dispatchMessage(ioMsg);
 
         // Waiting for the callback to finish
-        retVal = pthread_cond_timedwait( &aIO->cond, &aIO->mutex, &sleepWaitFor );
-        if ( LogResult( retVal, "Condition wait", ROADMAP_WARNING ) )
-        {
-                pthread_mutex_unlock( &aIO->mutex );
-                return retVal;
-        }
+        aIO->cond.wait(&aIO->mutex, MESSAGE_DISPATCHER_TIMEOUT );
 
-        retVal = pthread_mutex_unlock( &aIO->mutex );
-        if ( LogResult( retVal, "Mutex unlock failed", ROADMAP_WARNING ) )
-        {
-                return retVal;
-        }
+        aIO->mutex.unlock();
 
-
-        return retVal;
+        return 0;
 }
 
 /*************************************************************************************************
@@ -195,13 +169,13 @@ static int roadmap_main_handler_post_wait( int ioMsg, roadmap_main_io *aIO )
 static BOOL roadmap_main_invalidate_pending_close( roadmap_main_io *data )
 {
         BOOL res = FALSE;
-        pthread_mutex_lock( &data->mutex );
+        data->mutex.lock();
         if ( data->pending_close )
         {
-                data->pending_close = 0;
-                res = TRUE;
+            data->pending_close = 0;
+            res = TRUE;
         }
-        pthread_mutex_unlock( &data->mutex );
+        data->mutex.unlock();
 
         return res;
 }
@@ -213,12 +187,12 @@ static BOOL roadmap_main_invalidate_pending_close( roadmap_main_io *data )
  */
 static BOOL roadmap_main_is_pending_close( roadmap_main_io *data )
 {
-        BOOL res = FALSE;
-        pthread_mutex_lock( &data->mutex );
-        res = data->pending_close;
-        pthread_mutex_unlock( &data->mutex );
+    BOOL res = FALSE;
+    data->mutex.lock();
+    res = data->pending_close;
+    data->mutex.unlock();
 
-        return res;
+    return res;
 }
 
 /*************************************************************************************************
@@ -233,14 +207,13 @@ static void *roadmap_main_socket_handler( void* aParams )
         // IO data
         roadmap_main_io *data = (roadmap_main_io*) aParams;
         RoadMapIO *io = &data->io;
-        int io_id = data->io_id;
         // Sockets data
         int fd = roadmap_net_get_fd(io->os.socket);
         fd_set fdSet;
         struct timeval selectReadTO = SOCKET_READ_SELECT_TIMEOUT;
         struct timeval selectWriteTO = SOCKET_WRITE_SELECT_TIMEOUT;
         int retVal, ioMsg;
-    const char *handler_dir;
+        const char *handler_dir;
 
         // Empty the set
         FD_ZERO( &fdSet );
@@ -263,15 +236,15 @@ static void *roadmap_main_socket_handler( void* aParams )
                 // Try to read or write from the file descriptor. fd + 1 is the max + 1 of the fd-s set!
                 if ( data->io_type == _IO_DIR_WRITE )
                 {
-                   selectWriteTO = SOCKET_WRITE_SELECT_TIMEOUT;
-                        retVal = select( fd+1, NULL, &fdSet, NULL, &selectWriteTO );
-//			roadmap_log( ROADMAP_DEBUG, "Thread %d. IO %d WRITE : %d. FD: %d", pthread_self(), data->io_id, retVal, fd );
+                    selectWriteTO = SOCKET_WRITE_SELECT_TIMEOUT;
+                    retVal = select( fd+1, NULL, &fdSet, NULL, &selectWriteTO );
+//                  roadmap_log( ROADMAP_DEBUG, "Thread %d. IO %d WRITE : %d. FD: %d", pthread_self(), data->io_id, retVal, fd );
                 }
                 else
                 {
-                   selectReadTO = SOCKET_READ_SELECT_TIMEOUT;
-                        retVal = select( fd+1, &fdSet, NULL, NULL, &selectReadTO );
-//			roadmap_log( ROADMAP_DEBUG, "Thread %d. IO %d READ : %d. FD: %d", pthread_self(), data->io_id, retVal, fd );
+                    selectReadTO = SOCKET_READ_SELECT_TIMEOUT;
+                    retVal = select( fd+1, &fdSet, NULL, NULL, &selectReadTO );
+//                  roadmap_log( ROADMAP_DEBUG, "Thread %d. IO %d READ : %d. FD: %d", pthread_self(), data->io_id, retVal, fd );
                 }
                 // Cancellation point - if IO is marked for invalidation - thread has to be closed
                 if ( roadmap_main_invalidate_pending_close( data ) )
@@ -325,30 +298,21 @@ static void *roadmap_main_socket_handler( void* aParams )
  */
 static void roadmap_main_init_IO()
 {
-        int i;
-        int retVal;
-        for( i = 0; i < ROADMAP_MAX_IO; ++i )
-        {
-                RoadMapMainIo[i].io_id = IO_INVALID_VAL;
-                retVal = pthread_mutex_init( &RoadMapMainIo[i].mutex, NULL );
-                LogResult( retVal, "Mutex init. ", ROADMAP_ERROR );
-                retVal = pthread_cond_init( &RoadMapMainIo[i].cond, NULL );
-                LogResult( retVal, "Condition init init. ", ROADMAP_ERROR );
-                RoadMapMainIo[i].pending_close = 0;
+
+    for(int i = 0; i < ROADMAP_MAX_IO; ++i )
+    {
+        RoadMapMainIo[i].io_id = IO_INVALID_VAL;
+        RoadMapMainIo[i].pending_close = 0;
     }
 }
 
 void roadmap_main_new(const char* title, int width, int height) {
 
-   mainWindow = new RMapMainWindow(0,0);
+    mainWindow = new RMapMainWindow(0,0);
 
-#ifdef Q_WS_MAEMO_5
-   mainWindow->showMaximized();
-#else
-   mainWindow->showFullScreen();
-#endif
+    mainWindow->showFullScreen();
 
-  editor_main_set(1);
+    editor_main_set(1);
 }
 
 
@@ -519,20 +483,17 @@ void roadmap_main_set_input ( RoadMapIO *io, RoadMapInput callback )
    if (io->subsystem == ROADMAP_IO_NET) fd = roadmap_net_get_fd(io->os.socket);
    else fd = io->os.file; /* All the same on UNIX except sockets. */
 
-        for (i = 0; i < ROADMAP_MAX_IO; ++i)
+    for (i = 0; i < ROADMAP_MAX_IO; ++i)
+    {
+        if ( !IO_VALID( RoadMapMainIo[i].io_id ) )
         {
-                if ( !IO_VALID( RoadMapMainIo[i].io_id ) )
-                {
-                        RoadMapMainIo[i].io = *io;
-                        RoadMapMainIo[i].callback = callback;
-                        RoadMapMainIo[i].io_type = _IO_DIR_READ;
-                        RoadMapMainIo[i].io_id = i;
-                        retVal = pthread_mutex_init( &RoadMapMainIo[i].mutex, NULL );
-         LogResult( retVal, "Mutex init. ", ROADMAP_ERROR );
-         retVal = pthread_cond_init( &RoadMapMainIo[i].cond, NULL );
-         LogResult( retVal, "Condition init init. ", ROADMAP_ERROR );
-                        break;
-                }
+            RoadMapMainIo[i].io = *io;
+            RoadMapMainIo[i].callback = callback;
+            RoadMapMainIo[i].io_type = _IO_DIR_READ;
+            RoadMapMainIo[i].io_id = i;
+
+            break;
+        }
    }
    if ( i == ROADMAP_MAX_IO )
    {
@@ -560,31 +521,27 @@ void roadmap_main_set_output ( RoadMapIO *io, RoadMapInput callback )
    if (io->subsystem == ROADMAP_IO_NET) fd = roadmap_net_get_fd(io->os.socket);
    else fd = io->os.file; /* All the same on UNIX except sockets. */
 
-        for ( i = 0; i < ROADMAP_MAX_IO; ++i )
+    for ( i = 0; i < ROADMAP_MAX_IO; ++i )
+    {
+        if ( !IO_VALID( RoadMapMainIo[i].io_id ) )
         {
-                if ( !IO_VALID( RoadMapMainIo[i].io_id ) )
-                {
-                        RoadMapMainIo[i].io = *io;
-                        RoadMapMainIo[i].callback = callback;
-                        RoadMapMainIo[i].io_id = i;
-                        RoadMapMainIo[i].io_type = _IO_DIR_WRITE;
-         RoadMapMainIo[i].start_time = time(NULL);
-         retVal = pthread_mutex_init( &RoadMapMainIo[i].mutex, NULL );
-         LogResult( retVal, "Mutex init. ", ROADMAP_ERROR );
-         retVal = pthread_cond_init( &RoadMapMainIo[i].cond, NULL );
-         LogResult( retVal, "Condition init init. ", ROADMAP_ERROR );
-                        break;
-                }
+            RoadMapMainIo[i].io = *io;
+            RoadMapMainIo[i].callback = callback;
+            RoadMapMainIo[i].io_id = i;
+            RoadMapMainIo[i].io_type = _IO_DIR_WRITE;
+            RoadMapMainIo[i].start_time = time(NULL);
+            break;
         }
+    }
 
-        if ( i == ROADMAP_MAX_IO )
-        {
-           roadmap_log ( ROADMAP_FATAL, "Too many set output calls" );
-           return;
-        }
+    if ( i == ROADMAP_MAX_IO )
+    {
+       roadmap_log ( ROADMAP_FATAL, "Too many set output calls" );
+       return;
+    }
 
-        // Setting the handler
-        roadmap_main_set_handler( &RoadMapMainIo[i] );
+    // Setting the handler
+    roadmap_main_set_handler( &RoadMapMainIo[i] );
 
 }
 
@@ -617,16 +574,16 @@ void roadmap_main_remove_input ( RoadMapIO *io )
         {
            if ( IO_VALID( RoadMapMainIo[i].io_id ) && roadmap_io_same(&RoadMapMainIo[i].io, io))
            {
-                         // Cancel the thread and set is valid to zero
-                         roadmap_log( ROADMAP_DEBUG, "Canceling IO # %d thread %d\n", i, RoadMapMainIo[i].handler_thread );
-                         pthread_mutex_lock( &RoadMapMainIo[i].mutex );
-                         RoadMapMainIo[i].pending_close = 1;
-                         RoadMapMainIo[i].start_time = 0;
-                         roadmap_io_invalidate( &RoadMapMainIo[i].io );
-                         pthread_mutex_unlock( &RoadMapMainIo[i].mutex );
+                 // Cancel the thread and set is valid to zero
+                 roadmap_log( ROADMAP_DEBUG, "Canceling IO # %d thread %d\n", i, RoadMapMainIo[i].handler_thread );
+                 RoadMapMainIo[i].mutex.lock();
+                 RoadMapMainIo[i].pending_close = 1;
+                 RoadMapMainIo[i].start_time = 0;
+                 roadmap_io_invalidate( &RoadMapMainIo[i].io );
+                 RoadMapMainIo[i].mutex.unlock();
 
-                         roadmap_log( ROADMAP_DEBUG, "Removing the input id %d for the subsystem : %d \n", i, io->subsystem );
-                         break;
+                 roadmap_log( ROADMAP_DEBUG, "Removing the input id %d for the subsystem : %d \n", i, io->subsystem );
+                 break;
            }
         }
         if ( i == ROADMAP_MAX_IO )
@@ -642,16 +599,13 @@ void roadmap_main_remove_input ( RoadMapIO *io )
  */
 static void roadmap_main_reset_IO( roadmap_main_io *data )
 {
-        roadmap_log( ROADMAP_DEBUG, "Reset IO: %d \n", data->io_id );
+    roadmap_log( ROADMAP_DEBUG, "Reset IO: %d \n", data->io_id );
 
-        data->callback = NULL;
-        data->handler_thread = 0;
-        roadmap_io_invalidate( &data->io );
-        data->io_id = IO_INVALID_VAL;
-        data->pending_close = 0;
-   pthread_mutex_destroy( &data->mutex );
-   pthread_cond_destroy( &data->cond );
-
+    data->callback = NULL;
+    data->handler_thread = 0;
+    roadmap_io_invalidate( &data->io );
+    data->io_id = IO_INVALID_VAL;
+    data->pending_close = 0;
 }
 
 /*************************************************************************************************
@@ -771,11 +725,6 @@ void roadmap_main_exit(void) {
 
    roadmap_start_exit();
 
-   roadmap_log( ROADMAP_WARNING, "Closing the IO" );
-
-   // Close the mutexes and conditions
-   roadmap_main_close_IO();
-
    exit(0);
 }
 
@@ -827,7 +776,6 @@ void roadmap_main_message_dispatcher( int aMsg )
         //roadmap_main_time_interval( 0 );
         if ( aMsg & MSG_CATEGORY_IO_CALLBACK )	// IO callback message type
         {
-                int retVal;
                 int indexIo = aMsg & MSG_ID_MASK;
                 //roadmap_log( ROADMAP_DEBUG, "Dispatching the message for IO %d", indexIo );
                 // Call the handler
@@ -837,18 +785,15 @@ void roadmap_main_message_dispatcher( int aMsg )
                         RoadMapIO *io = &RoadMapMainIo[indexIo].io;
 
                         RoadMapMainIo[indexIo].callback( io );
-                    roadmap_log( ROADMAP_DEBUG, "Callback %x. IO %d", RoadMapMainIo[indexIo].callback, RoadMapMainIo[indexIo].io_id );
+                        roadmap_log( ROADMAP_DEBUG, "Callback %x. IO %d", RoadMapMainIo[indexIo].callback, RoadMapMainIo[indexIo].io_id );
 
                         // Send the signal to the thread if the IO is valid
                         roadmap_log( ROADMAP_INFO, "Signaling thread %d", RoadMapMainIo[indexIo].handler_thread );
-                        retVal = pthread_mutex_lock( &RoadMapMainIo[indexIo].mutex );
-                        LogResult( retVal, "Mutex lock failed", ROADMAP_WARNING );
+                        RoadMapMainIo[indexIo].mutex.lock();
 
-                        retVal = pthread_cond_signal( &RoadMapMainIo[indexIo].cond );
-                        LogResult( retVal, "Condition wait", ROADMAP_INFO );
+                        RoadMapMainIo[indexIo].cond.wakeOne();
 
-                        pthread_mutex_unlock( &RoadMapMainIo[indexIo].mutex );
-                        LogResult( retVal, "Condition unlock failed", ROADMAP_WARNING );
+                        RoadMapMainIo[indexIo].mutex.unlock();
                 }
                 else
                 {
@@ -900,22 +845,6 @@ long roadmap_main_time_msec()
         return val;
 }
 
-/*************************************************************************************************
- * void roadmap_main_close_IO()
- * Deallocate IO associated resources
- *
- */
-static void roadmap_main_close_IO()
-{
-        int i;
-        int retVal;
-
-        for (i = 0; i < ROADMAP_MAX_IO; ++i)
-        {
-                pthread_cond_destroy( &RoadMapMainIo[i].cond );
-                pthread_mutex_destroy( &RoadMapMainIo[i].mutex );
-        }
-}
 
 /*************************************************************************************************
  * void on_auto_hide_dialog_close( int exit_code, void* context )
@@ -951,8 +880,6 @@ static void roadmap_start_event (int event) {
 }
 
 int main(int argc, char* argv[]) {
-
-   int i;
 
    app = new QApplication(argc, argv);
 
