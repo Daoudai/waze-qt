@@ -1,26 +1,54 @@
 #include "qt_sound.h"
-#include <QMutex>
+#include <QUrl>
 
-PlaylistWait::PlaylistWait(QMediaPlayer* player, QObject *parent) :
+extern "C" {
+#include "roadmap.h"
+}
+
+Playlist::Playlist(QObject *parent) :
     QObject(parent)
-{
-   _player = player;
-
-   QObject::connect(_player, SIGNAL(stateChanged(QMediaPlayer::State)), this, SLOT(stateChanged(QMediaPlayer::State)));
+{ 
+   QObject::connect(&_player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(mediaStatusChanged(QMediaPlayer::MediaStatus)));
 }
 
-void PlaylistWait::stateChanged(QMediaPlayer::State state)
+Playlist::~Playlist()
 {
-   if (state == QMediaPlayer::StoppedState)
-   {
-       _waiter.wakeAll();
-   }
+    _playlist.clear();
+    _player.stop();
 }
 
-void PlaylistWait::waitEnd()
+void Playlist::playFirstInQueue()
 {
-    QMutex mutex;
-    mutex.lock();
-    _waiter.wait(&mutex);
-    mutex.unlock();
+    if (_playlist.count() > 0)
+    {
+        QUrl mediaUrl = _playlist.first();
+        roadmap_log(ROADMAP_INFO, "Playing %s", mediaUrl.toString().toAscii().data());
+        _player.setMedia(mediaUrl);
+        _player.play();
+    }
+}
+
+void Playlist::mediaStatusChanged(QMediaPlayer::MediaStatus status)
+{
+    if (status == QMediaPlayer::EndOfMedia)
+    {
+        _playlistMutex.lock();
+        _playlist.removeFirst();
+        playFirstInQueue();
+        _playlistMutex.unlock();
+    }
+}
+
+void Playlist::playMedia(QUrl url)
+{
+    _playlistMutex.lock();
+    _playlist.append(url);
+    playFirstInQueue();
+    _playlistMutex.unlock();
+}
+
+
+void Playlist::setVolume(int volume)
+{
+    _player.setVolume(volume);
 }
