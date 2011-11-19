@@ -31,8 +31,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <QMediaPlayer>
-#include <QMediaPlaylist>
 #include <QMediaResource>
 #include <QFile>
 #include <QUrl>
@@ -56,8 +54,7 @@ typedef struct roadmap_sound_st {
     QMediaResource *media;
 } roadmap_sound_st;
 
-static QMediaPlaylist *playList = NULL;
-static QMediaPlayer *mediaPlayer = NULL;
+static Playlist *mediaPlayer = NULL;
 
 RoadMapSoundList roadmap_sound_list_create (int flags) {
 
@@ -135,21 +132,23 @@ int roadmap_sound_play_file (const char *file_name) {
 
 int roadmap_sound_play_list (const RoadMapSoundList list) {
 
-    PlaylistWait waiter(mediaPlayer);
+    if (mediaPlayer != NULL)
+    {
+        QString path(roadmap_path_downloads());
+        path.append("/").append("sound").append("/").append(roadmap_prompts_get_name()).append("/");
 
-    QString path(roadmap_path_downloads());
-    path.append("sound").append(roadmap_prompts_get_name());
-
-    for (int i = 0; i < list->count; i++) {
-        QString full_path(path);
-        full_path.append(list->list[i]).append(".mp3");
-        playList->addMedia(QUrl::fromLocalFile(full_path));
+        for (int i = 0; i < list->count; i++) {
+            QString full_path(path);
+            full_path.append(list->list[i]).append(".mp3");
+            mediaPlayer->playMedia(QUrl::fromLocalFile(full_path));
+        }
+    }
+    else
+    {
+        roadmap_log(ROADMAP_WARNING, "Requested to play audio, but player not initialized yet...");
     }
 
-    mediaPlayer->play();
-
     if (!(list->flags & SOUND_LIST_NO_FREE)) {
-        waiter.waitEnd();
         roadmap_sound_list_free  (list);
     }
     return 0;
@@ -170,16 +169,10 @@ void roadmap_sound_initialize (void)
         SND_VOLUME_LVLS_LABELS[2] = roadmap_lang_get( "Medium" );
         SND_VOLUME_LVLS_LABELS[3] = roadmap_lang_get( "High" );
 
-        playList = new QMediaPlaylist();
-        mediaPlayer = new QMediaPlayer();
-
-        mediaPlayer->setPlaylist(playList);
+        mediaPlayer = new Playlist();
 }
 
 void roadmap_sound_shutdown   (void) {
-    mediaPlayer->stop();
-
-    delete playList;
     delete mediaPlayer;
 }
 

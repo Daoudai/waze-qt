@@ -3,22 +3,30 @@
 
 #include <QObject>
 #include <QMediaPlayer>
-#include <QWaitCondition>
+#include <QUrl>
+#include <QList>
+#include <QMutex>
 
-class PlaylistWait : public QObject
+class Playlist : public QObject
 {
     Q_OBJECT
 public:
-    PlaylistWait(QMediaPlayer *player, QObject* parent = 0);
+    Playlist(QObject* parent = 0);
+    virtual ~Playlist();
 
-    void waitEnd();
+    void playMedia(QUrl url);
+    void setVolume(int volume);
 
 private slots:
-    void stateChanged(QMediaPlayer::State state);
+    void mediaStatusChanged(QMediaPlayer::MediaStatus status);
+
+protected:
+    void playFirstInQueue();
 
 private:
-    QWaitCondition _waiter;
-    QMediaPlayer *_player;
+    QMediaPlayer _player;
+    QMutex _playlistMutex;
+    QList<QUrl> _playlist;
 };
 
 #endif // QT_SOUND_H
