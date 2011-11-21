@@ -62,8 +62,7 @@ RMapCanvas::RMapCanvas(QWidget* parent):QWidget(parent) {
    registerMouseWheelHandler(whandler);
 
    registerConfigureHandler(chandler);
-   //setBackgroundMode(Qt::NoBackground);
-   //setAttribute(Qt::WA_NoBackgrond);
+   setAttribute(Qt::WA_NoBackground);
 }
 
 RMapCanvas::~RMapCanvas() {
