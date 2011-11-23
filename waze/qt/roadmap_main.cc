@@ -39,6 +39,8 @@
 #include <QApplication>
 #include <QMutex>
 #include <QWaitCondition>
+#include <QProcess>
+#include <QFile>
 #include "qt_main.h"
 
 extern "C" {
@@ -51,6 +53,8 @@ extern "C" {
 #include "editor/editor_main.h"
 #include "roadmap_qtmain.h"
 }
+
+#define DEPLOY_DATA_SCRIPT "/opt/waze/bin/deploy_data.sh"
 
 int USING_PHONE_KEYPAD = 0;
 
@@ -885,6 +889,13 @@ void roadmap_main_show_contacts() {
 }
 
 int main(int argc, char* argv[]) {
+
+   if(QFile::exists(DEPLOY_DATA_SCRIPT))
+   {
+       QProcess deploy;
+       deploy.execute(DEPLOY_DATA_SCRIPT);
+       deploy.waitForFinished();
+   }
 
    app = new QApplication(argc, argv);
 
