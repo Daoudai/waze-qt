@@ -49,6 +49,10 @@ HEADERS += \
     qt/qt_sound.h \
     qt/roadmap_qtmain.h
 
+OTHER_FILES += \
+    qt/deploy_data.sh
+
+
 
 
 
