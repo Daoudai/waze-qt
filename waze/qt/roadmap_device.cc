@@ -26,6 +26,7 @@ extern "C" {
     #include "roadmap_main.h"
     #include "roadmap_device.h"
     #include "roadmap_camera.h"
+    #include "roadmap_qtmain.h"
 }
 
 #include <QSystemScreenSaver>

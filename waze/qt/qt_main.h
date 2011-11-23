@@ -39,6 +39,7 @@
 #include <QThread>
 #include <QTcpSocket>
 #include <QMutex>
+#include <QDeclarativeView>
 
 #define ROADMAP_MAX_TIMER 64
 
@@ -155,6 +156,8 @@ public:
 
    void toggleFullScreen();
 
+   void showContactList();
+
    static void signalHandler(int sig);
 
 public slots:
@@ -163,6 +166,8 @@ public slots:
 
 private slots:
    void onRecievedMessage(int message);
+   void contactsDialogOkPressed(QString address);
+   void contactsDialogCancelPressed();
 
 signals:
    void recievedMessage(int message);
@@ -174,6 +179,7 @@ protected:
    RoadMapKeyInput keyCallback;
    QToolBar* toolBar;
    RMapCanvas* canvas;
+   QDeclarativeView *contactsDialog;
 
    bool spacePressed;
 

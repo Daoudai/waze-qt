@@ -49,6 +49,7 @@ extern "C" {
 #include "roadmap_main.h"
 #include "roadmap_time.h"
 #include "editor/editor_main.h"
+#include "roadmap_qtmain.h"
 }
 
 int USING_PHONE_KEYPAD = 0;
@@ -877,6 +878,10 @@ static void roadmap_start_event (int event) {
                   break;
            }
    }*/
+}
+
+void roadmap_main_show_contacts() {
+    mainWindow->showContactList();
 }
 
 int main(int argc, char* argv[]) {
