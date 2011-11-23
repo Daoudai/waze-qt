@@ -37,7 +37,15 @@
 #include <QSocketNotifier>
 #include <QTcpSocket>
 #include <errno.h>
+#include <QDeclarativeView>
+#include <QDeclarativeProperty>
+#include <QObject>
+#include <QGraphicsObject>
 #include "qt_main.h"
+
+//extern "C" {
+//#include "single_search_dlg.h"
+//}
 
 static int signalFd[2];
 
@@ -214,6 +222,39 @@ void RMapMainWindow::addToolSpace(void) {
 void RMapMainWindow::addCanvas(void) {
    canvas->configure();
    adjustSize();
+}
+
+void RMapMainWindow::showContactList() {
+
+    contactsDialog = new QDeclarativeView;
+    contactsDialog->setSource(QUrl::fromLocalFile("/opt/waze/qml/Contacts.qml"));
+
+    QObject *item = dynamic_cast<QObject*>(contactsDialog->rootObject());
+    QDeclarativeProperty::write(item, "okButtonText", "OK");
+    QDeclarativeProperty::write(item, "cancelButtonText", "Cancel");
+    QObject::connect(item, SIGNAL(okPressed(QString)),
+                     this, SLOT(contactsDialogOkPressed(QString)));
+    QObject::connect(item, SIGNAL(cancelPressed()),
+                     this, SLOT(contactsDialogCancelPressed()));
+
+    contactsDialog->show();
+}
+
+void RMapMainWindow::contactsDialogCancelPressed() {
+    contactsDialog->hide();
+    delete contactsDialog;
+}
+
+void RMapMainWindow::contactsDialogOkPressed(QString address) {
+    contactsDialog->hide();
+    QObject *item = dynamic_cast<QObject*>(contactsDialog->rootObject());
+    QObject::disconnect(item, SIGNAL(okPressed(QString)),
+                     this, SLOT(contactsDialogOkPressed(QString)));
+    QObject::disconnect(item, SIGNAL(cancelPressed()),
+                     this, SLOT(contactsDialogCancelPressed()));
+    delete contactsDialog;
+
+//    single_search_auto_search(address);
 }
 
 void RMapMainWindow::dispatchMessage(int message) {

@@ -6,7 +6,9 @@ include(qt/qt.pro)
 # file1.source = myfile
 
 datadir.source = data
-DEPLOYMENTFOLDERS = datadir # file1 dir1
+qmldir.source = qt/qml
+
+DEPLOYMENTFOLDERS = datadir qmldir # file1 dir1
 
 symbian:TARGET.UID3 = 0xE6919A30
 
@@ -607,36 +609,10 @@ DEPENDPATH += $$PWD/qt
 #unix:!macx:!symbian: PRE_TARGETDEPS += $$PWD/qt/libwazeqt.a
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 maemo5 {
     icon.files = waze.png
     icon.path = /usr/share/icons/hicolor/64x64/apps
     INSTALLS += icon
 }
+
 

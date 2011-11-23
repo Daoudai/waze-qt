@@ -76,6 +76,10 @@
 #include "roadmap_androidmain.h"
 #endif
 
+#ifdef QTMOBILITY
+#include "roadmap_qtmain.h"
+#endif
+
 #ifdef IPHONE
 #include "iphone/roadmap_list_menu.h"
 
@@ -1201,6 +1205,9 @@ void roamdmap_search_address_book(void){
    address_book_dlg_show(NULL, NULL);
 #endif //IPHONE_NATIVE
 #ifdef ANDROID
+   roadmap_main_show_contacts();
+#endif
+#ifdef QTMOBILITY
    roadmap_main_show_contacts();
 #endif
 #if defined (_WIN32) && !defined (EMBEDDED_CE)

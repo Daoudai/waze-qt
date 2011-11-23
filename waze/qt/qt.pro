@@ -4,13 +4,13 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql declarative
 
 TARGET = wazeqt
 TEMPLATE = lib
 CONFIG += staticlib mobility
 
-MOBILITY = location systeminfo multimedia
+MOBILITY = location systeminfo multimedia contacts
 
 DEFINES += TOUCH_SCREEN SSD QTMOBILITY FREEMAP_IL PLAY_CLICK
 
@@ -46,7 +46,15 @@ HEADERS += \
     qt_canvas.h \
     roadmap_gpsqtm.h \
     qt/qt_gpsaccessor.h \
-    qt/qt_sound.h
+    qt/qt_sound.h \
+    qt/roadmap_qtmain.h
+
+
+
+
+
+
+
 
 
 
