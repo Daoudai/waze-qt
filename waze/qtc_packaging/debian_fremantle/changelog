@@ -1,3 +1,9 @@
+waze (0.0.2) unstable; urgency=low
+  * Fix the flickering
+  * Make the media files (audio/images) not show on the gallery/mediaplayer
+
+ -- Assaf Paz <damagedspline@gmail.com>  Wed, 23 Nov 2011 23:19:38 +0200
+
 waze (0.0.1) unstable; urgency=low
 
   * Initial Release.
