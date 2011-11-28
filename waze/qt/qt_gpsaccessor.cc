@@ -93,7 +93,7 @@ void QtGpsAccessor::positionUpdated(const QGeoPositionInfo &gpsPos)
                 latitude,
                 longitude,
                 altitude,
-                speed,
+                (int) speed*1.944, // convert from m/s to knots
                 azymuth);
     }
 }
