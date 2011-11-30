@@ -77,6 +77,8 @@ void QtGpsAccessor::positionUpdated(const QGeoPositionInfo &gpsPos)
     int speed = (int) gpsPos.attribute(QGeoPositionInfo::GroundSpeed);
     if (speed == -1) {
         speed = ROADMAP_NO_VALID_DATA;
+    } else {
+        speed = (int) speed*1.944;  // convert from m/s to knots
     }
 
     int azymuth = (int) gpsPos.attribute(QGeoPositionInfo::Direction);
@@ -93,7 +95,7 @@ void QtGpsAccessor::positionUpdated(const QGeoPositionInfo &gpsPos)
                 latitude,
                 longitude,
                 altitude,
-                (int) speed*1.944, // convert from m/s to knots
+                speed,
                 azymuth);
     }
 }
