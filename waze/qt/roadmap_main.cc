@@ -911,6 +911,7 @@ int main(int argc, char* argv[]) {
 
    roadmap_start(argc, argv);
 
+   mainWindow->setApplicationPath(app->applicationDirPath());
 
    return app->exec();
 }
