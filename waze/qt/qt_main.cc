@@ -47,6 +47,8 @@
 //#include "single_search_dlg.h"
 //}
 
+extern "C" BOOL single_search_auto_search( const char* address);
+
 static int signalFd[2];
 
 // Implementation of RMapCallback class
@@ -77,7 +79,7 @@ int  RMapTimerCallback::same(RoadMapCallback cb) {
 }
 
 // Implementation of RMapMainWindow class
-RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) : QMainWindow(parent, f) {
+RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) : QMainWindow(parent, f), contactsDialog(NULL) {
    spacePressed = false;
    canvas = new RMapCanvas(this);
    setCentralWidget(canvas);
@@ -96,7 +98,7 @@ RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) : QMainWindow(par
 }
 
 RMapMainWindow::~RMapMainWindow() {
-
+    delete contactsDialog;
 }
 
 void RMapMainWindow::setKeyboardCallback(RoadMapKeyInput c) {
@@ -225,24 +227,29 @@ void RMapMainWindow::addCanvas(void) {
 }
 
 void RMapMainWindow::showContactList() {
-
-    contactsDialog = new QDeclarativeView;
-    contactsDialog->setSource(QUrl::fromLocalFile("/opt/waze/qml/Contacts.qml"));
-
-    QObject *item = dynamic_cast<QObject*>(contactsDialog->rootObject());
-    QDeclarativeProperty::write(item, "okButtonText", "OK");
-    QDeclarativeProperty::write(item, "cancelButtonText", "Cancel");
-    QObject::connect(item, SIGNAL(okPressed(QString)),
-                     this, SLOT(contactsDialogOkPressed(QString)));
-    QObject::connect(item, SIGNAL(cancelPressed()),
-                     this, SLOT(contactsDialogCancelPressed()));
-
+    if (contactsDialog == NULL) {
+        contactsDialog = new QDeclarativeView;
+#ifdef Q_WS_SIMULATOR
+        contactsDialog->setSource(QUrl::fromLocalFile(applicationPath.append("/qml/Contacts.qml")));
+#else
+        contactsDialog->setSource(QUrl::fromLocalFile("/opt/waze/qml/Contacts.qml"));
+#endif
+        contactsDialog->setAttribute(Qt::WA_TranslucentBackground);
+        QObject *item = dynamic_cast<QObject*>(contactsDialog->rootObject());
+        item->setProperty("width", canvas->width());
+        item->setProperty("height", canvas->height());
+        QDeclarativeProperty::write(item, "okButtonText", "OK");
+        QDeclarativeProperty::write(item, "cancelButtonText", "Cancel");
+        QObject::connect(item, SIGNAL(okPressed(QString)),
+                         this, SLOT(contactsDialogOkPressed(QString)));
+        QObject::connect(item, SIGNAL(cancelPressed()),
+                         this, SLOT(contactsDialogCancelPressed()));
+    }
     contactsDialog->show();
 }
 
 void RMapMainWindow::contactsDialogCancelPressed() {
     contactsDialog->hide();
-    delete contactsDialog;
 }
 
 void RMapMainWindow::contactsDialogOkPressed(QString address) {
@@ -252,9 +259,8 @@ void RMapMainWindow::contactsDialogOkPressed(QString address) {
                      this, SLOT(contactsDialogOkPressed(QString)));
     QObject::disconnect(item, SIGNAL(cancelPressed()),
                      this, SLOT(contactsDialogCancelPressed()));
-    delete contactsDialog;
 
-//    single_search_auto_search(address);
+    single_search_auto_search(address.toAscii().data());
 }
 
 void RMapMainWindow::dispatchMessage(int message) {
@@ -361,6 +367,11 @@ void RMapMainWindow::handleSignal()
   roadmap_main_exit();
   snSignal->setEnabled(true);
 }
+
+void RMapMainWindow::setApplicationPath(QString path) {
+    applicationPath = path;
+}
+
 
 // Implementation of the RMapTimers class
 RMapTimers::RMapTimers (QObject *parent)

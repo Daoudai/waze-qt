@@ -1,170 +1,263 @@
 import QtQuick 1.0
+import QtMobility.contacts 1.1
 
 Rectangle {
-    id: contacts
-    width: 400
-    height: 400
+    id: contactsDialog
+    width: 800
+    height: 480
     color: "#000000"
-    radius: 26
-    clip: false
     opacity: 0.850
-    border.color: "#000000"
-
     property string okButtonText: "OK"
     property string cancelButtonText: "Cancel"
+    property string selectedAddress
 
     signal okPressed(string address)
     signal cancelPressed
 
-
-    Row {
-        id: button_row
-        height: 50
-        opacity: 0.850
-        spacing: 50
-        anchors.right: parent.right
-        anchors.rightMargin: 20
-        anchors.left: parent.left
-        anchors.leftMargin: 20
-        anchors.top: parent.top
-        anchors.topMargin: 20
-
-        Rectangle {
-            id: okButton
-            x: 13
-            width: (button_row.width-button_row.spacing)/2
-            radius: 18
-            gradient: Gradient {
-                GradientStop {
-                    position: 0.070
-                    color: "#585858"
-                }
-
-                GradientStop {
-                    position: 1
-                    color: "#000000"
-                }
-            }
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 0
-            anchors.top: parent.top
-            anchors.topMargin: 0
-
-            MouseArea {
-                id: okClickArea
-                anchors.fill: parent
-                onClicked: okClicked("")
-                Text {
-                    id: okText
-                    x: -26
-                    y: -58
-                    color: "#ffffff"
-                    text: okButtonText
-                    font.bold: true
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    font.pixelSize: 18
-                }
+    function getSpacedDetail(detail1, detail2)
+    {
+        var spacedDetail = "";
+        if (detail1 !== "")
+        {
+            spacedDetail = detail1;
+            if (detail2 !== "")
+            {
+                spacedDetail += " " + detail2;
             }
         }
-
-        Rectangle {
-            id: cancelButton
-            x: 7
-            y: 8
-            width: (button_row.width-button_row.spacing)/2
-            radius: 18
-            anchors.top: parent.top
-            anchors.topMargin: 0
-            MouseArea {
-                id: cancelClickArea
-                anchors.fill: parent
-                onClicked: cancelPressed()
-                Text {
-                    id: cancelText
-                    x: -26
-                    y: -58
-                    color: "#ffffff"
-                    text: cancelButtonText
-                    font.pixelSize: 18
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    font.bold: true
-                }
-            }
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 0
-            gradient: Gradient {
-                GradientStop {
-                    position: 0.070
-                    color: "#585858"
-                }
-
-                GradientStop {
-                    position: 1
-                    color: "#000000"
-                }
-            }
+        else
+        {
+            spacedDetail = detail2;
         }
+
+        return spacedDetail;
+    }
+
+    ContactModel {
+        id: contactModel
     }
 
     Rectangle {
-        id: rectangle1
-        height: 200
-        color: "#00000000"
-        border.color: "#ffffff"
-        anchors.right: parent.right
-        anchors.rightMargin: 20
-        anchors.left: parent.left
-        anchors.leftMargin: 20
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
-        anchors.top: button_row.bottom
-        anchors.topMargin: 20
+        id: contacts
+        width: 600
+        height: 350
+        color: "#000000"
+        radius: 26
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: 10
+        clip: false
+        opacity: 0.850
+        border.color: "#000000"
 
-        ListView {
-            id: contacts_list
-            anchors.fill: parent
-            delegate: Item {
-                x: 5
-                height: 40
-                Row {
-                    id: row1
-                    spacing: 10
-                    Rectangle {
-                        width: 40
-                        height: 40
-                        color: colorCode
+        Row {
+            id: button_row
+            height: 50
+            opacity: 0.850
+            spacing: 50
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            anchors.top: parent.top
+            anchors.topMargin: 20
+
+            Rectangle {
+                id: okButton
+                x: 13
+                width: (button_row.width-button_row.spacing)/2
+                radius: 18
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0.070
+                        color: "#585858"
                     }
 
+                    GradientStop {
+                        position: 1
+                        color: "#000000"
+                    }
+                }
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 0
+                anchors.top: parent.top
+                anchors.topMargin: 0
+
+                MouseArea {
+                    id: okClickArea
+                    anchors.fill: parent
+                    onClicked: okPressed(getSpacedDetail(selectedAddress))
                     Text {
-                        text: name
+                        id: okText
+                        x: -26
+                        y: -58
+                        color: "#ffffff"
+                        text: okButtonText
+                        font.bold: true
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        font.pixelSize: 18
+                    }
+                }
+            }
+
+            Rectangle {
+                id: cancelButton
+                x: 7
+                y: 8
+                width: (button_row.width-button_row.spacing)/2
+                radius: 18
+                anchors.top: parent.top
+                anchors.topMargin: 0
+                MouseArea {
+                    id: cancelClickArea
+                    anchors.fill: parent
+                    onClicked: cancelPressed()
+                    Text {
+                        id: cancelText
+                        x: -26
+                        y: -58
+                        color: "#ffffff"
+                        text: cancelButtonText
+                        font.pixelSize: 18
+                        anchors.horizontalCenter: parent.horizontalCenter
                         anchors.verticalCenter: parent.verticalCenter
                         font.bold: true
                     }
                 }
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 0
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0.070
+                        color: "#585858"
+                    }
+
+                    GradientStop {
+                        position: 1
+                        color: "#000000"
+                    }
+                }
             }
-            model: ListModel {
-                ListElement {
-                    name: "Grey"
-                    colorCode: "grey"
-                }
+        }
 
-                ListElement {
-                    name: "Red"
-                    colorCode: "red"
-                }
+        Rectangle {
+            id: rectangle1
+            height: 200
+            color: "#00000000"
+            border.color: "#ffffff"
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 20
+            anchors.top: button_row.bottom
+            anchors.topMargin: 20
 
-                ListElement {
-                    name: "Blue"
-                    colorCode: "blue"
-                }
-
-                ListElement {
-                    name: "Green"
-                    colorCode: "green"
+            ListView {
+                id: contacts_list
+                clip: true
+                anchors.fill: parent
+                model: contactModel
+                delegate: listdelegate
+                currentIndex: 0
+                highlightFollowsCurrentItem: false
             }
         }
     }
+    Component {
+        id: listdelegate
+
+        Rectangle {
+            id: wrapper
+            border.width: 2
+            height: 50;
+            width: contacts_list.width;
+            visible: model.contact.address.street !== "" || model.contact.address.locality !== ""
+
+            property color topColor: "#999999";
+            property color bottomColor: "#444444";
+
+            gradient: Gradient {
+                 GradientStop { position: 0.0; color: topColor }
+                 GradientStop { position: 1.0; color: bottomColor }
+            }
+
+            Rectangle {
+                id: selectedBackground
+                anchors.fill: parent
+                visible: contacts_list.currentIndex == index
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: "blue" }
+                    GradientStop { position: 1.0; color: "darkblue" }
+                }
+            }
+
+            MouseArea {
+                id: mr
+                width: wrapper.width;
+                height: wrapper.height;
+                anchors.centerIn: parent;
+                onClicked: {
+                    contacts_list.currentIndex = index;
+                    selectedAddress = addressTxt.text;
+                }
+            }
+            Column {
+                Row {
+                    spacing: 2
+                    Item {
+                        id: mainAvatar;
+                        height: wrapper.height;
+                        width: height;
+
+                        Rectangle {
+                            border.width: 2;
+                            radius: 4;
+                            anchors.fill: parent;
+                            anchors.margins: 2;
+
+                            Image {
+                                id: avatar
+                                anchors.fill: parent;
+                                anchors.margins: 2;
+
+                                source: model.contact.avatar.imageUrl;
+                                fillMode: Image.PreserveAspectFit
+                                smooth:true
+                            }
+                            Text {
+                                anchors.fill: parent;
+                                anchors.margins: 2;
+                                text: "???";
+                                color: "white";
+                                font.pixelSize: 28
+                                opacity: avatar.status == Image.Ready ? 0 : 1;
+                            }
+                        }
+                    }
+
+                    Column {
+                        spacing: 2
+                        Text {
+                            id: nameTxt
+                            y: 8;
+                            text: getSpacedDetail( model.contact.name.firstName, model.contact.name.lastName)
+                            font.pixelSize: 14
+                            color: "white"
+                        }
+
+                        Text {
+                            id: addressTxt
+                            y: 8;
+                            text: getSpacedDetail(model.contact.address.street, model.contact.address.locality)
+                            font.pixelSize: 14
+                            color: "white"
+                        }
+                    }
+                }
+            }
+        }
     }
 }

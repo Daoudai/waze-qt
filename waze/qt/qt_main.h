@@ -158,6 +158,8 @@ public:
 
    void showContactList();
 
+   void setApplicationPath(QString path);
+
    static void signalHandler(int sig);
 
 public slots:
@@ -187,6 +189,7 @@ protected:
    virtual void keyReleaseEvent(QKeyEvent* event);
    virtual void closeEvent(QCloseEvent* ev);
 
+   QString applicationPath;
 };
 
 extern RMapMainWindow* mainWindow;
