@@ -35,26 +35,32 @@
 #include <QFile>
 #include <QUrl>
 #include "qt_sound.h"
+#include "qt_main.h"
 
 extern "C" {
 #include "roadmap.h"
 #include "roadmap_path.h"
+#include "roadmap_config.h"
 #include "roadmap_sound.h"
 #include "roadmap_lang.h"
 #include "roadmap_prompts.h"
 }
 
-
-#define SND_VOLUME_LVLS_COUNT 4
+const int SND_VOLUME_LVLS_COUNT = 4;
 const int SND_VOLUME_LVLS[] = {0, 1, 2, 3};
 const char* SND_VOLUME_LVLS_LABELS[SND_VOLUME_LVLS_COUNT];
 const char* SND_DEFAULT_VOLUME_LVL = "2";
+
+static RoadMapConfigDescriptor RoadMapConfigVolControl =
+                        ROADMAP_CONFIG_ITEM( "Voice", "Volume Control" );
 
 typedef struct roadmap_sound_st {
     QMediaResource *media;
 } roadmap_sound_st;
 
-static Playlist *mediaPlayer = NULL;
+extern RMapMainWindow* mainWindow;
+
+Playlist *mediaPlayer = NULL;
 
 RoadMapSoundList roadmap_sound_list_create (int flags) {
 
@@ -169,7 +175,12 @@ void roadmap_sound_initialize (void)
         SND_VOLUME_LVLS_LABELS[2] = roadmap_lang_get( "Medium" );
         SND_VOLUME_LVLS_LABELS[3] = roadmap_lang_get( "High" );
 
-        mediaPlayer = new Playlist();
+        // Set current volume from the configuration
+        roadmap_config_declare("user", &RoadMapConfigVolControl, SND_DEFAULT_VOLUME_LVL, NULL );
+
+        mediaPlayer = new Playlist(mainWindow);
+
+        roadmap_sound_set_volume(roadmap_config_get_integer(&RoadMapConfigVolControl));
 }
 
 void roadmap_sound_shutdown   (void) {
@@ -183,5 +194,11 @@ void roadmap_sound_shutdown   (void) {
  */
 void roadmap_sound_set_volume ( int volLvl )
 {
-    mediaPlayer->setVolume(100/volLvl);
+    mediaPlayer->setVolume(volLvl*100/SND_VOLUME_LVLS_COUNT);
+
+    // Update the configuration
+    roadmap_config_set_integer( &RoadMapConfigVolControl, volLvl );
+
+    // Log the operation
+    roadmap_log( ROADMAP_DEBUG, "Current volume is set to level : %d.", volLvl );
 }
