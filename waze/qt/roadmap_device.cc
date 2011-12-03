@@ -24,6 +24,7 @@
 extern "C" {
     #include "roadmap.h"
     #include "roadmap_main.h"
+    #include "roadmap_config.h"
     #include "roadmap_device.h"
     #include "roadmap_camera.h"
     #include "roadmap_qtmain.h"
@@ -31,18 +32,50 @@ extern "C" {
 
 #include <QSystemScreenSaver>
 #include <QSystemDeviceInfo>
+#include "qt_main.h"
 QTM_USE_NAMESPACE
 
+RoadMapConfigDescriptor RoadMapConfigBackLight =
+                        ROADMAP_CONFIG_ITEM("Display", "BackLight");
+
+extern RMapMainWindow* mainWindow;
+
+static QSystemScreenSaver *screenSaver = NULL;
+
 int roadmap_device_initialize( void ) {
-    /* TODO */
+    // Load the configuration
+    roadmap_config_declare("user", &RoadMapConfigBackLight, "no", NULL);
+
+    // Log the operation
+    roadmap_log( ROADMAP_DEBUG, "roadmap_backlight_initialize() - Current setting : %s",
+                                 roadmap_config_get( &RoadMapConfigBackLight ) );
+
+    //set initial value
+    roadmap_device_set_backlight(roadmap_config_match( &RoadMapConfigBackLight, "yes" ));
 }
 
 void roadmap_device_set_backlight( int alwaysOn ) {
-#ifndef Q_WS_MAEMO_5
-    /* TODO */ // maemo5
-    QSystemScreenSaver scrSaver;
-    scrSaver.setScreenSaverInhibited(alwaysOn);
-#endif
+    const char * alwaysOnStr = alwaysOn ? "yes" : "no";
+
+    if (alwaysOn) {
+        if (screenSaver == NULL) {
+            screenSaver = new QSystemScreenSaver(mainWindow);
+            bool result = screenSaver->setScreenSaverInhibit();
+            roadmap_log(ROADMAP_INFO, "disabling the screensaver: %s", (result?"ok":"failed"));
+        }
+    } else {
+        if (screenSaver) {
+            delete screenSaver;
+            screenSaver = NULL;
+            roadmap_log(ROADMAP_INFO, "screensaver enabled");
+        }
+    }
+
+    // Update the configuration
+    roadmap_config_set( &RoadMapConfigBackLight, alwaysOnStr );
+
+    // Log the operation
+    roadmap_log( ROADMAP_DEBUG, "roadmap_set_backlight() - Current setting : %s", alwaysOnStr );
 }
 
 int roadmap_device_get_battery_level( void ) {
