@@ -38,14 +38,13 @@
 #include <QTcpSocket>
 #include <errno.h>
 #include <QDeclarativeView>
+#include <QDeclarativeEngine>
+#include <QDeclarativeContext>
 #include <QDeclarativeProperty>
 #include <QObject>
 #include <QGraphicsObject>
 #include "qt_main.h"
-
-//extern "C" {
-//#include "single_search_dlg.h"
-//}
+#include "qt_contactslistmodel.h"
 
 extern "C" BOOL single_search_auto_search( const char* address);
 
@@ -99,6 +98,7 @@ RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) : QMainWindow(par
 
 RMapMainWindow::~RMapMainWindow() {
     delete contactsDialog;
+    delete contactListModel;
 }
 
 void RMapMainWindow::setKeyboardCallback(RoadMapKeyInput c) {
@@ -228,7 +228,11 @@ void RMapMainWindow::addCanvas(void) {
 
 void RMapMainWindow::showContactList() {
     if (contactsDialog == NULL) {
-        contactsDialog = new QDeclarativeView;
+        QContactManager contactManager;
+        contactListModel = new ContactsList(contactManager, this);
+        contactsDialog = new QDeclarativeView(this);
+        contactsDialog->setWindowModality(Qt::ApplicationModal);
+        contactsDialog->engine()->rootContext()->setContextProperty("contactModel", contactListModel);
 #ifdef Q_WS_SIMULATOR
         contactsDialog->setSource(QUrl::fromLocalFile(applicationPath.append("/qml/Contacts.qml")));
 #else
@@ -245,6 +249,7 @@ void RMapMainWindow::showContactList() {
         QObject::connect(item, SIGNAL(cancelPressed()),
                          this, SLOT(contactsDialogCancelPressed()));
     }
+
     contactsDialog->show();
 }
 
@@ -260,7 +265,7 @@ void RMapMainWindow::contactsDialogOkPressed(QString address) {
     QObject::disconnect(item, SIGNAL(cancelPressed()),
                      this, SLOT(contactsDialogCancelPressed()));
 
-    single_search_auto_search(address.toAscii().data());
+    single_search_auto_search(address.toLocal8Bit().data());
 }
 
 void RMapMainWindow::dispatchMessage(int message) {

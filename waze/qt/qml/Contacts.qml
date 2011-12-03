@@ -1,5 +1,4 @@
 import QtQuick 1.0
-import QtMobility.contacts 1.1
 
 Rectangle {
     id: contactsDialog
@@ -14,29 +13,6 @@ Rectangle {
     signal okPressed(string address)
     signal cancelPressed
 
-    function getSpacedDetail(detail1, detail2)
-    {
-        var spacedDetail = "";
-        if (detail1 !== "")
-        {
-            spacedDetail = detail1;
-            if (detail2 !== "")
-            {
-                spacedDetail += " " + detail2;
-            }
-        }
-        else
-        {
-            spacedDetail = detail2;
-        }
-
-        return spacedDetail;
-    }
-
-    ContactModel {
-        id: contactModel
-    }
-
     Rectangle {
         id: contacts
         width: 600
@@ -44,8 +20,7 @@ Rectangle {
         color: "#000000"
         radius: 26
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        anchors.topMargin: 10
+        anchors.verticalCenter: parent.verticalCenter
         clip: false
         opacity: 0.850
         border.color: "#000000"
@@ -67,6 +42,7 @@ Rectangle {
                 x: 13
                 width: (button_row.width-button_row.spacing)/2
                 radius: 18
+                border.color: "#696969"
                 gradient: Gradient {
                     GradientStop {
                         position: 0.070
@@ -86,7 +62,7 @@ Rectangle {
                 MouseArea {
                     id: okClickArea
                     anchors.fill: parent
-                    onClicked: okPressed(getSpacedDetail(selectedAddress))
+                    onClicked: okPressed(selectedAddress)
                     Text {
                         id: okText
                         x: -26
@@ -107,6 +83,7 @@ Rectangle {
                 y: 8
                 width: (button_row.width-button_row.spacing)/2
                 radius: 18
+                border.color: "#696969"
                 anchors.top: parent.top
                 anchors.topMargin: 0
                 MouseArea {
@@ -161,7 +138,7 @@ Rectangle {
                 anchors.fill: parent
                 model: contactModel
                 delegate: listdelegate
-                currentIndex: 0
+                currentIndex: -1
                 highlightFollowsCurrentItem: false
             }
         }
@@ -174,7 +151,6 @@ Rectangle {
             border.width: 2
             height: 50;
             width: contacts_list.width;
-            visible: model.contact.address.street !== "" || model.contact.address.locality !== ""
 
             property color topColor: "#999999";
             property color bottomColor: "#444444";
@@ -223,14 +199,15 @@ Rectangle {
                                 anchors.fill: parent;
                                 anchors.margins: 2;
 
-                                source: model.contact.avatar.imageUrl;
+                                source: contactAvatarUrl;
                                 fillMode: Image.PreserveAspectFit
                                 smooth:true
                             }
                             Text {
-                                anchors.fill: parent;
+                                anchors.horizontalCenter: parent.horizontalCenter;
+                                anchors.verticalCenter: parent.verticalCenter;
                                 anchors.margins: 2;
-                                text: "???";
+                                text: "?";
                                 color: "white";
                                 font.pixelSize: 28
                                 opacity: avatar.status == Image.Ready ? 0 : 1;
@@ -243,16 +220,16 @@ Rectangle {
                         Text {
                             id: nameTxt
                             y: 8;
-                            text: getSpacedDetail( model.contact.name.firstName, model.contact.name.lastName)
-                            font.pixelSize: 14
+                            text: contactName
+                            font.pixelSize: 18
                             color: "white"
                         }
 
                         Text {
                             id: addressTxt
                             y: 8;
-                            text: getSpacedDetail(model.contact.address.street, model.contact.address.locality)
-                            font.pixelSize: 14
+                            text: contactAddress
+                            font.pixelSize: 18
                             color: "white"
                         }
                     }

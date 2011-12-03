@@ -59,6 +59,7 @@ void roadmap_main_message_dispatcher( int aMsg );
 }
 
 #include "qt_canvas.h"
+#include "qt_contactslistmodel.h"
 
 typedef enum
 {
@@ -181,6 +182,7 @@ protected:
    RoadMapKeyInput keyCallback;
    QToolBar* toolBar;
    RMapCanvas* canvas;
+   ContactsList *contactListModel;
    QDeclarativeView *contactsDialog;
 
    bool spacePressed;
