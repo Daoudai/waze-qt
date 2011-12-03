@@ -48,6 +48,10 @@
 
 extern "C" {
 #include "roadmap_lang.h"
+#ifdef PLAY_CLICK
+#include "roadmap_sound.h"
+#endif
+
 }
 
 extern "C" BOOL single_search_auto_search( const char* address);
@@ -257,9 +261,25 @@ void RMapMainWindow::showContactList() {
                          this, SLOT(contactsDialogOkPressed(QString)));
         QObject::connect(item, SIGNAL(cancelPressed()),
                          this, SLOT(contactsDialogCancelPressed()));
+        QObject::connect(item, SIGNAL(mouseAreaPressed()),
+                         this, SLOT(mouseAreaPressed()));
     }
 
+    mouseAreaPressed();
     contactsDialog->show();
+}
+
+void RMapMainWindow::mouseAreaPressed() {
+#ifdef PLAY_CLICK
+    static RoadMapSoundList list;
+
+    if (!list) {
+        list = roadmap_sound_list_create (SOUND_LIST_NO_FREE);
+        roadmap_sound_list_add (list, "click");
+    }
+
+    roadmap_sound_play_list (list);
+#endif
 }
 
 void RMapMainWindow::contactsDialogCancelPressed() {
@@ -268,11 +288,6 @@ void RMapMainWindow::contactsDialogCancelPressed() {
 
 void RMapMainWindow::contactsDialogOkPressed(QString address) {
     contactsDialog->hide();
-    QObject *item = dynamic_cast<QObject*>(contactsDialog->rootObject());
-    QObject::disconnect(item, SIGNAL(okPressed(QString)),
-                     this, SLOT(contactsDialogOkPressed(QString)));
-    QObject::disconnect(item, SIGNAL(cancelPressed()),
-                     this, SLOT(contactsDialogCancelPressed()));
 
     single_search_auto_search(address.toLocal8Bit().data());
 }

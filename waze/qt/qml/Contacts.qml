@@ -14,9 +14,11 @@ Rectangle {
 
     signal okPressed(string address)
     signal cancelPressed
+    signal mouseAreaPressed
 
     function buttonPressed(buttonText)
     {
+        mouseAreaPressed();
         if (buttonText == okButtonText)
         {
             okPressed(selectedAddress);
@@ -153,6 +155,7 @@ Rectangle {
                 height: wrapper.height;
                 anchors.centerIn: parent;
                 onClicked: {
+                    mouseAreaPressed();
                     contacts_list.currentIndex = index;
                     selectedAddress = addressTxt.text;
                 }

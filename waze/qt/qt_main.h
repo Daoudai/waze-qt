@@ -169,6 +169,7 @@ public slots:
 
 private slots:
    void onRecievedMessage(int message);
+   void mouseAreaPressed();
    void contactsDialogOkPressed(QString address);
    void contactsDialogCancelPressed();
 
