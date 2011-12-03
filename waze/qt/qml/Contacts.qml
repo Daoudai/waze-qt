@@ -6,12 +6,26 @@ Rectangle {
     height: 480
     color: "#000000"
     opacity: 0.850
-    property string okButtonText: "OK"
+    property string okButtonText: "Ok"
     property string cancelButtonText: "Cancel"
     property string selectedAddress
 
+    property bool isRtl: false
+
     signal okPressed(string address)
     signal cancelPressed
+
+    function buttonPressed(buttonText)
+    {
+        if (buttonText == okButtonText)
+        {
+            okPressed(selectedAddress);
+        }
+        else
+        {
+            cancelPressed();
+        }
+    }
 
     Rectangle {
         id: contacts
@@ -37,82 +51,45 @@ Rectangle {
             anchors.top: parent.top
             anchors.topMargin: 20
 
-            Rectangle {
-                id: okButton
-                x: 13
-                width: (button_row.width-button_row.spacing)/2
-                radius: 18
-                border.color: "#696969"
-                gradient: Gradient {
-                    GradientStop {
-                        position: 0.070
-                        color: "#585858"
-                    }
+            Repeater
+            {
+                model: 2
+                Rectangle {
+                    x: 13
+                    width: (button_row.width-button_row.spacing)/2
+                    radius: 18
+                    border.color: "#696969"
+                    gradient: Gradient {
+                        GradientStop {
+                            position: 0.070
+                            color: "#585858"
+                        }
 
-                    GradientStop {
-                        position: 1
-                        color: "#000000"
+                        GradientStop {
+                            position: 1
+                            color: "#000000"
+                        }
                     }
-                }
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 0
-                anchors.top: parent.top
-                anchors.topMargin: 0
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 0
+                    anchors.top: parent.top
+                    anchors.topMargin: 0
 
-                MouseArea {
-                    id: okClickArea
-                    anchors.fill: parent
-                    onClicked: okPressed(selectedAddress)
-                    Text {
-                        id: okText
-                        x: -26
-                        y: -58
-                        color: "#ffffff"
-                        text: okButtonText
-                        font.bold: true
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.verticalCenter: parent.verticalCenter
-                        font.pixelSize: 18
-                    }
-                }
-            }
-
-            Rectangle {
-                id: cancelButton
-                x: 7
-                y: 8
-                width: (button_row.width-button_row.spacing)/2
-                radius: 18
-                border.color: "#696969"
-                anchors.top: parent.top
-                anchors.topMargin: 0
-                MouseArea {
-                    id: cancelClickArea
-                    anchors.fill: parent
-                    onClicked: cancelPressed()
-                    Text {
-                        id: cancelText
-                        x: -26
-                        y: -58
-                        color: "#ffffff"
-                        text: cancelButtonText
-                        font.pixelSize: 18
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.verticalCenter: parent.verticalCenter
-                        font.bold: true
-                    }
-                }
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 0
-                gradient: Gradient {
-                    GradientStop {
-                        position: 0.070
-                        color: "#585858"
-                    }
-
-                    GradientStop {
-                        position: 1
-                        color: "#000000"
+                    MouseArea {
+                        id: button1ClickArea
+                        anchors.fill: parent
+                        onClicked: buttonPressed(buttonText.text)
+                        Text {
+                            id: buttonText
+                            x: -26
+                            y: -58
+                            color: "#ffffff"
+                            text: ((!isRtl && index === 0) || (isRtl && index === 1))? okButtonText : cancelButtonText
+                            font.bold: true
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            font.pixelSize: 18
+                        }
                     }
                 }
             }
@@ -219,6 +196,7 @@ Rectangle {
                         spacing: 2
                         Text {
                             id: nameTxt
+                            width: wrapper.width - mainAvatar.width - 4
                             y: 8;
                             text: contactName
                             font.pixelSize: 18
@@ -227,6 +205,7 @@ Rectangle {
 
                         Text {
                             id: addressTxt
+                            width: nameTxt.width
                             y: 8;
                             text: contactAddress
                             font.pixelSize: 18
@@ -235,6 +214,23 @@ Rectangle {
                     }
                 }
             }
+
+            states: [
+                State {
+                    name: "rtl"
+                    when: isRtl
+
+                    PropertyChanges {
+                        target: nameTxt
+                        horizontalAlignment: "AlignRight"
+                    }
+
+                    PropertyChanges {
+                        target: addressTxt
+                        horizontalAlignment: "AlignRight"
+                    }
+                }
+            ]
         }
     }
 }

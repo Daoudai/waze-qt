@@ -46,6 +46,10 @@
 #include "qt_main.h"
 #include "qt_contactslistmodel.h"
 
+extern "C" {
+#include "roadmap_lang.h"
+}
+
 extern "C" BOOL single_search_auto_search( const char* address);
 
 static int signalFd[2];
@@ -92,6 +96,9 @@ RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) : QMainWindow(par
    snSignal = new QSocketNotifier(signalFd[1], QSocketNotifier::Read, this);
    connect(snSignal, SIGNAL(activated(int)), this, SLOT(handleSignal()));
    connect(this, SIGNAL(recievedMessage(int)), this, SLOT(onRecievedMessage(int)));
+
+   QContactManager contactManager;
+   contactListModel = new ContactsList(contactManager, this);
 
    roadmap_log(ROADMAP_INFO, "main thread id: %d ", this->thread()->currentThreadId());
 }
@@ -228,8 +235,6 @@ void RMapMainWindow::addCanvas(void) {
 
 void RMapMainWindow::showContactList() {
     if (contactsDialog == NULL) {
-        QContactManager contactManager;
-        contactListModel = new ContactsList(contactManager, this);
         contactsDialog = new QDeclarativeView(this);
         contactsDialog->setWindowModality(Qt::ApplicationModal);
         contactsDialog->engine()->rootContext()->setContextProperty("contactModel", contactListModel);
@@ -242,8 +247,12 @@ void RMapMainWindow::showContactList() {
         QObject *item = dynamic_cast<QObject*>(contactsDialog->rootObject());
         item->setProperty("width", canvas->width());
         item->setProperty("height", canvas->height());
-        QDeclarativeProperty::write(item, "okButtonText", "OK");
-        QDeclarativeProperty::write(item, "cancelButtonText", "Cancel");
+        if (roadmap_lang_rtl())
+        {
+            item->setProperty("isRtl", QVariant(true));
+        }
+        QDeclarativeProperty::write(item, "okButtonText", QString::fromLocal8Bit(roadmap_lang_get("Ok")));
+        QDeclarativeProperty::write(item, "cancelButtonText", QString::fromLocal8Bit(roadmap_lang_get("Cancel")));
         QObject::connect(item, SIGNAL(okPressed(QString)),
                          this, SLOT(contactsDialogOkPressed(QString)));
         QObject::connect(item, SIGNAL(cancelPressed()),
