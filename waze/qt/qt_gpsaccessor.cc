@@ -78,7 +78,11 @@ void QtGpsAccessor::positionUpdated(const QGeoPositionInfo &gpsPos)
     if (speed == -1) {
         speed = ROADMAP_NO_VALID_DATA;
     } else {
+#ifdef Q_WS_MAEMO_5
+        speed = (int) speed*0.5399;  // convert from kph to knots - to overcome the bug of wrong speed reading unit in QtMobility 1.0
+#else
         speed = (int) speed*1.944;  // convert from m/s to knots
+#endif
     }
 
     int azymuth = (int) gpsPos.attribute(QGeoPositionInfo::Direction);
