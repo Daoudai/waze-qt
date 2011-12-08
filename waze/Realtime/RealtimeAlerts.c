@@ -4085,7 +4085,7 @@ void report_alert(int iAlertType, const char * szDescription, int iDirection, co
     AlertConext->szGroup = szGroup;
 
     ssd_dialog_hide_current(dec_close);
-#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined(ANDROID)
+#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined(ANDROID) || defined(QTMOBILITY)
     ShowEditbox(roadmap_lang_get("Additional Details"), "",
             on_keyboard_closed, (void *)AlertConext, EEditBoxStandard | EEditBoxAlphaNumeric );
 #else
@@ -4485,7 +4485,7 @@ void add_real_time_chit_chat()
     AlertConext->szDescription = "";
     AlertConext->iDirection = RT_ALERT_MY_DIRECTION;
 
-#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(ANDROID)
+#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(ANDROID) || defined(QTMOBILITY)
     ShowEditbox(roadmap_lang_get("Chat"), "", on_keyboard_closed,
             AlertConext, EEditBoxEmptyForbidden | EEditBoxAlphaNumeric );
 #else
@@ -4556,7 +4556,7 @@ void real_time_post_alert_comment_by_id(int iAlertid)
       return;
    }
 
-#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined(ANDROID)
+#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined(ANDROID) || defined(QTMOBILITY)
     ShowEditbox(roadmap_lang_get("Comment"), "", post_comment_keyboard_callback,
             pAlert, EEditBoxEmptyForbidden | EEditBoxAlphaNumeric );
 #else

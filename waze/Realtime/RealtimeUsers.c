@@ -528,7 +528,7 @@ static BOOL post_comment_keyboard_callback(int         exit_code,
 static LPRTUserLocation g_user;
 
 static void disclaimer_cb( int exit_code ){
-#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(ANDROID)
+#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(ANDROID) || defined(QTMOBILITY)
     ShowEditbox(roadmap_lang_get("Chit chat"), "", post_comment_keyboard_callback,
           g_user, EEditBoxEmptyForbidden | EEditBoxAlphaNumeric );
 #else
@@ -557,7 +557,7 @@ static int ping (LPRTUserLocation user){
       return 0;
    }
 
-#if ((defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE_NATIVE) || defined(ANDROID))
+#if ((defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE_NATIVE) || defined(ANDROID)) || defined(QTMOBILITY)
     ShowEditbox(roadmap_lang_get("Chit chat"), "", post_comment_keyboard_callback,
             user, EEditBoxEmptyForbidden | EEditBoxAlphaNumeric );
 #else

@@ -26,20 +26,21 @@
 
 #include <stdlib.h>
 #include "qt_main.h"
+#include "qt_keyboard_dialog.h"
 
 extern "C" {
 #include "roadmap_editbox.h"
 #include "roadmap_screen.h"
 #include "ssd/ssd_entry.h"
 #include "ssd/ssd_widget.h"
-#include "ssd/ssd_text.h"
-#include "ssd/ssd_dialog.h"
 #include "ssd/ssd_keyboard_dialog.h"
-#include "ssd/ssd_container.h"
+#include "ssd/ssd_text.h"
 #include "roadmap_lang.h"
 }
 
 extern RMapMainWindow* mainWindow;
+
+KeyboardDialog *keyboard = NULL;
 
 static void roadmap_editbox_dlg_show( const char* title );
 
@@ -80,11 +81,20 @@ void ShowEditbox(const char* titleUtf8, const char* textUtf8, SsdKeyboardCallbac
        ctx = ( SsdEntryContext* ) ((SsdWidget)context)->context;
        if (ctx->kb_flags & SSD_KB_DLG_SHOW_NEXT_BTN)
        {
-            action = EEditBoxActionNext;
+            action |= EEditBoxActionNext;
+       }
+       if (ctx->kb_flags & SSD_KB_DLG_INPUT_ENGLISH)
+       {
+           action |= EEditBoxAlphaNumeric;
        }
    }
 
-   mainWindow->showTextBox(action, boxType & EEditBoxPassword, textUtf8, pCtx, margin);
+   if (keyboard == NULL)
+   {
+       keyboard = new KeyboardDialog(mainWindow);
+   }
+
+   keyboard->show(action, QString::fromLocal8Bit(titleUtf8), boxType, QString::fromLocal8Bit(textUtf8), pCtx);
 }
 
 /***********************************************************

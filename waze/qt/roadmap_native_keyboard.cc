@@ -24,69 +24,36 @@
 extern "C" {
     #include "roadmap_native_keyboard.h"
 }
-#include <QSystemDeviceInfo>
-QTM_USE_NAMESPACE
+
+
+/******************************
+
+
+
+THIS FILE IS NOT REALLY USED
+
+
+
+
+*****************************/
+
 
 BOOL roadmap_native_keyboard_enabled( void ) {
-#ifndef Q_WS_MAEMO_5
-    QSystemDeviceInfo info;
-    return (info.inputMethodType() & QSystemDeviceInfo::Keyboard) &&
-            (info.keyboardTypes() & QSystemDeviceInfo::FullQwertyKeyboard) &&
-            info.isKeyboardFlippedOpen();
-#else
-    /* TODO */ //maemo5
     return false;
-#endif
 }
 
 BOOL roadmap_native_keyboard_visible( void ) {
-    /* TODO */
-    return true;
+
 }
 
 void roadmap_native_keyboard_show( RMNativeKBParams* params ) {
-    /* TODO */
-//    android_kb_action_type type;
 
-//    if ( !roadmap_native_keyboard_enabled() )
-//            return;
-/*
-    switch ( params->action_button )
-    {
-            case _native_kb_action_default:
-            {
-                    type = _andr_ime_action_none;
-                    break;
-            }
-            case _native_kb_action_done:
-            {
-                    type = _andr_ime_action_done;
-            }	break;
-            case _native_kb_action_search:
-            {
-                    type = _andr_ime_action_search;
-                    break;
-            }
-            case _native_kb_action_next:
-            {
-                    type = _andr_ime_action_next;
-                    break;
-            }
-
-            default:
-            {
-                    type = _andr_ime_action_none;
-                    break;
-            }
-    } // switch
-
-    FreeMapNativeManager_ShowSoftKeyboard( type, params->close_on_action ); */
 }
 
 void roadmap_native_keyboard_hide( void ) {
-    /* TODO */
+
 }
 
 void roadmap_native_keyboard_get_params( RMNativeKBParams* params_out ) {
-    /* TODO */
+    /* never called */
 }

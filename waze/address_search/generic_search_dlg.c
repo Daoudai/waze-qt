@@ -166,7 +166,7 @@ void generic_search_dlg_switch_gui(void)
 void reopen_keyboard(void)
 {
 
-#if ((defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(ANDROID))
+#if ((defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(ANDROID)) || defined(QTMOBILITY)
     ShowEditbox(roadmap_lang_get( search_context[s_type].c_dlg_title), search_context[s_type].c_saved_txt,
             on_keyboard_closed, NULL, EEditBoxStandard | EEditBoxAlphaNumeric | EEditBoxEmbedded | EEditBoxActionSearch );
     roadmap_main_remove_periodic( reopen_keyboard);
@@ -546,7 +546,7 @@ void generic_search_dlg_update_text( const char* text, search_types type )
 
 void generic_search_dlg_reopen_native_keyboard(void)
 {
-#if ( (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN))  || defined(ANDROID) )
+#if ( (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN))  || defined(ANDROID) ) || defined(QTMOBILITY)
 
     ShowEditbox(roadmap_lang_get( search_context[s_type].c_dlg_title), search_context[s_type].c_saved_txt,
             on_keyboard_closed, NULL, EEditBoxStandard | EEditBoxAlphaNumeric |EEditBoxEmbedded|EEditBoxActionSearch );

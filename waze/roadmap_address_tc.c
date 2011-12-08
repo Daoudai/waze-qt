@@ -1041,7 +1041,7 @@ static void add_to_favorites(int exit_code, void *data){
 	if( dec_yes != exit_code)
       return;
 
-   #if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE)
+   #if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined(QTMOBILITY)
     	ShowEditbox(roadmap_lang_get("Name"), "",
             keyboard_callback, (void *)data, EEditBoxStandard | EEditBoxAlphaNumeric );
 	#else
