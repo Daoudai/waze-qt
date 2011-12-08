@@ -38,18 +38,6 @@
 #include "ssd_entry.h"
 #include "roadmap_editbox.h"
 
-typedef struct
-{
-	const char* 	  mb_text;			/* Message box text for the confirmed entry */
-    const char* 	  kb_title;			/* Title for the extended keyboard */
-    const char* 	  kb_label;			/* Label for the extended keyboard */
-    const char* 	  kb_note;			/* Note for the extended keyboard */
-    CB_OnKeyboardDone kb_post_done_cb; 	/* Post processing callback for the keyboard done */
-    int				  kb_flags;			/* Flags for the extended keyboard */
-
-    const char*     editbox_title;       /* Title for the native edit box*/
-} SsdEntryContext;
-
 
 static void entry_ctx_init( SsdEntryContext* ctx )
 {
@@ -95,7 +83,7 @@ static int edit_callback (SsdWidget widget, const char *new_value) {
 
    value = widget->get_value (widget);
 
-#if ((defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined( ANDROID ))
+#if ((defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined( ANDROID ) || defined(QTMOBILITY) )
    {
 	   SsdWidget text = ssd_widget_get(widget->children, "Text");
 

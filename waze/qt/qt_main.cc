@@ -86,7 +86,7 @@ int  RMapTimerCallback::same(RoadMapCallback cb) {
 }
 
 // Implementation of RMapMainWindow class
-RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) : QMainWindow(parent, f), contactsDialog(NULL), textboxDialog(NULL) {
+RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) : QMainWindow(parent, f), contactsDialog(NULL) {
    spacePressed = false;
    canvas = new RMapCanvas(this);
    setCentralWidget(canvas);
@@ -292,81 +292,6 @@ void RMapMainWindow::contactsDialogOkPressed(QString address) {
     single_search_auto_search(address.toLocal8Bit().data());
 }
 
-void RMapMainWindow::showTextBox(int action, bool isPassword, const char* text, EditBoxContextType context, int topMargin) {
-    QString buttonText;
-
-    textboxCallback = context;
-
-    switch (action)
-    {
-    case EEditBoxActionDone:
-        buttonText = QString::fromLocal8Bit(roadmap_lang_get("Done"));
-        break;
-    case EEditBoxActionSearch:
-        buttonText = QString::fromLocal8Bit(roadmap_lang_get("Search"));
-        break;
-    case EEditBoxActionNext:
-        buttonText = QString::fromLocal8Bit(roadmap_lang_get("Next"));
-        break;
-    }
-
-    QObject *item = NULL;
-
-    if (textboxDialog == NULL) {
-        textboxDialog = new QDeclarativeView(this);
-#ifdef Q_WS_SIMULATOR
-        textboxDialog->setSource(QUrl::fromLocalFile(applicationPath + QString("/qml/TextBox.qml")));
-#else
-        textboxDialog->setSource(QUrl::fromLocalFile("/opt/waze/qml/TextBox.qml"));
-#endif
-        textboxDialog->setAttribute(Qt::WA_TranslucentBackground);
-
-        item = dynamic_cast<QObject*>(textboxDialog->rootObject());
-        QObject::connect(item, SIGNAL(mouseAreaPressed()),
-                         this, SLOT(mouseAreaPressed()));
-        QObject::connect(item, SIGNAL(actionButtonPressed(QString)),
-                         this, SLOT(textEditActionPressed(QString)));
-        QObject::connect(item, SIGNAL(cancelButtonPressed()),
-                         this, SLOT(textEditCancelPressed()));
-    }
-    else
-    {
-        item = dynamic_cast<QObject*>(textboxDialog->rootObject());
-    }
-
-    item->setProperty("width", canvas->width());
-    item->setProperty("height", canvas->height());
-    if (roadmap_lang_rtl())
-    {
-        item->setProperty("isRtl", QVariant(true));
-    }
-    QDeclarativeProperty::write(item, "actionButtonText", buttonText);
-    QDeclarativeProperty::write(item, "cancelButtonText", QString::fromLocal8Bit(roadmap_lang_get("Cancel")));
-    QDeclarativeProperty::write(item, "text", QString::fromLocal8Bit(text));
-    QDeclarativeProperty::write(item, "isPassword", isPassword);
-
-    textboxDialog->setGeometry(0, 0, canvas->width(), canvas->height());
-
-    textboxDialog->show();
-    textboxDialog->setFocus();
-}
-
-void RMapMainWindow::textEditActionPressed(QString text) {
-    int existStatus = dec_ok;
-
-    textboxCallback.callback(existStatus, text.toLocal8Bit().data(), textboxCallback.cb_context);
-
-    textboxDialog->hide();
-}
-
-void RMapMainWindow::textEditCancelPressed() {
-    int existStatus = dec_close;
-
-    textboxCallback.callback(existStatus, "", textboxCallback.cb_context);
-
-    textboxDialog->hide();
-}
-
 void RMapMainWindow::dispatchMessage(int message) {
     roadmap_log(ROADMAP_INFO, "dispatch thread id: %d ", this->thread()->currentThreadId());
     emit recievedMessage(message);
@@ -476,6 +401,9 @@ void RMapMainWindow::setApplicationPath(QString path) {
     applicationPath = path;
 }
 
+QString RMapMainWindow::getApplicationPath() {
+    return applicationPath;
+}
 
 // Implementation of the RMapTimers class
 RMapTimers::RMapTimers (QObject *parent)

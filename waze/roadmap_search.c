@@ -547,7 +547,7 @@ static BOOL keyboard_callback(  int         exit_code,
 
 static void on_add_to_favorites(void *data){
 
-   #if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined(ANDROID)
+   #if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined(ANDROID) || defined(QTMOBILITY)
       ShowEditbox(roadmap_lang_get("Name"), "",
           keyboard_callback, (void *)data, EEditBoxStandard | EEditBoxAlphaNumeric );
     #else

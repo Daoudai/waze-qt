@@ -51,7 +51,6 @@ extern "C" {
 #include "roadmap_history.h"
 #include "roadmap_main.h"
 #include "roadmap_path.h"
-#include "roadmap_editbox.h"
 
 typedef void (*RoadMapQtInput) (int fd);
 
@@ -160,9 +159,8 @@ public:
 
    void showContactList();
 
-   void showTextBox(int action, bool isPassword, const char* text, EditBoxContextType context, int topMargin);
-
    void setApplicationPath(QString path);
+   QString getApplicationPath();
 
    static void signalHandler(int sig);
 
@@ -175,8 +173,7 @@ private slots:
    void mouseAreaPressed();
    void contactsDialogOkPressed(QString address);
    void contactsDialogCancelPressed();
-   void textEditActionPressed(QString text);
-   void textEditCancelPressed();
+
 
 signals:
    void recievedMessage(int message);
@@ -190,8 +187,6 @@ protected:
    RMapCanvas* canvas;
    ContactsList *contactListModel;
    QDeclarativeView *contactsDialog;
-   QDeclarativeView *textboxDialog;
-   EditBoxContextType textboxCallback;
 
    bool spacePressed;
 

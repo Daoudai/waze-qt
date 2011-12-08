@@ -3,11 +3,12 @@ import QtQuick 1.0
 Rectangle {
     id: rectangle3
     width: 400
-    height: 125
+    height: 150
     color: "#00000000"
 
     property bool isRtl: false
 
+    property string title: ""
     property bool isPassword: false
     property string text: "text"
     property string actionButtonText: "Action"
@@ -37,7 +38,7 @@ Rectangle {
         color: "#ffffff"
         height: 50
         radius: height/3
-        anchors.top: parent.top
+        anchors.top: titleText.bottom
         anchors.topMargin: 10
         anchors.right: parent.right
         anchors.rightMargin: 10
@@ -48,7 +49,6 @@ Rectangle {
 
         TextInput {
             id: text_input1
-            height: 20
             text: rectangle3.text
             echoMode: isPassword? TextInput.PasswordEchoOnEdit : TextInput.Normal
             cursorVisible: true
@@ -84,5 +84,17 @@ Rectangle {
                 onButtonPressed: rectangle3.buttonPressed(text)
             }
         }
+    }
+
+    Text {
+        id: titleText
+        x: 190
+        height: text != ""? font.pixelSize + 4 : 0
+        text: rectangle3.title
+        anchors.top: parent.top
+        anchors.topMargin: 0
+        verticalAlignment: Text.AlignVCenter
+        visible: true
+        font.pixelSize: 18
     }
 }

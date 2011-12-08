@@ -28,6 +28,18 @@
 
 #include "ssd_keyboard_dialog.h"
 
+typedef struct
+{
+        const char* 	  mb_text;			/* Message box text for the confirmed entry */
+    const char* 	  kb_title;			/* Title for the extended keyboard */
+    const char* 	  kb_label;			/* Label for the extended keyboard */
+    const char* 	  kb_note;			/* Note for the extended keyboard */
+    CB_OnKeyboardDone kb_post_done_cb; 	/* Post processing callback for the keyboard done */
+    int				  kb_flags;			/* Flags for the extended keyboard */
+
+    const char*     editbox_title;       /* Title for the native edit box*/
+} SsdEntryContext;
+
 SsdWidget ssd_entry_new (const char *name, const char *value, int entry_flags,
                          int text_flags, int width, int height, const char *background_text);
 
