@@ -56,43 +56,10 @@ Rectangle {
             Repeater
             {
                 model: 2
-                Rectangle {
-                    x: 13
+                Button {
                     width: (button_row.width-button_row.spacing)/2
-                    radius: 18
-                    border.color: "#696969"
-                    gradient: Gradient {
-                        GradientStop {
-                            position: 0.070
-                            color: "#585858"
-                        }
-
-                        GradientStop {
-                            position: 1
-                            color: "#000000"
-                        }
-                    }
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 0
-                    anchors.top: parent.top
-                    anchors.topMargin: 0
-
-                    MouseArea {
-                        id: button1ClickArea
-                        anchors.fill: parent
-                        onClicked: buttonPressed(buttonText.text)
-                        Text {
-                            id: buttonText
-                            x: -26
-                            y: -58
-                            color: "#ffffff"
-                            text: ((!isRtl && index === 0) || (isRtl && index === 1))? okButtonText : cancelButtonText
-                            font.bold: true
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.verticalCenter: parent.verticalCenter
-                            font.pixelSize: 18
-                        }
-                    }
+                    text: ((!isRtl && index === 0) || (isRtl && index === 1))? okButtonText : cancelButtonText
+                    onButtonPressed: ((!isRtl && index === 0) || (isRtl && index === 1))? okPressed(selectedAddress) : cancelPressed()
                 }
             }
         }

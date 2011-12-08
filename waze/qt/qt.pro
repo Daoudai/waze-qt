@@ -38,7 +38,8 @@ SOURCES += \
     qt/qt_gpsaccessor.cc \
     qt/roadmap_sound.cc \
     qt/qt_sound.cc \
-    qt/qt_contactslistmodel.cc
+    qt/qt_contactslistmodel.cc \
+    qt/roadmap_editbox.cc
 
 HEADERS += \
     qt_progress.h \
@@ -53,6 +54,7 @@ HEADERS += \
 
 OTHER_FILES += \
     qt/deploy_data.sh
+
 
 
 
