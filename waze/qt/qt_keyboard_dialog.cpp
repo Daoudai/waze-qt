@@ -22,8 +22,8 @@ KeyboardDialog::KeyboardDialog(RMapMainWindow *parent) :
     QObject *item = dynamic_cast<QObject*>(rootObject());
     item->setProperty("width", mainWindow->width());
     item->setProperty("height", mainWindow->height());
-    QObject::connect(mainWindow, SIGNAL(mouseAreaPressed()),
-                     this, SLOT(mouseAreaPressed()));
+    QObject::connect(item, SIGNAL(mouseAreaPressed()),
+                     mainWindow, SLOT(mouseAreaPressed()));
     QObject::connect(item, SIGNAL(actionButtonPressed(QString)),
                      this, SLOT(textEditActionPressed(QString)));
     QObject::connect(item, SIGNAL(cancelButtonPressed()),
@@ -61,17 +61,19 @@ void KeyboardDialog::show(QString title, TEditBoxType boxType, QString text, Edi
         break;
     }
 
+    closeDialogOnAction = (boxType & EEditBoxEmbedded) == 0;
+
     QObject *item = dynamic_cast<QObject*>(rootObject());
 
     if (roadmap_lang_rtl())
     {
         item->setProperty("isRtl", QVariant(true));
     }
-    QDeclarativeProperty::write(item, "title", title);
-    QDeclarativeProperty::write(item, "actionButtonText", actionButtonText);
-    QDeclarativeProperty::write(item, "cancelButtonText", QString::fromLocal8Bit(roadmap_lang_get("Cancel")));
-    QDeclarativeProperty::write(item, "text", text);
-    QDeclarativeProperty::write(item, "isPassword", isPassword);
+    item->setProperty("title", title);
+    item->setProperty("actionButtonText", actionButtonText);
+    item->setProperty("cancelButtonText", QString::fromLocal8Bit(roadmap_lang_get("Cancel")));
+    item->setProperty("text", text);
+    item->setProperty("isPassword", isPassword);
 
     setVisible(true);
     setFocus();
@@ -86,7 +88,10 @@ void KeyboardDialog::textEditActionPressed(QString text) {
 
     context.callback(exit_code, value, context.cb_context);
 
-    ssd_dialog_hide_current( exit_code);
+    if (closeDialogOnAction)
+    {
+        ssd_dialog_hide_current(exit_code);
+    }
 }
 
 void KeyboardDialog::textEditCancelPressed() {
@@ -97,5 +102,8 @@ void KeyboardDialog::textEditCancelPressed() {
 
     context.callback(exit_code, "", context.cb_context);
 
-    ssd_dialog_hide_current( exit_code);
+    if (closeDialogOnAction)
+    {
+        ssd_dialog_hide_current(exit_code);
+    }
 }
