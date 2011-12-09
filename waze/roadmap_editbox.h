@@ -46,6 +46,8 @@ typedef struct
 
 #define EDITBOX_TYPE_MASK     0x000000FFL
 #define EDITBOX_ACTION_MASK   0x0000FF00L
+#define EDITBOX_EXT_MASK      0x00FF0000L
+
 /*
  * Edit box type flags
  */

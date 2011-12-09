@@ -81,11 +81,11 @@ void ShowEditbox(const char* titleUtf8, const char* textUtf8, SsdKeyboardCallbac
        ctx = ( SsdEntryContext* ) ((SsdWidget)context)->context;
        if (ctx->kb_flags & SSD_KB_DLG_SHOW_NEXT_BTN)
        {
-            action |= EEditBoxActionNext;
+           boxType = (TEditBoxType) ( boxType | EEditBoxActionNext);
        }
        if (ctx->kb_flags & SSD_KB_DLG_INPUT_ENGLISH)
        {
-           action |= EEditBoxAlphaNumeric;
+           boxType = (TEditBoxType) ( boxType | EEditBoxAlphaNumeric);
        }
    }
 
@@ -94,7 +94,7 @@ void ShowEditbox(const char* titleUtf8, const char* textUtf8, SsdKeyboardCallbac
        keyboard = new KeyboardDialog(mainWindow);
    }
 
-   keyboard->show(action, QString::fromLocal8Bit(titleUtf8), boxType, QString::fromLocal8Bit(textUtf8), pCtx);
+   keyboard->show(QString::fromLocal8Bit(titleUtf8), boxType, QString::fromLocal8Bit(textUtf8), pCtx);
 }
 
 /***********************************************************
