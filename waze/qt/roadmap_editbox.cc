@@ -42,6 +42,7 @@ extern RMapMainWindow* mainWindow;
 
 KeyboardDialog *keyboard = NULL;
 
+static SsdWidget dialog = NULL;
 static void roadmap_editbox_dlg_show( const char* title );
 
 #define SSD_EDITBOX_DIALOG_NAME   "EditBox Dialog"
@@ -61,6 +62,7 @@ void ShowEditbox(const char* titleUtf8, const char* textUtf8, SsdKeyboardCallbac
    int margin = EDITBOX_TOP_MARGIN;
 
    margin = roadmap_screen_adjust_height( margin );
+
 
    EditBoxContextType pCtx;
    pCtx.callback = callback;
@@ -106,7 +108,6 @@ void ShowEditbox(const char* titleUtf8, const char* textUtf8, SsdKeyboardCallbac
 
 static void roadmap_editbox_dlg_show( const char* title )
 {
-   static SsdWidget dialog = NULL;
    static SsdWidget container = NULL;
    static SsdWidget title_text = NULL;
 
