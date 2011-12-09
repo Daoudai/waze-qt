@@ -88,9 +88,9 @@ Rectangle {
 
     Text {
         id: titleText
-        x: 190
         height: text != ""? font.pixelSize + 4 : 0
         text: rectangle3.title
+        anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.topMargin: 0
         verticalAlignment: Text.AlignVCenter
