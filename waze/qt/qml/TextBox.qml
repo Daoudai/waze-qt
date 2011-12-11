@@ -2,13 +2,13 @@ import QtQuick 1.0
 
 Rectangle {
     id: rectangle3
-    width: 400
-    height: 150
-    color: "#00000000"
+    width: 800
+    height: 400
+    color: "#000000"
 
     property bool isRtl: false
 
-    property string title: ""
+    property string title: "title"
     property bool isPassword: false
     property string text: "text"
     property string actionButtonText: "Action"
@@ -33,17 +33,15 @@ Rectangle {
 
     Rectangle {
         id: rectangle1
-        x: 10
-        y: 9
+        height: text_input1.height*1.1
         color: "#ffffff"
-        height: 50
         radius: height/3
-        anchors.top: titleText.bottom
+        anchors.top: buttonRow.bottom
         anchors.topMargin: 10
         anchors.right: parent.right
-        anchors.rightMargin: 10
+        anchors.rightMargin: 20
         anchors.left: parent.left
-        anchors.leftMargin: 10
+        anchors.leftMargin: 20
         border.width: 2
         border.color: "#000000"
 
@@ -58,29 +56,28 @@ Rectangle {
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter
-            font.pixelSize: 18
+            font.pixelSize: 64
             focus: true
+            selectByMouse: true
         }
     }
 
     Row {
         id: buttonRow
-        height: 50
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 10
+        anchors.top: titleText.bottom
+        anchors.topMargin: 10
         anchors.right: parent.right
-        anchors.rightMargin: 10
+        anchors.rightMargin: 20
         anchors.left: parent.left
-        anchors.leftMargin: 10
+        anchors.leftMargin: 20
         spacing: 10
+
         Repeater {
             model: 2
             Button {
                 width: (buttonRow.width-10)/2
                 visible: ((isRtl && index == 1) || (!isRtl && index === 0))? actionButtonText != "" : true
                 text: ((isRtl && index == 1) || (!isRtl && index === 0))? actionButtonText : cancelButtonText
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
                 onButtonPressed: rectangle3.buttonPressed(text)
             }
         }
@@ -88,13 +85,14 @@ Rectangle {
 
     Text {
         id: titleText
-        height: text != ""? font.pixelSize + 4 : 0
+        color: "#ffffff"
         text: rectangle3.title
+        horizontalAlignment: Text.AlignHCenter
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.topMargin: 0
         verticalAlignment: Text.AlignVCenter
         visible: true
-        font.pixelSize: 18
+        font.pixelSize: 28
     }
 }

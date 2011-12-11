@@ -71,7 +71,7 @@ void KeyboardDialog::show(QString title, TEditBoxType boxType, QString text, Edi
     }
     item->setProperty("title", title);
     item->setProperty("actionButtonText", actionButtonText);
-    item->setProperty("cancelButtonText", QString::fromLocal8Bit(roadmap_lang_get("Cancel")));
+    item->setProperty("cancelButtonText", QString::fromLocal8Bit(roadmap_lang_get("Back_key")));
     item->setProperty("text", text);
     item->setProperty("isPassword", isPassword);
 

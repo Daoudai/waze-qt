@@ -255,8 +255,9 @@ void RMapMainWindow::showContactList() {
         {
             item->setProperty("isRtl", QVariant(true));
         }
-        QDeclarativeProperty::write(item, "okButtonText", QString::fromLocal8Bit(roadmap_lang_get("Ok")));
-        QDeclarativeProperty::write(item, "cancelButtonText", QString::fromLocal8Bit(roadmap_lang_get("Cancel")));
+        item->setProperty("okButtonText", QString::fromLocal8Bit(roadmap_lang_get("Ok")));
+        item->setProperty("cancelButtonText", QString::fromLocal8Bit(roadmap_lang_get("Back_key")));
+        item->setProperty("title", QString::fromLocal8Bit(roadmap_lang_get("Contacts")));
         QObject::connect(item, SIGNAL(okPressed(QString)),
                          this, SLOT(contactsDialogOkPressed(QString)));
         QObject::connect(item, SIGNAL(cancelPressed()),

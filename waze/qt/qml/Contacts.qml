@@ -5,10 +5,10 @@ Rectangle {
     width: 800
     height: 480
     color: "#000000"
-    opacity: 0.850
     property string okButtonText: "Ok"
     property string cancelButtonText: "Cancel"
     property string selectedAddress
+    property string title: "title"
 
     property bool isRtl: false
 
@@ -29,66 +29,52 @@ Rectangle {
         }
     }
 
-    Rectangle {
-        id: contacts
-        width: 600
-        height: 350
-        color: "#000000"
-        radius: 26
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-        clip: false
-        opacity: 0.850
-        border.color: "#000000"
-
-        Row {
-            id: button_row
-            height: 50
-            opacity: 0.850
-            spacing: 50
-            anchors.right: parent.right
-            anchors.rightMargin: 20
-            anchors.left: parent.left
-            anchors.leftMargin: 20
-            anchors.top: parent.top
-            anchors.topMargin: 20
-
-            Repeater
-            {
-                model: 2
-                Button {
-                    width: (button_row.width-button_row.spacing)/2
-                    text: ((!isRtl && index === 0) || (isRtl && index === 1))? okButtonText : cancelButtonText
-                    onButtonPressed: ((!isRtl && index === 0) || (isRtl && index === 1))? okPressed(selectedAddress) : cancelPressed()
-                }
-            }
-        }
-
-        Rectangle {
-            id: rectangle1
-            height: 200
-            color: "#00000000"
-            border.color: "#ffffff"
-            anchors.right: parent.right
-            anchors.rightMargin: 20
-            anchors.left: parent.left
-            anchors.leftMargin: 20
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 20
-            anchors.top: button_row.bottom
-            anchors.topMargin: 20
-
-            ListView {
-                id: contacts_list
-                clip: true
-                anchors.fill: parent
-                model: contactModel
-                delegate: listdelegate
-                currentIndex: -1
-                highlightFollowsCurrentItem: false
+    Row {
+        id: button_row
+        spacing: 50
+        anchors.right: parent.right
+        anchors.rightMargin: 20
+        anchors.left: parent.left
+        anchors.leftMargin: 20
+        anchors.top: titleText.bottom
+        anchors.topMargin: 10
+        Repeater
+        {
+            model: 2
+            Button {
+                id: button
+                width: (button_row.width-button_row.spacing)/2
+                text: ((!isRtl && index === 0) || (isRtl && index === 1))? okButtonText : cancelButtonText
+                onButtonPressed: ((!isRtl && index === 0) || (isRtl && index === 1))? okPressed(selectedAddress) : cancelPressed()
             }
         }
     }
+
+    Rectangle {
+        id: rectangle1
+        height: 200
+        color: "#00000000"
+        border.color: "#ffffff"
+        anchors.right: parent.right
+        anchors.rightMargin: 20
+        anchors.left: parent.left
+        anchors.leftMargin: 20
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20
+        anchors.top: button_row.bottom
+        anchors.topMargin: 20
+
+        ListView {
+            id: contacts_list
+            clip: true
+            anchors.fill: parent
+            model: contactModel
+            delegate: listdelegate
+            currentIndex: -1
+            highlightFollowsCurrentItem: false
+        }
+    }
+
     Component {
         id: listdelegate
 
@@ -202,5 +188,17 @@ Rectangle {
                 }
             ]
         }
+    }
+
+    Text {
+        id: titleText
+        color: "#ffffff"
+        text: contactsDialog.title
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: 0
+        font.pixelSize: 28
     }
 }
