@@ -293,6 +293,10 @@ void RMapMainWindow::contactsDialogOkPressed(QString address) {
     single_search_auto_search(address.toLocal8Bit().data());
 }
 
+void RMapMainWindow::setFocusToCanvas() {
+    canvas->setFocus();
+}
+
 void RMapMainWindow::dispatchMessage(int message) {
     roadmap_log(ROADMAP_INFO, "dispatch thread id: %d ", this->thread()->currentThreadId());
     emit recievedMessage(message);

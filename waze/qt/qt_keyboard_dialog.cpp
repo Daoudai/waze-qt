@@ -84,6 +84,8 @@ void KeyboardDialog::textEditActionPressed(QString text) {
     int exit_code = dec_ok;
     const char *value = text.toLocal8Bit().data();
 
+    mainWindow->setFocusToCanvas();
+
     hide();
 
     context.callback(exit_code, value, context.cb_context);
@@ -97,6 +99,8 @@ void KeyboardDialog::textEditActionPressed(QString text) {
 void KeyboardDialog::textEditCancelPressed() {
 
     int exit_code = dec_cancel;
+
+    mainWindow->setFocusToCanvas();
 
     hide();
 
