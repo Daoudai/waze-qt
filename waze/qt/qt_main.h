@@ -164,6 +164,8 @@ public:
 
    static void signalHandler(int sig);
 
+   void setFocusToCanvas();
+
 public slots:
    void handleSignal();
    void mouseAreaPressed();
