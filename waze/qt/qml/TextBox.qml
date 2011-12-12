@@ -18,6 +18,12 @@ Rectangle {
     signal actionButtonPressed(string text)
     signal cancelButtonPressed()
 
+    onMouseAreaPressed: {
+        // auto accept the last word that might not be in a dictionary
+        text_input1.focus = false;
+        text_input1.focus = true;
+    }
+
     function buttonPressed(buttonText)
     {
         mouseAreaPressed();
@@ -59,6 +65,7 @@ Rectangle {
             font.pixelSize: 64
             focus: true
             selectByMouse: true
+            onAccepted: rectangle3.buttonPressed(actionButtonText)
         }
     }
 
