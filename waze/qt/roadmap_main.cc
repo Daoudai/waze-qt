@@ -39,8 +39,6 @@
 #include <QApplication>
 #include <QMutex>
 #include <QWaitCondition>
-#include <QProcess>
-#include <QFile>
 #include "qt_main.h"
 
 extern "C" {
@@ -889,13 +887,6 @@ void roadmap_main_show_contacts() {
 }
 
 int main(int argc, char* argv[]) {
-
-   if(QFile::exists(DEPLOY_DATA_SCRIPT))
-   {
-       QProcess deploy;
-       deploy.execute(DEPLOY_DATA_SCRIPT);
-       deploy.waitForFinished();
-   }
 
    app = new QApplication(argc, argv);
 

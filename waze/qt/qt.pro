@@ -54,8 +54,11 @@ HEADERS += \
     qt/qt_contactslistmodel.h \
     qt/qt_keyboard_dialog.h
 
-OTHER_FILES += \
-    qt/deploy_data.sh
+
+
+
+
+
 
 
 

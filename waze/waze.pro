@@ -6,12 +6,10 @@ include(qt/qt.pro)
 # file1.source = myfile
 
 datadir.source = data
-bindir.source = qt/deploy_data.sh
-bindir.target = bin
 
 qmldir.source = qt/qml
 
-DEPLOYMENTFOLDERS = datadir bindir qmldir # file1 dir1
+DEPLOYMENTFOLDERS = datadir qmldir # file1 dir1
 
 symbian:TARGET.UID3 = 0xE6919A30
 
@@ -588,6 +586,7 @@ OTHER_FILES += \
     qtc_packaging/debian_fremantle/compat \
     qtc_packaging/debian_fremantle/control \
     qtc_packaging/debian_fremantle/copyright \
+    qtc_packaging/debian_fremantle/postinst \
     qtc_packaging/debian_fremantle/rules \
     qtc_packaging/debian_harmattan/README \
     qtc_packaging/debian_harmattan/changelog \
@@ -595,6 +594,7 @@ OTHER_FILES += \
     qtc_packaging/debian_harmattan/control \
     qtc_packaging/debian_harmattan/copyright \
     qtc_packaging/debian_harmattan/manifest.aegis \
+    qtc_packaging/debian_harmattan/postinst \
     qtc_packaging/debian_harmattan/rules
 
 
@@ -615,6 +615,10 @@ maemo5 {
     icon.path = /usr/share/icons/hicolor/64x64/apps
     INSTALLS += icon
 }
+
+
+
+
 
 
 
