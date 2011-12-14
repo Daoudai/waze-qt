@@ -61,8 +61,6 @@ void KeyboardDialog::show(QString title, TEditBoxType boxType, QString text, Edi
         break;
     }
 
-    closeDialogOnAction = (boxType & EEditBoxEmbedded) == 0;
-
     QObject *item = dynamic_cast<QObject*>(rootObject());
 
     if (roadmap_lang_rtl())
@@ -90,10 +88,7 @@ void KeyboardDialog::textEditActionPressed(QString text) {
 
     hide();
 
-    if (closeDialogOnAction)
-    {
-        ssd_dialog_hide_current(exit_code);
-    }
+    roadmap_editbox_dlg_hide();
 }
 
 void KeyboardDialog::textEditCancelPressed() {
@@ -106,8 +101,5 @@ void KeyboardDialog::textEditCancelPressed() {
 
     context.callback(exit_code, "", context.cb_context);
 
-    if (closeDialogOnAction)
-    {
-        ssd_dialog_hide_current(exit_code);
-    }
+    roadmap_editbox_dlg_hide();
 }
