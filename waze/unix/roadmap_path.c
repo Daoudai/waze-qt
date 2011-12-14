@@ -45,12 +45,10 @@
 #ifdef IPHONE
 #include "roadmap_main.h"
 #define HOME_PREFIX ""
+#elif defined(QTMOBILITY)
+#define HOME_PREFIX "MyDocs/.waze"
 #else
 #define HOME_PREFIX ".waze"
-#endif
-
-#if defined(QTMOBILITY)
-#define MAPS_HOME_PREFIX "MyDocs/.waze"
 #endif
 
 typedef struct RoadMapPathRecord *RoadMapPathList;
@@ -85,10 +83,6 @@ static const char *RoadMapPathUserPreferred = "~/"HOME_PREFIX;
 static const char *RoadMapPathSkin[] = {
    "~/"HOME_PREFIX"/skins/default/day",
    "~/"HOME_PREFIX"/skins/default",
-#ifdef QTMOBILITY
-    "/opt/waze/data/skins/default/day",
-    "/opt/waze/data/skins/default",
-#endif
 #ifdef IPHONE
 	"+/"HOME_PREFIX"/skins/default/day",
         "+/"HOME_PREFIX"/skins/default",
@@ -143,13 +137,11 @@ static const char *RoadMapPathMaps[] = {
    "/mnt/card/QtPalmtop/share/roadmap",
 #else
    /* This is for standard Unix configurations. */
-#ifdef IPHONE
-    "#/"HOME_PREFIX"/maps",
-         "+/"HOME_PREFIX"/maps",
-#elif defined (QTMOBILITY)
-    "~/"MAPS_HOME_PREFIX"/maps",
-#else
+#ifndef IPHONE
    "~/"HOME_PREFIX"/maps",
+#else
+   "#/"HOME_PREFIX"/maps",
+        "+/"HOME_PREFIX"/maps",
 #endif //IPHONE
    "/var/lib/roadmap",
    "/usr/lib/roadmap",
@@ -169,7 +161,7 @@ static const char *RoadMapPathMapsPreferred =
 #ifdef IPHONE
                       "#/"HOME_PREFIX"/maps";
 #elif defined(QTMOBILITY)
-                      "~/"MAPS_HOME_PREFIX"/maps";
+                      "~/"HOME_PREFIX"/maps";
 #else
                       "/var/lib/roadmap";
 #endif //IPHONE
