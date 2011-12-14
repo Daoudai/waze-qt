@@ -664,7 +664,7 @@ BOOL single_search_auto_search( const char* address)
    SsdWidget edit    = NULL;
 
    generic_search_dlg_update_text( address, single_search );
-#ifdef ANDROID
+#if defined(ANDROID) || defined(QTMOBILITY)
    single_search_dlg_show( on_auto_search_completed, (void*)address);
 #else
    single_search_dlg_show_auto( on_auto_search_completed, (void*)address);
@@ -674,7 +674,7 @@ BOOL single_search_auto_search( const char* address)
    ssd_text_set_text( edit, address);
 
 // AGA Don't start, just show to user. Perhaps some editing is necessary
-#ifndef ANDROID
+#if !defined(ANDROID) && !defined(QTMOBILITY)
    on_search();
 #endif
 

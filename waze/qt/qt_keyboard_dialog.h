@@ -22,7 +22,6 @@ public slots:
     void textEditCancelPressed();
 
 private:
-    bool closeDialogOnAction;
     EditBoxContextType context;
     RMapMainWindow *mainWindow;
 };

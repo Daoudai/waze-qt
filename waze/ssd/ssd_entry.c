@@ -62,7 +62,7 @@ static BOOL on_kb_closed(  int         exit_code,
          ssd_widget_show( ssd_widget_get( w, "BgText"));
    }
 
-#ifndef ANDROID
+#if !defined(ANDROID) && !defined(QTMOBILITY)
    if ( ctx->kb_post_done_cb )
    {
 	   retVal = ctx->kb_post_done_cb( exit_code, value, context );
