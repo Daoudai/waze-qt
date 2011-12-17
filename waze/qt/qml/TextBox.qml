@@ -10,7 +10,7 @@ Rectangle {
 
     property string title: "title"
     property bool isPassword: false
-    property string text: "text"
+    property alias text: text_input1.text
     property string actionButtonText: "Action"
     property string cancelButtonText: "Cancel"
 
@@ -53,7 +53,6 @@ Rectangle {
 
         TextInput {
             id: text_input1
-            text: rectangle3.text
             echoMode: isPassword? TextInput.PasswordEchoOnEdit : TextInput.Normal
             cursorVisible: true
             horizontalAlignment: isRtl? TextInput.AlignRight : TextInput.AlignLeft

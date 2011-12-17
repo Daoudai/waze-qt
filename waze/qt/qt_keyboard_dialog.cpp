@@ -7,6 +7,7 @@
 
 extern "C" {
 #include "roadmap_lang.h"
+#include "roadmap_skin.h"
 }
 
 KeyboardDialog::KeyboardDialog(RMapMainWindow *parent) :
@@ -20,8 +21,6 @@ KeyboardDialog::KeyboardDialog(RMapMainWindow *parent) :
     setAttribute(Qt::WA_TranslucentBackground);
 
     QObject *item = dynamic_cast<QObject*>(rootObject());
-    item->setProperty("width", mainWindow->width());
-    item->setProperty("height", mainWindow->height());
     QObject::connect(item, SIGNAL(mouseAreaPressed()),
                      mainWindow, SLOT(mouseAreaPressed()));
     QObject::connect(item, SIGNAL(actionButtonPressed(QString)),
@@ -63,6 +62,9 @@ void KeyboardDialog::show(QString title, TEditBoxType boxType, QString text, Edi
 
     QObject *item = dynamic_cast<QObject*>(rootObject());
 
+    item->setProperty("width", mainWindow->width());
+    item->setProperty("height", mainWindow->height());
+    item->setProperty("color", roadmap_skin_state()? "#74859b" : "#70bfea"); // ssd_container::draw_bg()
     if (roadmap_lang_rtl())
     {
         item->setProperty("isRtl", QVariant(true));
