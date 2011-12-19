@@ -1,3 +1,10 @@
+waze (0.0.4) unstable; urgency=low
+  * Native keyboard support
+  * Initial multitouch gestures
+  * Fix map download (hopefully)
+
+ -- Assaf Paz <damagedspline@gmail.com>  Mon, 19 Dec 2011 20:37:49 +0200
+
 waze (0.0.3) unstable; urgency=low
   * Navigate to a contact's saved address
   * Volume control (in general settings)
