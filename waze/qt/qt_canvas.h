@@ -32,6 +32,8 @@
 #include <QEvent>
 #include <QUrl>
 #include <QImage>
+#include <QGestureEvent>
+#include <QPinchGesture>
 
 extern "C" {
 
@@ -105,6 +107,7 @@ public:
 
 protected:
    QColor translateColor(const char* color);
+   bool event(QEvent *event);
 
    QMap<QString, QColor*> colors;
    QMap<QString, RoadMapPen> pens;
@@ -127,6 +130,10 @@ protected:
    virtual void wheelEvent(QWheelEvent*);
    virtual void resizeEvent(QResizeEvent*);
    virtual void paintEvent(QPaintEvent*);
+private:
+    bool gestureEvent(QGestureEvent *event);
+    void pinchTriggered(QPinchGesture*);
+    int accumolatedZoom;
 };
 
 extern RMapCanvas *roadMapCanvas;
