@@ -34,6 +34,13 @@
 #include <QWheelEvent>
 #include "qt_canvas.h"
 #include <QDebug>
+#include <QGestureEvent>
+#include <QPinchGesture>
+
+extern "C" {
+#include "roadmap_screen.h"
+#include "ssd/ssd_dialog.h"
+}
 
 
 RMapCanvas *roadMapCanvas = 0;
@@ -62,6 +69,7 @@ RMapCanvas::RMapCanvas(QWidget* parent):QWidget(parent) {
    registerMouseWheelHandler(whandler);
 
    registerConfigureHandler(chandler);
+   grabGesture(Qt::PinchGesture);
    setAttribute(Qt::WA_NoBackground);
 }
 
@@ -72,6 +80,57 @@ RMapCanvas::~RMapCanvas() {
    }
 
    // TODO: delete pens
+}
+
+bool RMapCanvas::event(QEvent *event)
+{
+   if (event->type() == QEvent::Gesture)
+       return gestureEvent(static_cast<QGestureEvent*>(event));
+   return QWidget::event(event);
+}
+
+bool RMapCanvas::gestureEvent(QGestureEvent *event)
+{
+    // when in dialog, don't handle gestures
+    if (ssd_dialog_currently_active_name())
+        return true;
+
+    if (QGesture *pinch = event->gesture(Qt::PinchGesture))
+        pinchTriggered(static_cast<QPinchGesture *>(pinch));
+
+    return true;
+}
+
+void RMapCanvas::pinchTriggered(QPinchGesture *gesture)
+ {
+    if (gesture->state() == Qt::GestureStarted)
+    {
+        accumolatedZoom = 0;
+    }
+
+    if (gesture->state() == Qt::GestureUpdated)
+    {
+        if (gesture->changeFlags() & QPinchGesture::RotationAngleChanged)
+        {
+            roadmap_screen_rotate(gesture->rotationAngle() - gesture->lastRotationAngle());
+        }
+
+        if (gesture->changeFlags() & QPinchGesture::ScaleFactorChanged)
+        {
+            qreal scale = gesture->scaleFactor();
+
+            if (1 < scale && scale < 1.01 && accumolatedZoom <= 2)
+            {
+                roadmap_screen_zoom_in();
+                accumolatedZoom++;
+            }
+            else if (0.99 < scale && scale < 1 && -2 <= accumolatedZoom)
+            {
+                roadmap_screen_zoom_out();
+                accumolatedZoom--;
+            }
+        }
+    }
 }
 
 RoadMapPen RMapCanvas::createPen(const char* name) {
