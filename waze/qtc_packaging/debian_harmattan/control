@@ -1,5 +1,5 @@
 Source: waze
-Section: user/navigation
+Section: user/location
 Priority: optional
 Maintainer: Assaf Paz <damagedspline@gmail.com>
 Build-Depends: debhelper (>= 5), libqt4-dev
