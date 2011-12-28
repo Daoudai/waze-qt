@@ -365,7 +365,7 @@ static int button_callback (SsdWidget widget, const char *new_value) {
    }
 
 
-#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined(ANDROID) || defined(QTMOBILITY)
+#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined(ANDROID)
     ShowEditbox(title, "",
             keyboard_callback, (void *)widget, EEditBoxStandard | EEditBoxNumeric );
 #else
@@ -655,8 +655,10 @@ void update_range_dialog(void) {
       return;
    }
 
+   roadmap_log_push("update_range_dialog");
    roadmap_plugin_line_from (&line, &from);
    roadmap_plugin_line_to   (&line, &to);
+   roadmap_log_pop();
 
    if (!roadmap_plugin_get_distance
         ((RoadMapPosition *)&CurrentGpsPoint, &line, &result)) {

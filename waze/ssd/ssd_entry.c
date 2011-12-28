@@ -37,6 +37,18 @@
 
 #include "ssd_entry.h"
 #include "roadmap_editbox.h"
+#include "roadmap_screen.h"
+typedef struct
+{
+	const char* 	  mb_text;			/* Message box text for the confirmed entry */
+    const char* 	  kb_title;			/* Title for the extended keyboard */
+    const char* 	  kb_label;			/* Label for the extended keyboard */
+    const char* 	  kb_note;			/* Note for the extended keyboard */
+    CB_OnKeyboardDone kb_post_done_cb; 	/* Post processing callback for the keyboard done */
+    int				  kb_flags;			/* Flags for the extended keyboard */
+
+    const char*     editbox_title;       /* Title for the native edit box*/
+} SsdEntryContext;
 
 
 static void entry_ctx_init( SsdEntryContext* ctx )
@@ -62,12 +74,11 @@ static BOOL on_kb_closed(  int         exit_code,
          ssd_widget_show( ssd_widget_get( w, "BgText"));
    }
 
-#if !defined(ANDROID) && !defined(QTMOBILITY)
    if ( ctx->kb_post_done_cb )
    {
 	   retVal = ctx->kb_post_done_cb( exit_code, value, context );
    }
-#endif
+
    return retVal;
 }
 
@@ -83,7 +94,7 @@ static int edit_callback (SsdWidget widget, const char *new_value) {
 
    value = widget->get_value (widget);
 
-#if ((defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined( ANDROID ) || defined(QTMOBILITY) )
+#if ((defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined( ANDROID ))
    {
 	   SsdWidget text = ssd_widget_get(widget->children, "Text");
 
@@ -104,7 +115,8 @@ static int edit_callback (SsdWidget widget, const char *new_value) {
    }
 
 #else
-   ssd_show_keyboard_dialog_ext(  ctx->kb_title,
+   
+   ssd_show_keyboard_dialog_ext(  ctx->editbox_title ? ctx->editbox_title : ctx->kb_title,
 								   value,
 								   ctx->kb_label,
 								   ctx->kb_note,
@@ -161,7 +173,7 @@ SsdWidget ssd_entry_new (const char *name,
    SsdWidget text_box;
    SsdWidget text;
    int tab_st = 0;
-   int txt_box_height = 40;
+   int txt_box_height = ADJ_SCALE(37);
    SsdEntryContext*  ctx = (SsdEntryContext*) calloc( 1, sizeof( SsdEntryContext ) );
 #ifndef TOUCH_SCREEN
    txt_box_height = 23;
@@ -201,7 +213,9 @@ SsdWidget ssd_entry_new (const char *name,
    ssd_widget_add(text_box, space);
    text = ssd_text_new ("Text", value, -1, text_flags|SSD_ALIGN_VCENTER|SSD_TEXT_SINGLE_LINE );
    ssd_widget_add (text_box, text);
+#ifdef TOUCH_SCREEN
    ssd_widget_set_offset(text, 0, -2);
+#endif
    if (background_text == NULL)
    		bg_text = ssd_text_new ("BgText", "", -1, SSD_ALIGN_VCENTER|SSD_TEXT_SINGLE_LINE);
    else

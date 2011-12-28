@@ -367,7 +367,7 @@ static void roadmap_address_street_result (const char *result, void *data) {
    if (context->street_name) free(context->street_name);
    context->street_name = strdup(name);
 
-#if defined(ANDROID) || defined(QTMOBILITY)
+#ifdef ANDROID
    ShowEditbox( roadmap_lang_get ("House number"), "",
          house_keyboard_callback, (void *)context, EEditBoxStandard | EEditBoxAlphaNumeric );
 #else
@@ -489,7 +489,7 @@ void roadmap_address_search_dialog (const char *city,
       title = roadmap_lang_get ("Street");
    }
 
-#if defined(ANDROID) || defined(QTMOBILITY)
+#ifdef ANDROID
    ShowEditbox( title, "",
          keyboard_callback, (void *)context, EEditBoxStandard | EEditBoxAlphaNumeric );
 #else

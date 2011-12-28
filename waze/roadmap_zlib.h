@@ -21,7 +21,7 @@
 #ifndef INCLUDE__ROADMAP_ZLIB__H
 #define INCLUDE__ROADMAP_ZLIB__H
 
-#include <zlib.h>
+#include "zlib/zlib.h"
 
 int roadmap_zlib_compress (const char* in_path, const char* in_file, const char* out_path, const char* out_file, int level,BOOL isLogFile);
 
