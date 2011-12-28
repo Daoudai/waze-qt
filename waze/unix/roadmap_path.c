@@ -72,7 +72,7 @@ static RoadMapPathList RoadMapPaths = NULL;
 static const char *RoadMapPathUser[] = {
    "~/"HOME_PREFIX,
 #ifdef IPHONE
-        "+/"HOME_PREFIX,
+	"+/"HOME_PREFIX,
 #endif //IPHONE
    NULL
 };
@@ -85,7 +85,7 @@ static const char *RoadMapPathSkin[] = {
    "~/"HOME_PREFIX"/skins/default",
 #ifdef IPHONE
 	"+/"HOME_PREFIX"/skins/default/day",
-        "+/"HOME_PREFIX"/skins/default",
+	"+/"HOME_PREFIX"/skins/default",
 #endif //IPHONE
    NULL
 };
@@ -141,7 +141,7 @@ static const char *RoadMapPathMaps[] = {
    "~/"HOME_PREFIX"/maps",
 #else
    "#/"HOME_PREFIX"/maps",
-        "+/"HOME_PREFIX"/maps",
+	"+/"HOME_PREFIX"/maps",
 #endif //IPHONE
    "/var/lib/roadmap",
    "/usr/lib/roadmap",
@@ -761,6 +761,30 @@ const char *roadmap_path_images( void )
 	  roadmap_path_create( RoadMapPathImages );
    }
    return RoadMapPathImages;
+}
+
+const char *roadmap_path_voices( void )
+{
+   static char *RoadMapPathVoices = NULL;
+   
+   if ( RoadMapPathVoices == NULL )
+   {
+      RoadMapPathVoices = roadmap_path_join( roadmap_path_user(), "voices" );
+      roadmap_path_create( RoadMapPathVoices );
+   }
+   return RoadMapPathVoices;
+}
+
+const char *roadmap_path_tts( void )
+{
+   static char *RoadMapPathTts = NULL;
+
+   if ( RoadMapPathTts == NULL )
+   {
+      RoadMapPathTts = roadmap_path_join( roadmap_path_user(), "tts" );
+      roadmap_path_create( RoadMapPathTts );
+   }
+   return RoadMapPathTts;
 }
 
 const char *roadmap_path_downloads( void )

@@ -59,7 +59,7 @@
 #include "zlib/zlib.h"
 #include <device_specific.h>
 #else
-#include <zlib.h>
+#include "zlib/zlib.h"
 #endif
 
 #include "roadmap.h"

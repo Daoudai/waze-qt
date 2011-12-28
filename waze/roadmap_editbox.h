@@ -46,8 +46,6 @@ typedef struct
 
 #define EDITBOX_TYPE_MASK     0x000000FFL
 #define EDITBOX_ACTION_MASK   0x0000FF00L
-#define EDITBOX_EXT_MASK      0x00FF0000L
-
 /*
  * Edit box type flags
  */
@@ -69,12 +67,15 @@ typedef enum
       // If empty input is forbidden
       EEditBoxEmptyForbidden = 0x00020000,
       // If editbox should be shown without drawing new dialog
-      EEditBoxEmbedded = 0x00040000
+      EEditBoxEmbedded = 0x00040000,
+      // Speech to text enabled type
+      EEditBoxSTTEnabled = 0x00080000
 } TEditBoxType;
 
 void ShowEditbox(const char* aTitleUtf8, const char* aTextUtf8, SsdKeyboardCallback callback, void *context, TEditBoxType aBoxType );
 
 void roadmap_editbox_dlg_hide( void );
+void roadmap_editbox_confirm_warning_hide( void );
 
 #ifdef __cplusplus
 }
