@@ -94,7 +94,7 @@ static int edit_callback (SsdWidget widget, const char *new_value) {
 
    value = widget->get_value (widget);
 
-#if ((defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined( ANDROID ))
+#if ((defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined( ANDROID ) || defined(QTMOBILITY) )
    {
 	   SsdWidget text = ssd_widget_get(widget->children, "Text");
 

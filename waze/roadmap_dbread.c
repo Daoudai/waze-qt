@@ -58,6 +58,8 @@
 #elif defined (J2ME)
 #include "zlib/zlib.h"
 #include <device_specific.h>
+#elif defined(QTMOBILITY)
+#include <zlib.h>
 #else
 #include "zlib/zlib.h"
 #endif
