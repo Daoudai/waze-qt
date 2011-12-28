@@ -4675,7 +4675,7 @@ static void recommend_waze_dialog_callbak(int exit_code, void *context){
     if (exit_code != dec_yes)
          return;
 
-#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(ANDROID)
+#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(ANDROID) || defined(QTMOBILITY)
     ShowEditbox(roadmap_lang_get("Phone number"), "",
             keyboard_callback, NULL, EEditBoxEmptyForbidden | EEditBoxNumeric );
 #else

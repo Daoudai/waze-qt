@@ -124,7 +124,7 @@ static int on_ok( SsdWidget this, const char *new_value) {
    roadmap_config_set(&RoadMapConfigConnectionAuto, ( const char* ) ssd_dialog_get_data("AutoConnect"));
 #endif
 
-#if (defined(__SYMBIAN32__) || defined(ANDROID))
+#if (defined(__SYMBIAN32__) || defined(ANDROID)) || defined(QTMOBILITY)
    roadmap_device_set_backlight( !( strcasecmp( ( const char* ) ssd_dialog_get_data("BackLight"), yesno[0] ) ) );
 
    roadmap_sound_set_volume( ( int ) ssd_dialog_get_data( "Volume Control" ) );
@@ -593,7 +593,7 @@ void roadmap_general_settings_show(void) {
       ssd_widget_add (container, ssd_separator_new("separator", SSD_END_ROW));
 #endif
 
-#if (defined(__SYMBIAN32__) || defined(ANDROID) )
+#if (defined(__SYMBIAN32__) || defined(ANDROID) || defined(QTMOBILITY))
       //////////////////////////////////////////////////////////
 
       ////////////  Backlight control  /////////////
@@ -605,9 +605,9 @@ void roadmap_general_settings_show(void) {
       ssd_widget_add (container, ssd_separator_new("separator", SSD_END_ROW));
 
       //////////////////////////////////////////////////////////
-#endif // defined(__SYMBIAN32__) || defined(ANDROID)
+#endif // defined(__SYMBIAN32__) || defined(ANDROID) || defined(QTMOBILITY))
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) || defined(QTMOBILITY)
       ////////////  Volume control  /////////////
       // TODO :: Move to another settings directory
       box = ssd_container_new ("Volume Control Group", NULL, SSD_MAX_SIZE, height,
@@ -799,7 +799,7 @@ void roadmap_general_settings_show(void) {
       ssd_dialog_set_data("AutoConnect", pVal );
 #endif
 
-#if (defined(__SYMBIAN32__) || defined(ANDROID))
+#if (defined(__SYMBIAN32__) || defined(ANDROID)) || defined(QTMOBILITY)
       pVal = roadmap_config_match( &RoadMapConfigBackLight, yesno[0] ) ? yesno[0] : yesno[1];
       ssd_dialog_set_data("BackLight", pVal );
       ssd_dialog_set_data("Volume Control", ( void* ) roadmap_config_get_integer( &RoadMapConfigVolControl ) );

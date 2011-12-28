@@ -59,7 +59,7 @@
 #include "../roadmap_device_events.h"
 #include "../roadmap_editbox.h"
 
-#if defined(TOUCH_SCREEN) && !defined(ANDROID)
+#if defined(TOUCH_SCREEN) && !defined(ANDROID) && !defined(QTMOBILITY)
    #define  USE_ONSCREEN_KEYBOARD
 #endif   // TOUCH_SCREEN
 
@@ -144,7 +144,7 @@ void generic_search_dlg_switch_gui(void)
       ssd_dialog_set_current_scroll_flag(TRUE);
    else
    {
-#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(ANDROID)
+#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(ANDROID) || defined(QTMOBILITY)
     ssd_dialog_draw ();
 
     roadmap_main_set_periodic( 50, reopen_keyboard);
@@ -167,7 +167,7 @@ void generic_search_dlg_switch_gui(void)
 void reopen_keyboard(void)
 {
 
-#if ((defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(ANDROID))
+#if ((defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(ANDROID)) || defined(QTMOBILITY)
     ShowEditbox(roadmap_lang_get( search_context[s_type].c_dlg_title), search_context[s_type].c_saved_txt,
             on_keyboard_closed, NULL, EEditBoxStandard | EEditBoxAlphaNumeric | EEditBoxEmbedded | EEditBoxActionSearch );
     roadmap_main_remove_periodic( reopen_keyboard);
@@ -464,7 +464,7 @@ void generic_search_dlg_show( search_types   type,
 
    ssd_dialog_set_current_scroll_flag(FALSE);
 
-#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(ANDROID)
+#if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(ANDROID) || defined(QTMOBILITY)
 
    button = ssd_widget_get( dialog, GSD_IC_BUTTON_NAME);
    if ( button )
@@ -546,7 +546,7 @@ void generic_search_dlg_update_text( const char* text, search_types type )
 
 void generic_search_dlg_reopen_native_keyboard(void)
 {
-#if ( (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN))  || defined(ANDROID) )
+#if ( (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN))  || defined(ANDROID) ) || defined(QTMOBILITY)
 
     ShowEditbox(roadmap_lang_get( search_context[s_type].c_dlg_title), search_context[s_type].c_saved_txt,
             on_keyboard_closed, NULL, EEditBoxStandard | EEditBoxAlphaNumeric |EEditBoxEmbedded|EEditBoxActionSearch );
