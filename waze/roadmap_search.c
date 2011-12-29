@@ -80,6 +80,10 @@
 #include "roadmap_androidmain.h"
 #endif
 
+#ifdef QTMOBILITY
+#include "roadmap_qtmain.h"
+#endif
+
 #ifdef IPHONE
 #include "iphone/roadmap_list_menu.h"
 
@@ -635,7 +639,7 @@ static BOOL keyboard_callback(  int         exit_code,
 
 static void on_add_to_favorites(void *data){
 
-   #if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined(ANDROID)
+   #if (defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE) || defined(ANDROID) || defined(QTMOBILITY)
       ShowEditbox(roadmap_lang_get("Name"), "",
           keyboard_callback, (void *)data, EEditBoxStandard | EEditBoxAlphaNumeric );
     #else
@@ -1410,7 +1414,7 @@ void roamdmap_search_address_book(void){
 
    address_book_dlg_show(NULL, NULL);
 #endif //IPHONE_NATIVE
-#ifdef ANDROID
+#if defined(ANDROID) || defined(QTMOBILITY)
    roadmap_main_show_contacts();
 #endif
 #if defined (_WIN32) && !defined (EMBEDDED_CE)
@@ -1736,7 +1740,7 @@ static void reset_edit_box(SsdWidget widget)
    SsdWidget edit;
    const char *text;
 // AGA TEMPORARY SOLUTION
-#ifdef ANDROID
+#if defined(ANDROID) || defined(QTMOBILITY)
    search_menu_single_search();
    return;
 #endif
