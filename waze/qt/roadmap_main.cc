@@ -50,9 +50,9 @@ extern "C" {
 #include "roadmap_time.h"
 #include "editor/editor_main.h"
 #include "roadmap_qtmain.h"
+#include "tts_was_provider.h"
+#include "unix/resolver.h"
 }
-
-#define DEPLOY_DATA_SCRIPT "/opt/waze/bin/deploy_data.sh"
 
 int USING_PHONE_KEYPAD = 0;
 
@@ -107,7 +107,7 @@ static int RoadMapMainStatus;
 
 
 //////// Timers section ////////////////
-#define ROADMAP_MAX_TIMER 24
+#define ROADMAP_MAX_TIMER 32
 
 typedef struct roadmap_main_timer {
    int id;
@@ -117,6 +117,15 @@ static roadmap_main_timer RoadMapMainPeriodicTimer[ROADMAP_MAX_TIMER];
 
 ////////////////////////////////////////
 
+/*************************************************************************************************
+ * void roadmap_main_show_contacts( void )
+ * Requests the system to show the external browser with the requested url
+ *
+ */
+void roadmap_main_open_url( const char* url )
+{
+   /* TODO */
+}
 
 /*************************************************************************************************
  * int LogResult( int aVal, int aVerbose, const char *aStrPrefix)
@@ -210,18 +219,18 @@ static void *roadmap_main_socket_handler( void* aParams )
         // IO data
         roadmap_main_io *data = (roadmap_main_io*) aParams;
         RoadMapIO *io = &data->io;
+        int io_id = data->io_id;
         // Sockets data
-        int fd = roadmap_net_get_fd(io->os.socket);
         fd_set fdSet;
         struct timeval selectReadTO = SOCKET_READ_SELECT_TIMEOUT;
         struct timeval selectWriteTO = SOCKET_WRITE_SELECT_TIMEOUT;
-        int retVal, ioMsg;
+        int fd, retVal, ioMsg;
         const char *handler_dir;
 
         // Empty the set
         FD_ZERO( &fdSet );
 
-        handler_dir = ( data->io_type == _IO_DIR_WRITE ) ? "WRITE" : "READ";
+        handler_dir = ( data->io_type & _IO_DIR_WRITE ) ? "WRITE" : "READ";
 //	roadmap_log( ROADMAP_INFO, "Starting the %s socket handler %d for socket %d IO ID %d", handler_dir, pthread_self(), io->os.socket, data->io_id );
         // Polling loop
         while( !roadmap_main_invalidate_pending_close( data ) &&
@@ -229,6 +238,9 @@ static void *roadmap_main_socket_handler( void* aParams )
                         ( io->subsystem != ROADMAP_IO_INVALID ) &&
                         !APP_SHUTDOWN_FLAG )
         {
+
+                fd = roadmap_net_get_fd(io->os.socket);
+
                 // Add the file descriptor to the set if necessary
                 if ( !FD_ISSET( fd, &fdSet ) )
                 {
@@ -237,7 +249,7 @@ static void *roadmap_main_socket_handler( void* aParams )
                 }
                 //selectTO = (struct timeval) SOCKET_SELECT_TIMEOUT;
                 // Try to read or write from the file descriptor. fd + 1 is the max + 1 of the fd-s set!
-                if ( data->io_type == _IO_DIR_WRITE )
+                if ( data->io_type & _IO_DIR_WRITE )
                 {
                     selectWriteTO = SOCKET_WRITE_SELECT_TIMEOUT;
                     retVal = select( fd+1, NULL, &fdSet, NULL, &selectWriteTO );
@@ -324,6 +336,12 @@ void roadmap_main_set_keyboard(struct RoadMapFactoryKeyMap *bindings, RoadMapKey
    if (mainWindow) {
           mainWindow->setKeyboardCallback(callback);
    }
+}
+
+void roadmap_main_post_resolver_result( int entry_id )
+{
+   int msg = ( MSG_CATEGORY_RESOLVER | ( entry_id & MSG_ID_MASK ) );
+   mainWindow->dispatchMessage( msg );
 }
 
 RoadMapMenu roadmap_main_new_menu () {
@@ -449,7 +467,7 @@ static void roadmap_main_set_handler( roadmap_main_io* aIO )
            case ROADMAP_IO_NET:
        {
             const char *handler_dir;
-                handler_dir = ( aIO->io_type == _IO_DIR_WRITE ) ? "WRITE" : "READ";
+                handler_dir = ( aIO->io_type & _IO_DIR_WRITE ) ? "WRITE" : "READ";
 
                    retVal = pthread_create( &aIO->handler_thread, NULL,
                                                                                 roadmap_main_socket_handler, aIO );
@@ -513,7 +531,7 @@ void roadmap_main_set_input ( RoadMapIO *io, RoadMapInput callback )
  * roadmap_main_set_output()
  * Allocates the entry for the io and creates the handler thread
  */
-void roadmap_main_set_output ( RoadMapIO *io, RoadMapInput callback )
+void roadmap_main_set_output ( RoadMapIO *io, RoadMapInput callback, BOOL is_connect )
 {
 
         int i, retVal;
@@ -532,6 +550,11 @@ void roadmap_main_set_output ( RoadMapIO *io, RoadMapInput callback )
             RoadMapMainIo[i].callback = callback;
             RoadMapMainIo[i].io_id = i;
             RoadMapMainIo[i].io_type = _IO_DIR_WRITE;
+                        if ( is_connect )
+                        {
+                            int type = RoadMapMainIo[i].io_type | _IO_DIR_CONNECT;
+                            RoadMapMainIo[i].io_type = (io_direction_type) type;
+                        }
             RoadMapMainIo[i].start_time = time(NULL);
             break;
         }
@@ -553,9 +576,12 @@ RoadMapIO *roadmap_main_output_timedout(time_t timeout) {
    int i;
 
    for (i = 0; i < ROADMAP_MAX_IO; ++i) {
-      if ( IO_VALID( RoadMapMainIo[i].io_id ) ) {
-         if (RoadMapMainIo[i].start_time &&
-               (timeout > RoadMapMainIo[i].start_time)) {
+      if ( IO_VALID( RoadMapMainIo[i].io_id ) &&
+            ( RoadMapMainIo[i].io_type & _IO_DIR_CONNECT ) )
+      {
+         if ( RoadMapMainIo[i].start_time &&
+               ( timeout > RoadMapMainIo[i].start_time ) )
+         {
             return &RoadMapMainIo[i].io;
          }
       }
@@ -823,6 +849,12 @@ void roadmap_main_message_dispatcher( int aMsg )
 //                int itemId = aMsg & MSG_ID_MASK;
 //                roadmap_androidmenu_handler( itemId );
         }
+        // DNS resolver message
+        if ( aMsg & MSG_CATEGORY_RESOLVER )
+        {
+           int itemId = aMsg & MSG_ID_MASK;
+     //      resolver_handler( itemId );
+        }
 }
 
 
@@ -867,19 +899,22 @@ static void on_auto_hide_dialog_close( int exit_code, void* context )
  */
 static void roadmap_start_event (int event) {
     /* TODO */
-    /*switch (event) {
+    switch (event) {
            case ROADMAP_START_INIT:
            {
         #ifdef FREEMAP_IL
                   editor_main_check_map ();
-        #endif
-                  roadmap_device_events_register( on_device_event, NULL);
-                  roadmap_main_set_bottom_bar( TRUE );
-                  roadmap_androidbrowser_init();
-                  roadmap_androidrecommend_init();
+        #endif      /*
+                    roadmap_device_events_register( on_device_event, NULL);
+                    roadmap_main_set_bottom_bar( TRUE );
+                    roadmap_androidbrowser_init();
+                    roadmap_androidrecommend_init();
+                    roadmap_androideditbox_init();
+                    roadmap_androidspeechtt_init();*/
+                    tts_was_provider_init();
                   break;
            }
-   }*/
+   }
 }
 
 void roadmap_main_show_contacts() {
