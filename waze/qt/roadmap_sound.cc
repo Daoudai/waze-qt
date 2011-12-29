@@ -82,6 +82,10 @@ int roadmap_sound_list_add (RoadMapSoundList list, const char *name) {
    return list->count - 1;
 }
 
+int roadmap_sound_list_add_buf (RoadMapSoundList list, void* buf, size_t size ) {
+    /* TODO */
+    return TRUE;
+}
 
 int roadmap_sound_list_count (const RoadMapSoundList list) {
 
@@ -162,10 +166,13 @@ int roadmap_sound_play_list (const RoadMapSoundList list) {
 
 
 int roadmap_sound_record (const char *file_name, int seconds) {
-
+    /* TODO */
    return 0;
 }
 
+void roadmap_sound_stop_recording (void) {
+    /* TODO */
+}
 
 void roadmap_sound_initialize (void)
 {
