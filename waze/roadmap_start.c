@@ -1020,7 +1020,7 @@ RoadMapAction RoadMapStartActions[MAX_ACTIONS + 1] = {
    {"scoreboard", "My Scoreboard", NULL,  NULL,
       "My Scoreboard", roadmap_scoreboard},
 
-#if defined (IPHONE) || defined (_WIN32) || defined(ANDROID)
+#if defined (IPHONE) || defined (_WIN32) || defined(ANDROID) || defined(QTMOBILITY)
    {"search_ab", "Contacts", "Contacts", NULL,
          "Contacts", roamdmap_search_address_book},
 #endif
