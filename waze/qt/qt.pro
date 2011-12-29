@@ -40,7 +40,8 @@ SOURCES += \
     qt/qt_sound.cc \
     qt/qt_contactslistmodel.cc \
     qt/roadmap_editbox.cc \
-    qt/qt_keyboard_dialog.cpp
+    qt/qt_keyboard_dialog.cpp \
+    qt/tts_db_qtsqlite.cc
 
 HEADERS += \
     qt_progress.h \

@@ -34,6 +34,10 @@ SsdWidget	ssd_text_new(	const char*	name,
 									int			size,
 									int			flags);
 
+#ifdef QTMOBILITY
+#define this me
+#endif
+
 void			ssd_text_set_input_type	( SsdWidget this, roadmap_input_type input_type);
 void			ssd_text_reset_text		( SsdWidget this);
 const char*	ssd_text_get_text			( SsdWidget this);
@@ -49,4 +53,9 @@ void        ssd_text_set_color      ( SsdWidget this, const char* color);
 void        ssd_text_set_lines_space_padding( SsdWidget this, int space );
 void        ssd_text_set_font_normal( SsdWidget this);
 void        ssd_text_set_use_height_factor( SsdWidget this, BOOL use_height_factor );
+
+#ifdef QTMOBILITY
+#undef this
+#endif
+
 #endif // __SSD_WIDGET_TEXT_H_

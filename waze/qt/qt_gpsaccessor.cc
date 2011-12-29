@@ -90,6 +90,11 @@ void QtGpsAccessor::positionUpdated(const QGeoPositionInfo &gpsPos)
         azymuth = ROADMAP_NO_VALID_DATA;
     }
 
+    int accuracy = (int) gpsPos.attribute(QGeoPositionInfo::HorizontalAccuracy);
+    if (accuracy == -1) {
+        accuracy = ROADMAP_NO_VALID_DATA;
+    }
+
     char status = gpsPos.coordinate().isValid()? 'A' : 'V';
 
     QList<RoadMapGpsdNavigation>::iterator i;
@@ -100,7 +105,8 @@ void QtGpsAccessor::positionUpdated(const QGeoPositionInfo &gpsPos)
                 longitude,
                 altitude,
                 speed,
-                azymuth);
+                azymuth,
+                accuracy);
     }
 }
 
