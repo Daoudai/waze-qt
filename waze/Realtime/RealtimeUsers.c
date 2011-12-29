@@ -531,7 +531,7 @@ static BOOL post_comment_keyboard_callback(int         exit_code,
 }
 
 static void disclaimer_cb( int exit_code ){
-#if ((defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE_NATIVE) || defined(ANDROID) || defined(QTMOBILITY)
+#if ((defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)) || defined(IPHONE_NATIVE) || defined(ANDROID) || defined(QTMOBILITY))
     ShowEditbox(roadmap_lang_get("Chit chat"), "", post_comment_keyboard_callback,
           &g_user, EEditBoxEmptyForbidden | EEditBoxAlphaNumeric );
 #else

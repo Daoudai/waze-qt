@@ -38,18 +38,6 @@
 #include "ssd_entry.h"
 #include "roadmap_editbox.h"
 #include "roadmap_screen.h"
-typedef struct
-{
-	const char* 	  mb_text;			/* Message box text for the confirmed entry */
-    const char* 	  kb_title;			/* Title for the extended keyboard */
-    const char* 	  kb_label;			/* Label for the extended keyboard */
-    const char* 	  kb_note;			/* Note for the extended keyboard */
-    CB_OnKeyboardDone kb_post_done_cb; 	/* Post processing callback for the keyboard done */
-    int				  kb_flags;			/* Flags for the extended keyboard */
-
-    const char*     editbox_title;       /* Title for the native edit box*/
-} SsdEntryContext;
-
 
 static void entry_ctx_init( SsdEntryContext* ctx )
 {
