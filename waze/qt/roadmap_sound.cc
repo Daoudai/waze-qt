@@ -61,6 +61,7 @@ typedef struct roadmap_sound_st {
 extern RMapMainWindow* mainWindow;
 
 Playlist *mediaPlayer = NULL;
+Recorder *recorder = NULL;
 
 RoadMapSoundList roadmap_sound_list_create (int flags) {
 
@@ -83,8 +84,36 @@ int roadmap_sound_list_add (RoadMapSoundList list, const char *name) {
 }
 
 int roadmap_sound_list_add_buf (RoadMapSoundList list, void* buf, size_t size ) {
-    /* TODO */
-    return TRUE;
+    char path[512];
+    int file_num = list->count;
+    RoadMapFile file;
+
+    if (list->count == MAX_SOUND_LIST) return SND_LIST_ERR_LIST_FULL;
+
+    list->buf_list[list->count] = buf;
+    list->buf_list_sizes[list->count] = size;
+
+
+    /*
+     * Temporary solution - write the buffer to the file for further playing
+     * AGA
+     */
+    sprintf( path, "%s/tmp/%d", roadmap_path_tts(), file_num );
+    if ( file_num == 0 )
+    {
+       roadmap_path_create( roadmap_path_parent( path, NULL ) );
+    }
+
+    file = roadmap_file_open( path, "w" );
+    roadmap_file_write( file, buf, size );
+    roadmap_file_close( file );
+
+    strncpy_safe( list->list[list->count], path, 512 );
+
+
+    list->count++;
+
+    return list->count - 1;
 }
 
 int roadmap_sound_list_count (const RoadMapSoundList list) {
@@ -135,8 +164,8 @@ int roadmap_sound_play      (RoadMapSound sound) {
 
 
 int roadmap_sound_play_file (const char *file_name) {
-    /* TODO */
-   return 0;
+    /* TODO */ // currently same as android
+   return -1;
 }
 
 
@@ -166,12 +195,12 @@ int roadmap_sound_play_list (const RoadMapSoundList list) {
 
 
 int roadmap_sound_record (const char *file_name, int seconds) {
-    /* TODO */
+    recorder->recordMedia(QUrl::fromLocalFile(file_name), seconds*1000);
    return 0;
 }
 
 void roadmap_sound_stop_recording (void) {
-    /* TODO */
+    recorder->stop();
 }
 
 void roadmap_sound_initialize (void)
@@ -186,12 +215,14 @@ void roadmap_sound_initialize (void)
         roadmap_config_declare("user", &RoadMapConfigVolControl, SND_DEFAULT_VOLUME_LVL, NULL );
 
         mediaPlayer = new Playlist(mainWindow);
+        recorder = new Recorder(mainWindow);
 
         roadmap_sound_set_volume(roadmap_config_get_integer(&RoadMapConfigVolControl));
 }
 
 void roadmap_sound_shutdown   (void) {
     delete mediaPlayer;
+    delete recorder;
 }
 
 /***********************************************************
