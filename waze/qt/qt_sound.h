@@ -3,9 +3,13 @@
 
 #include <QObject>
 #include <QMediaPlayer>
+#include <QMediaContent>
 #include <QUrl>
 #include <QList>
 #include <QMutex>
+#include <QAudioCaptureSource>
+#include <QMediaRecorder>
+
 
 class Playlist : public QObject
 {
@@ -14,7 +18,7 @@ public:
     Playlist(QObject* parent = 0);
     virtual ~Playlist();
 
-    void playMedia(QUrl url);
+    void playMedia(QMediaContent mediaContent);
     void setVolume(int volume);
 
 private slots:
@@ -26,7 +30,24 @@ protected:
 private:
     QMediaPlayer _player;
     QMutex _playlistMutex;
-    QList<QUrl> _playlist;
+    QList<QMediaContent> _playlist;
+};
+
+class Recorder : public QObject
+{
+    Q_OBJECT
+public:
+    Recorder(QObject* parent = 0);
+    virtual ~Recorder();
+
+    void recordMedia(QUrl mediaContent, int msecs);
+
+public slots:
+    void stop();
+
+private:
+    QAudioCaptureSource* _source;
+    QMediaRecorder* _recorder;
 };
 
 #endif // QT_SOUND_H
