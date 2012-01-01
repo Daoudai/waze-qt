@@ -55,7 +55,7 @@
 #include "roadmap_main.h"
 #include "roadmap_ssl.h"
 
-#if defined(ANDROID) || defined(GTK)
+#if defined(ANDROID) || defined(GTK) || QTMOBILITY
 #define __SSL__
 #endif
 
