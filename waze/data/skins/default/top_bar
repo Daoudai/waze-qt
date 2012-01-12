@@ -121,14 +121,14 @@ B -4 -18 50 28
 
 N Seperator
 I Topbar_Sep
-P -240 10
+P -250 10
 
 N gps_reception
 I TS_top_satellite_off
 I TS_top_satellite_off
 I TS_top_satellite_poor
 I TS_top_satellite_on
-P -230 7
+P -240 7
 S GPS_reception
 A gps_net_stat
 B -20 -7 50 51
@@ -136,14 +136,20 @@ B -20 -7 50 51
 N on_line
 I TS_top_not_connected
 I TS_top_connected
-P -180 9
+P -200 9
 S real_time_state
 A gps_net_stat
 B -4 -9 50 49
 
 N Seperator
 I Topbar_Sep
-P -130 10
+P -160 10
+
+N MyWaze
+P -160 0
+I general_settings
+A mywaze
+B -4 -18 64 50
 
 N Settings
 P -100 14
