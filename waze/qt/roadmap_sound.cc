@@ -178,8 +178,23 @@ int roadmap_sound_play_list (const RoadMapSoundList list) {
 
         for (int i = 0; i < list->count; i++) {
             QString full_path(path);
-            full_path.append(list->list[i]).append(".mp3");
-            mediaPlayer->playMedia(QUrl::fromLocalFile(full_path));
+            QString sound_path;
+            if (QFile::exists(list->list[i]))
+            {
+                sound_path = QString(list->list[i]);
+            }
+            else if (QFile::exists(full_path.append(list->list[i]).append(".mp3")))
+            {
+                sound_path = QString(full_path);
+                roadmap_log(ROADMAP_WARNING, "No path provided assuming as <%s>", full_path.toLocal8Bit());
+            }
+            else
+            {
+               roadmap_log(ROADMAP_ERROR, "Sound file not exist <%s>", list->list[i]);
+               continue;
+            }
+
+            mediaPlayer->playMedia(QUrl::fromLocalFile(sound_path));
         }
     }
     else
