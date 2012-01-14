@@ -651,7 +651,7 @@ static QSqlDatabase* _get_db( void )
       return sgSQLiteDb;
    }
 
-   sgSQLiteDb = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
+   sgSQLiteDb = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE", "tts"));
    sgSQLiteDb->setDatabaseName(full_path);
 
    check_sqlite_error( "opening database", sgSQLiteDb->open() );

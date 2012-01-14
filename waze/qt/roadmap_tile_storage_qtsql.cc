@@ -177,7 +177,7 @@ static QSqlDatabase* get_db( int fips )
 		return sgSQLiteDb;
 	}
 
-        sgSQLiteDb = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
+    sgSQLiteDb = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE", "tiles"));
         sgSQLiteDb->setDatabaseName(full_path);
 
         check_sqlite_error( "opening database", sgSQLiteDb->open());
