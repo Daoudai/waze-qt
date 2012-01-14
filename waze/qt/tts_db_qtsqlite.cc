@@ -595,19 +595,21 @@ void tts_db_sqlite_destroy( void )
 static BOOL _check_sqlite_error_line( const char* errstr, int code, int line )
 {
 
-   if ( code )
+   if ( !code )
    {
        QByteArray errorBA;
        const char* errmsg = "";
+       int errorCode = 0;
        if (sgSQLiteDb)
        {
            errorBA = sgSQLiteDb->lastError().text().toLocal8Bit();
            errmsg = errorBA.data();
+           errorCode = sgSQLiteDb->lastError().number();
        }
 
       errstr = errstr ? errstr : "";
       roadmap_log( ROADMAP_MESSAGE_ERROR, __FILE__, line, "SQLite error in %s executing sqlite statement. Error : %d ( %s )",
-            errstr, code, errmsg );
+            errstr, errorCode, errmsg );
       return FALSE;
    }
    return TRUE;
