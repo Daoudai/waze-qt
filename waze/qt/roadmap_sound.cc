@@ -186,7 +186,7 @@ int roadmap_sound_play_list (const RoadMapSoundList list) {
             else if (QFile::exists(full_path.append(list->list[i]).append(".mp3")))
             {
                 sound_path = QString(full_path);
-                roadmap_log(ROADMAP_WARNING, "No path provided assuming as <%s>", full_path.toLocal8Bit());
+                roadmap_log(ROADMAP_WARNING, "No path provided assuming as <%s>", full_path.toLocal8Bit().data());
             }
             else
             {
