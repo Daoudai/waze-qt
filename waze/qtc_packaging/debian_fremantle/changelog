@@ -1,0 +1,26 @@
+waze (0.0.4) unstable; urgency=low
+  * Native keyboard support
+  * Fix speed reading
+  * Fix map download (hopefully)
+
+ -- Assaf Paz <damagedspline@gmail.com>  Mon, 19 Dec 2011 20:37:49 +0200
+
+waze (0.0.3) unstable; urgency=low
+  * Navigate to a contact's saved address
+  * Volume control (in general settings)
+  * Disable screensaver (in general settings)
+  * Fixed speed reading
+
+ -- Assaf Paz <damagedspline@gmail.com>  Sat, 03 Dec 2011 20:07:17 +0200
+
+waze (0.0.2) unstable; urgency=low
+  * Fix the flickering
+  * Make the media files (audio/images) not show on the gallery/mediaplayer
+
+ -- Assaf Paz <damagedspline@gmail.com>  Wed, 23 Nov 2011 23:19:38 +0200
+
+waze (0.0.1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Assaf Paz <damagedspline@gmail.com>  Thu, 27 Oct 2011 20:03:37 +0200
