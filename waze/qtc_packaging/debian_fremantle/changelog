@@ -1,3 +1,25 @@
+waze (0.0.5) unstable; urgency=low
+  * Upgrade the base code to Waze v2.4.0 which add a lot of features, like: (the next are taken from the Waze official changelog - with small comments where related to this Qt port)
+  * ---------------------------------------------------------------
+  * Complete voice guidance using natural text-to-speech capabilities (English USA and Canada only. More languages coming soon!)
+  * Road shields and improved map graphics display (Qt port need fixing here)
+  * Animated display of top contributing wazers
+  * Automatic centering on map after panning
+  * Night mode settings saved if not in auto night mode
+  * Alert popup screen modification
+  * Shuffle 'start driving' prompt (English only)
+  * Alternative routes button in navigation menu and new display of routes selection on map
+  * New ETA update messages
+  * Improved routing request in case of poor network connectivity (Qt port need fixing here)
+  * Async logs upload
+  * Updated alerts list with number of comments and number of thumbs up
+  * My waze menu (Qt port will modify this in future versions)
+  * Vocal navigation instructions fix (for non English languages)
+  * UTF Long text trimming
+  * Various crash fixes
+
+ -- Assaf Paz <damagedspline@gmail.com>  Mon, 16 Jan 2012 19:02:05 +0200
+
 waze (0.0.4) unstable; urgency=low
   * Native keyboard support
   * Fix speed reading
