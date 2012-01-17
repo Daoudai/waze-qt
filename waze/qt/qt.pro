@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql declarative
+QT       += core gui sql declarative network
 
 TARGET = wazeqt
 TEMPLATE = lib
