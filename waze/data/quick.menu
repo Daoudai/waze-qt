@@ -16,6 +16,7 @@ mywaze.scoreboard
 mywaze.groups
 mywaze.login_details
 mywaze.get_social
+mywaze.foursquare_checkin
 mywaze.my_coupons
 mywaze.recommend_waze
 recommend_waze
