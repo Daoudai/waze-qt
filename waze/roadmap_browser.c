@@ -235,7 +235,7 @@ void roadmap_browser_show (const char* title, const char* url, RoadMapCallback o
     * Set the attributes
     */
 
-#if defined (ANDROID) || defined (IPHONE)
+#if defined (ANDROID) || defined (IPHONE) || defined (QTMOBILITY)
    RMBrowserAttributes attrs;
    roadmap_browser_reset_attributes( &attrs );
    attrs.on_close_cb = on_close_cb;
@@ -281,7 +281,7 @@ void roadmap_browser_show_extended ( const char* url, int browser_flags, const R
    /*
     * Show the view
     */
-#if defined (ANDROID) || defined (IPHONE)
+#if defined (ANDROID) || defined (IPHONE) || defined (QTMOBILITY)
 #ifdef SSD
    roadmap_browser_show_ssd( url, browser_flags );
 #endif
@@ -312,7 +312,7 @@ BOOL roadmap_browser_url_handler( const char* url )
 
    roadmap_log( ROADMAP_DEBUG, "Processing url: %s", url );
 
-#if defined(IPHONE) || defined(ANDROID)
+#if defined(IPHONE) || defined(ANDROID) || defined(QTMOBILITY)
    if ( strstr( url, WAZE_EXTERN_URL_PREFIX ) == url )
    {
       const char* external_url = url + strlen( WAZE_EXTERN_URL_PREFIX );
