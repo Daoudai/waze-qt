@@ -543,7 +543,11 @@ static int Realtime_DecodeRefreshRateMilliseconds( RoadMapConfigDescriptor *pDes
    //   Calculate refresh rate:
    szRefreshRate = roadmap_config_get( pDesc);
    if( szRefreshRate && (*szRefreshRate))
+#ifdef LOCALE_SAFE
+       fRefreshRate = (float) atof_locale_safe(szRefreshRate);
+#else
       fRefreshRate = (float) atof(szRefreshRate);
+#endif
 
    //   Fix refresh rate:
    if( !fRefreshRate)

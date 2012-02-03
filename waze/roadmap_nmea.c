@@ -166,7 +166,11 @@ static int roadmap_nmea_decode_numeric (char *value, int unit) {
    int result;
 
    if (strchr (value, '.') != NULL) {
+#ifdef LOCALE_SAFE
+      result = (int) (atof_locale_safe(value) * unit);
+#else
       result = (int) (atof(value) * unit);
+#endif
    } else {
       result = atoi (value) * unit;
    }
@@ -347,9 +351,15 @@ static int roadmap_nmea_gsa (int argc, char *argv[]) {
       RoadMapNmeaReceived.gsa.satellite[i++] = 0;
    }
 
+#ifdef LOCALE_SAFE
+   RoadMapNmeaReceived.gsa.dilution_position   = (float) atof_locale_safe(argv[++index]);
+   RoadMapNmeaReceived.gsa.dilution_horizontal = (float) atof_locale_safe(argv[++index]);
+   RoadMapNmeaReceived.gsa.dilution_vertical   = (float) atof_locale_safe(argv[++index]);
+#else
    RoadMapNmeaReceived.gsa.dilution_position   = (float) atof(argv[++index]);
    RoadMapNmeaReceived.gsa.dilution_horizontal = (float) atof(argv[++index]);
    RoadMapNmeaReceived.gsa.dilution_vertical   = (float) atof(argv[++index]);
+#endif
 
    return 1;
 }

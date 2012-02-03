@@ -317,5 +317,9 @@ FILE * roadmap_log_get_log_file();
 #define  is_parser_error(_error_)      is_module_error(parser,_error_)
 #define  is_realtime_error(_error_)    is_module_error(realtime,_error_)
 
+#ifdef LOCALE_SAFE
+double atof_locale_safe(const char* str);
+#endif
+
 #endif // INCLUDE__ROADMAP__H
 
