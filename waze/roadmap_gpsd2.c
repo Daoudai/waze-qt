@@ -55,7 +55,11 @@ static double roadmap_gpsd2_decode_float (const char *input) {
 
    if (input[0] == '?') return 0.0;
 
+#ifdef LOCALE_SAFE
+   return atof_locale_safe(input);
+#else
    return atof(input);
+#endif
 }
 
 

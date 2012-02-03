@@ -242,7 +242,11 @@ static void roadmap_option_set_square (const char *value) {
 
 static void roadmap_option_set_fastforward (const char *value) {
 	
-	roadmap_option_fast_forward_factor = atof(value);
+#ifdef LOCALE_SAFE
+    roadmap_option_fast_forward_factor = atof_locale_safe(value);
+#else
+    roadmap_option_fast_forward_factor = atof(value);
+#endif
 	
 }
 

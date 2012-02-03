@@ -36,6 +36,7 @@
 // Crash handling
 #include <signal.h>
 
+#include <sstream>
 #include <QApplication>
 #include <QMutex>
 #include <QWaitCondition>
@@ -915,6 +916,16 @@ static void roadmap_start_event (int event) {
                   break;
            }
    }
+}
+
+double atof_locale_safe(const char *str) {
+    double result;
+    std::istringstream s(str);
+    std::locale l("C");
+    s.imbue(l);
+    s >> result;
+    return result;
+
 }
 
 void roadmap_main_show_contacts() {

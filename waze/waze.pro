@@ -624,7 +624,8 @@ HEADERS += \
     navigate/navigate_tts_defs.h \
     navigate/navigate_tts.h \
     roadmap_base64.h \
-    navigate/navigate_route_events.h
+    navigate/navigate_route_events.h \
+    roadmap_ssl.h
 
 OTHER_FILES += \
     qtc_packaging/debian_fremantle/README \

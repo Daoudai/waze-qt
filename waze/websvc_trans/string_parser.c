@@ -208,6 +208,8 @@ const char*   ReadDoubleFromString(
       
 #ifdef __SYMBIAN32__      
    (*pValue) = m_atof(sDouble);
+#elif defined (LOCALE_SAFE)
+   (*pValue) = atof_locale_safe(sDouble);
 #else
   (*pValue) = atof(sDouble);
 #endif   

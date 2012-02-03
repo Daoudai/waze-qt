@@ -563,8 +563,13 @@ static void on_search(void)
                     latitude_ascii++;
 
                  if ((isdigit(txt_buffer[0]) || txt_buffer[0] == '-') && (isdigit(latitude_ascii[0]) || latitude_ascii[0] == '-')){
+#ifdef LOCALE_SAFE
+                    longtitude= atof_locale_safe(latitude_ascii);
+                    latitude= atof_locale_safe(lon_ascii);
+#else
                     longtitude= atof(latitude_ascii);
                     latitude= atof(lon_ascii);
+#endif
                     position.longitude = longtitude*1000000;
                     position.latitude  = latitude*1000000;
                     roadmap_trip_set_point ("Selection", &position);
@@ -597,8 +602,13 @@ static void on_search(void)
             latitude_ascii++;
 
          if ((isdigit(txt_buffer[0]) || txt_buffer[0] == '-') && (isdigit(latitude_ascii[0]) || latitude_ascii[0] == '-')){
+#ifdef LOCALE_SAFE
+            longtitude= atof_locale_safe(lon_ascii);
+            latitude= atof_locale_safe(latitude_ascii);
+#else
             longtitude= atof(lon_ascii);
             latitude= atof(latitude_ascii);
+#endif
             position.longitude = longtitude*1000000;
             position.latitude  = latitude*1000000;
 //            if (!(position.longitude==0 && position.latitude==0)){

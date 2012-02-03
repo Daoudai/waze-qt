@@ -123,8 +123,13 @@ static void decode (char *txt) {
             lon = lat + strlen(lat) + 1;
             if (lon) {
                roadmap_log(ROADMAP_DEBUG, "decode: valid lon %s", lon);
+#ifdef LOCALE_SAFE
+               gs_Query.map_center.latitude = floor(atof_locale_safe(lat) * 1000000);
+               gs_Query.map_center.longitude = floor(atof_locale_safe(lon) * 1000000);
+#else
                gs_Query.map_center.latitude = floor(atof(lat) * 1000000);
                gs_Query.map_center.longitude = floor(atof(lon) * 1000000);
+#endif
             }
          }
       }
