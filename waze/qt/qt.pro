@@ -42,7 +42,8 @@ SOURCES += \
     qt/roadmap_editbox.cc \
     qt/qt_keyboard_dialog.cpp \
     qt/tts_db_qtsqlite.cc \
-    qt/roadmap_qtbrowser.cc
+    qt/roadmap_qtbrowser.cc \
+    qt/qt_webview.cc
 
 HEADERS += \
     qt_progress.h \
@@ -55,7 +56,8 @@ HEADERS += \
     qt/roadmap_qtmain.h \
     qt/qt_contactslistmodel.h \
     qt/qt_keyboard_dialog.h \
-    qt/roadmap_qtbrowser.h
+    qt/roadmap_qtbrowser.h \
+    qt/qt_webview.h
 
 
 

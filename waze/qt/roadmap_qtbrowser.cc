@@ -25,6 +25,7 @@
 #include "qt_main.h"
 #include <QWebView>
 #include <QWebFrame>
+#include "qt_webview.h"
 
 extern "C" {
 #include "roadmap_browser.h"
@@ -33,14 +34,14 @@ extern "C" {
 
 extern RMapMainWindow* mainWindow;
 
-static QWebView *webview = NULL;
+static WazeWebView *webview = NULL;
 
 static void roadmap_qtbrowser_launcher( RMBrowserContext* context );
 static void roadmap_qtbrowser_close();
 static void _resize( const RoadMapGuiRect* rect );
 
 /***********************************************************/
-/*  Name        : void roadmap_androidbrowser_init()
+/*  Name        : void roadmap_qtbrowser_init()
  *  Purpose     : Initializes the browser
  *  Params      : void
  */
@@ -49,11 +50,9 @@ void roadmap_qtbrowser_init( void )
    /*
     * Launcher and closer registration.
     */
-    webview = new QWebView(mainWindow);
-
-   roadmap_browser_register_launcher( (RMBrowserLauncherCb) roadmap_qtbrowser_launcher );
-   roadmap_browser_register_close( roadmap_qtbrowser_close );
-   roadmap_browser_register_resize( _resize );
+    roadmap_browser_register_launcher( (RMBrowserLauncherCb) roadmap_qtbrowser_launcher );
+    roadmap_browser_register_close( roadmap_qtbrowser_close );
+    roadmap_browser_register_resize( _resize );
 }
 
 /*************************************************************************************************
@@ -63,27 +62,21 @@ void roadmap_qtbrowser_init( void )
  */
 static void roadmap_qtbrowser_launcher( RMBrowserContext* context )
 {
+    if (webview == NULL)
+    {
+        webview = new WazeWebView(mainWindow);
+        webview->hide();
+    }
+
     _resize(&(context->rect));
 
-    webview->load(QUrl(QString::fromAscii(context->url)));
-
-    bool noScrollbars = context->flags & BROWSER_FLAG_WINDOW_TYPE_NO_SCROLL;
-    webview->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, noScrollbars? Qt::ScrollBarAlwaysOff : Qt::ScrollBarAsNeeded);
-    webview->page()->mainFrame()->setScrollBarPolicy(Qt::Vertical, noScrollbars? Qt::ScrollBarAlwaysOff : Qt::ScrollBarAsNeeded);
-
-    if (context->flags & BROWSER_FLAG_WINDOW_TYPE_TRANSPARENT)
-    {
-        QPalette palette = webview->palette();
-        palette.setBrush(QPalette::Base, Qt::transparent);
-        webview->page()->setPalette(palette);
-        webview->setAttribute(Qt::WA_OpaquePaintEvent, false);
-    }
+    webview->show(QUrl(QString::fromAscii(context->url)), context->flags);
+    webview->setFocus();
 }
 
 void roadmap_qtbrowser_close()
 {
     webview->hide();
-    webview->setHtml(QString());
 }
 
 /*************************************************************************************************
@@ -94,7 +87,6 @@ void roadmap_qtbrowser_close()
 void roadmap_groups_browser_btn_home_cb( void )
 {
     // TODO
-    //webview->page()->currentFrame()->evaluateJavaScript("home();");
 }
 /*************************************************************************************************
  * void roadmap_groups_browser_btn_back_cb( void )
@@ -103,7 +95,7 @@ void roadmap_groups_browser_btn_home_cb( void )
  */
 void roadmap_groups_browser_btn_back_cb( void )
 {
-   webview->back();
+   // TODO
 }
 /*************************************************************************************************
  * void _resize
@@ -112,6 +104,5 @@ void roadmap_groups_browser_btn_back_cb( void )
  */
 static void _resize( const RoadMapGuiRect* rect )
 {
-   //webview->setGeometry(rect->minx, rect->miny, rect->maxx - rect->minx, rect->maxy - rect->miny);
-   webview->setGeometry(0, 0, mainWindow->width(), mainWindow->height());
+   webview->setGeometry(rect->minx, rect->miny, rect->maxx - rect->minx, rect->maxy - rect->miny);
 }
