@@ -41,6 +41,7 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include "qt_main.h"
+#include "roadmap_qtbrowser.h"
 
 extern "C" {
 #include "roadmap.h"
@@ -908,10 +909,10 @@ static void roadmap_start_event (int event) {
         #endif      /*
                     roadmap_device_events_register( on_device_event, NULL);
                     roadmap_main_set_bottom_bar( TRUE );
-                    roadmap_androidbrowser_init();
                     roadmap_androidrecommend_init();
                     roadmap_androideditbox_init();
                     roadmap_androidspeechtt_init();*/
+                    roadmap_qtbrowser_init();
                     tts_was_provider_init();
                   break;
            }
