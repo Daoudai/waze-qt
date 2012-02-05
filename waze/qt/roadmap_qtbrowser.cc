@@ -71,7 +71,15 @@ static void roadmap_qtbrowser_launcher( RMBrowserContext* context )
 
     _resize(&(context->rect));
 
-    webview->show(QUrl(QString::fromAscii(context->url)), context->flags);
+    QString url = QString::fromAscii(context->url);
+
+    if ( url.indexOf("groups?") == -1)
+    {
+        // only groups require deviceid
+        url.remove("&deviceid=90");
+    }
+
+    webview->show(QUrl(url), context->flags);
     webview->setFocus();
 }
 
