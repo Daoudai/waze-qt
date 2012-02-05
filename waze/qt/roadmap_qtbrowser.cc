@@ -65,6 +65,7 @@ static void roadmap_qtbrowser_launcher( RMBrowserContext* context )
     if (webview == NULL)
     {
         webview = new WazeWebView(mainWindow);
+        webview->setResizeMode(QDeclarativeView::SizeRootObjectToView);
         webview->hide();
     }
 
@@ -104,5 +105,5 @@ void roadmap_groups_browser_btn_back_cb( void )
  */
 static void _resize( const RoadMapGuiRect* rect )
 {
-   webview->setGeometry(rect->minx, rect->miny, rect->maxx - rect->minx, rect->maxy - rect->miny);
+    webview->setGeometry(rect->minx, rect->miny, rect->maxx - rect->minx, rect->maxy - rect->miny);
 }
