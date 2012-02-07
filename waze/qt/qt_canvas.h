@@ -133,7 +133,7 @@ protected:
 private:
     bool gestureEvent(QGestureEvent *event);
     void pinchTriggered(QPinchGesture*);
-    int accumolatedZoom;
+    bool ignoreClicks;
 };
 
 extern RMapCanvas *roadMapCanvas;

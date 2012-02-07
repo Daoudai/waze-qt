@@ -4239,6 +4239,12 @@ void roadmap_screen_decrease_horizon (void) {
    roadmap_screen_repaint ();
 }
 
+void roadmap_screen_set_horizon (int horizon) {
+
+   RoadMapScreen3dHorizon = horizon;
+}
+
+
 #define FRACMOVE 15
 
 void roadmap_screen_move (int dx, int dy) {
