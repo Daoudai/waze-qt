@@ -70,6 +70,7 @@ void roadmap_screen_set_orientation_fixed (void);
 void roadmap_screen_set_orientation_dynamic (void);
 void roadmap_screen_increase_horizon (void);
 void roadmap_screen_decrease_horizon (void);
+void roadmap_screen_set_horizon (int horizon);
 int roadmap_screen_get_orientation_mode (void);
 int roadmap_screen_get_view_mode (void);
 int roadmap_screen_get_nonogl_view_mode (void);

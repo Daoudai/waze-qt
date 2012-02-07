@@ -26,8 +26,6 @@
  *   See qt_canvas.h
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <QPolygon>
 #include <QPainter>
 #include <QMouseEvent>
@@ -38,7 +36,10 @@
 #include <QPinchGesture>
 
 extern "C" {
+#include "roadmap_view.h"
+#include "roadmap_layer.h"
 #include "roadmap_screen.h"
+#include "roadmap_math.h"
 #include "ssd/ssd_dialog.h"
 }
 
@@ -53,6 +54,7 @@ RoadMapCanvasConfigureHandler chandler = 0;
 // Implementation of RMapCanvas class
 RMapCanvas::RMapCanvas(QWidget* parent):QWidget(parent) {
    pixmap = 0;
+   ignoreClicks = false;
    currentPen = 0;
    roadMapCanvas = this;
    basePen = createPen("stubPen");
@@ -105,7 +107,12 @@ void RMapCanvas::pinchTriggered(QPinchGesture *gesture)
  {
     if (gesture->state() == Qt::GestureStarted)
     {
-        accumolatedZoom = 0;
+        ignoreClicks = true;
+    }
+
+    if (gesture->state() == Qt::GestureFinished)
+    {
+        ignoreClicks = false;
     }
 
     if (gesture->state() == Qt::GestureUpdated)
@@ -117,17 +124,23 @@ void RMapCanvas::pinchTriggered(QPinchGesture *gesture)
 
         if (gesture->changeFlags() & QPinchGesture::ScaleFactorChanged)
         {
-            qreal scale = gesture->scaleFactor();
+            enum projection_modes mode = PROJECTION_MODE_NONE;
+            int height = roadmap_screen_height();
+            qreal factor = gesture->scaleFactor();
+            factor -= 1;
+            int scale = roadmap_math_get_scale((long) (height * (1 - factor)));
 
-            if (1 < scale && scale < 1.01 && accumolatedZoom <= 2)
-            {
-                roadmap_screen_zoom_in();
-                accumolatedZoom++;
-            }
-            else if (0.99 < scale && scale < 1 && -2 <= accumolatedZoom)
-            {
-                roadmap_screen_zoom_out();
-                accumolatedZoom--;
+            roadmap_view_auto_zoom_suspend();
+            if (roadmap_math_set_scale(scale, height)) {
+                int horizon3D = 0;
+                if (!roadmap_screen_is_hd_screen() && ( roadmap_screen_get_view_mode() == VIEW_MODE_3D ) ) {
+                    horizon3D = -100;
+                    roadmap_screen_set_horizon(-100);
+                   mode = PROJECTION_MODE_3D_NON_OGL;
+                }
+                roadmap_screen_set_horizon(horizon3D);
+                roadmap_math_set_horizon (horizon3D, mode);
+                roadmap_layer_adjust ();
             }
         }
     }
@@ -459,7 +472,7 @@ void RMapCanvas::mousePressEvent(QMouseEvent* ev) {
    pt.x = ev->x();
    pt.y = ev->y();
 
-   if (buttonPressedHandler != 0) {
+   if (buttonPressedHandler != 0 && !ignoreClicks) {
       buttonPressedHandler(&pt);
    }
 }
