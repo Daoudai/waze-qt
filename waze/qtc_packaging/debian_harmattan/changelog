@@ -1,3 +1,14 @@
+waze (0.0.6) unstable; urgency=low
+  * Fix mislocation issue
+  * Fix multitouch zoom on N9
+  * Add to the Maemo/Meego repositories
+  * Browser integration
+  * Groups support
+  * Coupons support
+  * Business information support
+
+ -- Assaf Paz <damagedspline@gmail.com>  Wed, 08 Feb 2012 20:08:54 +0200
+
 waze (0.0.5) unstable; urgency=low
   * Upgrade the base code to Waze v2.4.0 which add a lot of features, like: (the next are taken from the Waze official changelog - with small comments where related to this Qt port)
   * ---------------------------------------------------------------
