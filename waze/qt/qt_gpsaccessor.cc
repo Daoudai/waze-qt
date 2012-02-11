@@ -49,6 +49,8 @@ QtGpsAccessor::QtGpsAccessor(QObject *parent) :
      // QGeoPositionInfoSource
      m_location = QGeoPositionInfoSource::createDefaultSource(this);
 
+     if (m_location == NULL) return; //GPS not supported not machine
+
      m_location->setUpdateInterval(1000);
      m_location->startUpdates();
 
@@ -58,6 +60,8 @@ QtGpsAccessor::QtGpsAccessor(QObject *parent) :
 }
 
 QtGpsAccessor::~QtGpsAccessor() {
+    if (m_location == NULL) return; //GPS not supported not machine
+
     m_location->stopUpdates();
     delete m_location;
 }
@@ -115,5 +119,10 @@ void QtGpsAccessor::registerChangeListener(RoadMapGpsdNavigation callback) {
 }
 
 QGeoPositionInfo QtGpsAccessor::lastKnownPosition() {
+    if (m_location == NULL) //GPS not supported not machine
+    {
+        return QGeoPositionInfo();
+    }
+
     return m_location->lastKnownPosition();
 }
