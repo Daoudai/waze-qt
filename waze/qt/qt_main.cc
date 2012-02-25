@@ -31,7 +31,6 @@
  */
 #include <signal.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <unistd.h>
 #include <QKeyEvent>
 #include <QSocketNotifier>
@@ -53,11 +52,22 @@ extern "C" {
 #include "roadmap_sound.h"
 #endif
 
+#ifdef __WIN32
+#include <windows.h>
+#include <signal.h>
+#endif
 }
 
 extern "C" BOOL single_search_auto_search( const char* address);
 
-static int signalFd[2];
+QObservableInt::QObservableInt() {
+
+}
+
+void QObservableInt::setValue(int value) {
+    _value = value;
+    emit valueChanged(value);
+}
 
 // Implementation of RMapCallback class
 RMapCallback::RMapCallback(RoadMapCallback cb) {
@@ -93,13 +103,8 @@ RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) : QMainWindow(par
    setCentralWidget(canvas);
    canvas->setFocus();
    //setToolBarsMovable(FALSE);
-   toolBar = 0;
 
-   // setup the signal handling
-   if (::socketpair(AF_UNIX, SOCK_STREAM, 0, signalFd))
-        qFatal("Couldn't create Signal socketpair");
-   snSignal = new QSocketNotifier(signalFd[1], QSocketNotifier::Read, this);
-   connect(snSignal, SIGNAL(activated(int)), this, SLOT(handleSignal()));
+   connect(&signalFd, SIGNAL(intValueChanged(int)), this, SLOT(handleSignal(int)));
    connect(this, SIGNAL(recievedMessage(int)), this, SLOT(onRecievedMessage(int)));
 
    QContactManager contactManager;
@@ -391,24 +396,22 @@ void RMapMainWindow::closeEvent(QCloseEvent* ev) {
 
 void RMapMainWindow::signalHandler(int sig)
 {
-  write(signalFd[0], &sig, sizeof(sig));
+    mainWindow->signalFd.setValue(sig);
 }
 
-void RMapMainWindow::handleSignal()
+void RMapMainWindow::handleSignal(int sig)
 {
-  snSignal->setEnabled(false);
-  int tmp;
-  read(signalFd[1], &tmp, sizeof(tmp));
   QString action;
-  switch (tmp) {
+  switch (sig) {
     case SIGTERM: action="SIGTERM"; break;
     case SIGINT : action="SIGINT"; break;
+#ifndef __WIN32
     case SIGHUP : action="SIGHUP"; break;
     case SIGQUIT: action="SIGQUIT"; break;
+#endif
   }
   roadmap_log(ROADMAP_WARNING,"received signal %s",action.toUtf8().constData());
   roadmap_main_exit();
-  snSignal->setEnabled(true);
 }
 
 void RMapMainWindow::setApplicationPath(QString path) {

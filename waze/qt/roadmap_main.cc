@@ -30,7 +30,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <sys/time.h>
 
 // Crash handling
@@ -53,7 +52,6 @@ extern "C" {
 #include "editor/editor_main.h"
 #include "roadmap_qtmain.h"
 #include "tts_was_provider.h"
-#include "unix/resolver.h"
 }
 
 int USING_PHONE_KEYPAD = 0;
@@ -74,7 +72,7 @@ typedef struct roadmap_main_io {
    RoadMapInput callback;
 
    int io_id;						// If is not valid < 0
-   pthread_t handler_thread;
+//   pthread_t handler_thread;
    QMutex mutex;			// Mutex for the condition variable
    QWaitCondition cond;				// Condition variable for the thread
    io_direction_type io_type;
@@ -94,7 +92,6 @@ const struct timeval SOCKET_WRITE_SELECT_TIMEOUT = {30, 0}; // {sec, u sec}
 static struct roadmap_main_io RoadMapMainIo[ROADMAP_MAX_IO];
 
 static void roadmap_main_reset_IO( roadmap_main_io *data );
-static int roadmap_main_handler_post_wait( int ioMsg, roadmap_main_io *aIO );
 static void roadmap_start_event (int event);
 static BOOL roadmap_main_is_pending_close( roadmap_main_io *data );
 
@@ -128,26 +125,6 @@ void roadmap_main_open_url( const char* url )
 {
    /* TODO */
 }
-
-/*************************************************************************************************
- * int LogResult( int aVal, int aVerbose, const char *aStrPrefix)
- * Logs the system api call error if occurred
- * aVal - the tested call return value
- * aVerbose - the log severity
- * level, source and line are hidden in the ROADMAP_DEBUG, INFO etc macros
- */
-int LogResult( int aVal, const char *aStrPrefix, int level, char *source, int line )
-{
-        if ( aVal == 0 )
-                return 0;
-        if ( aVal == -1 )
-                aVal = errno;
-
-        roadmap_log( level, source, line, "%s (Thread %d). Error %d: %s", aStrPrefix, pthread_self(), aVal, strerror( aVal ) );
-
-        return aVal;
-}
-
 
 /*************************************************************************************************
  * roadmap_main_handler_post_wait( int ioMsg, roadmap_main_io *aIO )
@@ -207,105 +184,6 @@ static BOOL roadmap_main_is_pending_close( roadmap_main_io *data )
     data->mutex.unlock();
 
     return res;
-}
-
-/*************************************************************************************************
- * roadmap_main_socket_handler()
- * Socket handler thread body. Polling on the file descriptor.
- * ( Blocks with timeout )
- * Posts message to the main thread in case of file descriptor change
- * Waits on the condition variable before continue polling
- */
-static void *roadmap_main_socket_handler( void* aParams )
-{
-        // IO data
-        roadmap_main_io *data = (roadmap_main_io*) aParams;
-        RoadMapIO *io = &data->io;
-        int io_id = data->io_id;
-        // Sockets data
-        fd_set fdSet;
-        struct timeval selectReadTO = SOCKET_READ_SELECT_TIMEOUT;
-        struct timeval selectWriteTO = SOCKET_WRITE_SELECT_TIMEOUT;
-        int fd, retVal, ioMsg;
-        const char *handler_dir;
-
-        // Empty the set
-        FD_ZERO( &fdSet );
-
-        handler_dir = ( data->io_type & _IO_DIR_WRITE ) ? "WRITE" : "READ";
-//	roadmap_log( ROADMAP_INFO, "Starting the %s socket handler %d for socket %d IO ID %d", handler_dir, pthread_self(), io->os.socket, data->io_id );
-        // Polling loop
-        while( !roadmap_main_invalidate_pending_close( data ) &&
-                        IO_VALID( data->io_id ) &&
-                        ( io->subsystem != ROADMAP_IO_INVALID ) &&
-                        !APP_SHUTDOWN_FLAG )
-        {
-
-                fd = roadmap_net_get_fd(io->os.socket);
-
-                // Add the file descriptor to the set if necessary
-                if ( !FD_ISSET( fd, &fdSet ) )
-                {
-//			roadmap_log( ROADMAP_DEBUG, "Thread %d. Calling FD_SET for FD: %d", pthread_self(), fd );
-                        FD_SET( fd, &fdSet );
-                }
-                //selectTO = (struct timeval) SOCKET_SELECT_TIMEOUT;
-                // Try to read or write from the file descriptor. fd + 1 is the max + 1 of the fd-s set!
-                if ( data->io_type & _IO_DIR_WRITE )
-                {
-                    selectWriteTO = SOCKET_WRITE_SELECT_TIMEOUT;
-                    retVal = select( fd+1, NULL, &fdSet, NULL, &selectWriteTO );
-//                  roadmap_log( ROADMAP_DEBUG, "Thread %d. IO %d WRITE : %d. FD: %d", pthread_self(), data->io_id, retVal, fd );
-                }
-                else
-                {
-                    selectReadTO = SOCKET_READ_SELECT_TIMEOUT;
-                    retVal = select( fd+1, &fdSet, NULL, NULL, &selectReadTO );
-//                  roadmap_log( ROADMAP_DEBUG, "Thread %d. IO %d READ : %d. FD: %d", pthread_self(), data->io_id, retVal, fd );
-                }
-                // Cancellation point - if IO is marked for invalidation - thread has to be closed
-                if ( roadmap_main_invalidate_pending_close( data ) )
-                {
-//			roadmap_log( ROADMAP_INFO, "IO %d invalidated. Thread %d going to exit...", io_id, pthread_self() );
-                        break;
-                }
-
-                if ( retVal == 0 )
-                {
-                        roadmap_log( ROADMAP_ERROR, "IO %d Socket %d timeout", data->io_id, io->os.socket );
-                }
-                if( retVal  < 0 )
-                {
-                        // Error in file descriptor polling
-                        roadmap_log( ROADMAP_ERROR, "IO %d Socket %d error for thread %d: Error # %d, %s", data->io_id, io->os.socket, pthread_self(), errno, strerror( errno ) );
-                        break;
-                }
-                /* Check if this input was unregistered while we were
-                 * sleeping.
-                 */
-                if ( io->subsystem == ROADMAP_IO_INVALID || !IO_VALID( data->io_id ) )
-                {
-                        break;
-                }
-
-                if ( retVal && !APP_SHUTDOWN_FLAG ) // Non zero if data available
-                {
-                        ioMsg = ( data->io_id & MSG_ID_MASK ) | MSG_CATEGORY_IO_CALLBACK;
-//			roadmap_log( ROADMAP_DEBUG, "Handling data for IO %d. Posting the message", data->io_id );
-                        // Waiting for the callback to finish its work
-                        if ( roadmap_main_handler_post_wait( ioMsg, data ) != 0 )
-                        {
-                                // The message dispatching is not performed !!!
-                                roadmap_log( ROADMAP_ERROR, "IO %d message dispatching failed. Thread %d going to finilize", data->io_id, pthread_self() );
-                                break;
-                        }
-                }
-    }
-//	roadmap_log( ROADMAP_INFO, "Finalizing the %s socket handler %d for socket %d IO ID %d", handler_dir, pthread_self(), io->os.socket, data->io_id );
-        ioMsg = ( data->io_id & MSG_ID_MASK ) | MSG_CATEGORY_IO_CLOSE;
-        mainWindow->dispatchMessage(ioMsg);
-
-        return (NULL);
 }
 
 /*************************************************************************************************
@@ -466,18 +344,18 @@ static void roadmap_main_set_handler( roadmap_main_io* aIO )
                    roadmap_log ( ROADMAP_ERROR, "Serial IO is roadmap_main_set_handlernot supported" );
                    retVal = 0;
                   break;
-           case ROADMAP_IO_NET:
-       {
-            const char *handler_dir;
-                handler_dir = ( aIO->io_type & _IO_DIR_WRITE ) ? "WRITE" : "READ";
+//           case ROADMAP_IO_NET:
+//       {
+//            const char *handler_dir;
+//                handler_dir = ( aIO->io_type & _IO_DIR_WRITE ) ? "WRITE" : "READ";
 
-                   retVal = pthread_create( &aIO->handler_thread, NULL,
-                                                                                roadmap_main_socket_handler, aIO );
+//                   retVal = pthread_create( &aIO->handler_thread, NULL,
+//                                                                                roadmap_main_socket_handler, aIO );
 
-                   roadmap_log ( ROADMAP_DEBUG, "Creating handler thread for the net subsystem. ID: %d. Socket: %d. Thread: %d. Direction: %s",
-                                                                                                           aIO->io_id, aIO->io.os.socket, aIO->handler_thread, handler_dir );
-                   break;
-           }
+//                   roadmap_log ( ROADMAP_DEBUG, "Creating handler thread for the net subsystem. ID: %d. Socket: %d. Thread: %d. Direction: %s",
+//                                                                                                           aIO->io_id, aIO->io.os.socket, aIO->handler_thread, handler_dir );
+//                   break;
+//           }
 
            case ROADMAP_IO_FILE:
                    roadmap_log ( ROADMAP_ERROR, "FILE IO is not supported" );
@@ -606,7 +484,7 @@ void roadmap_main_remove_input ( RoadMapIO *io )
            if ( IO_VALID( RoadMapMainIo[i].io_id ) && roadmap_io_same(&RoadMapMainIo[i].io, io))
            {
                  // Cancel the thread and set is valid to zero
-                 roadmap_log( ROADMAP_DEBUG, "Canceling IO # %d thread %d\n", i, RoadMapMainIo[i].handler_thread );
+                 //roadmap_log( ROADMAP_DEBUG, "Canceling IO # %d thread %d\n", i, RoadMapMainIo[i].handler_thread );
                  RoadMapMainIo[i].mutex.lock();
                  RoadMapMainIo[i].pending_close = 1;
                  RoadMapMainIo[i].start_time = 0;
@@ -633,7 +511,7 @@ static void roadmap_main_reset_IO( roadmap_main_io *data )
     roadmap_log( ROADMAP_DEBUG, "Reset IO: %d \n", data->io_id );
 
     data->callback = NULL;
-    data->handler_thread = 0;
+    //data->handler_thread = 0;
     roadmap_io_invalidate( &data->io );
     data->io_id = IO_INVALID_VAL;
     data->pending_close = 0;
@@ -761,6 +639,7 @@ void roadmap_main_exit(void) {
 
 static int roadmap_main_signals_init()
 {
+#ifndef __WIN32
   struct sigaction signala;
 
   memset(&signala, 0, sizeof (struct sigaction));
@@ -778,6 +657,10 @@ static int roadmap_main_signals_init()
   if (sigaction(SIGQUIT, &signala, 0) > 0)
     return 4;
   return 0;
+#else
+  signal(SIGTERM, RMapMainWindow::signalHandler);
+  signal(SIGINT, RMapMainWindow::signalHandler);
+#endif
 }
 
 void roadmap_gui_minimize() {
@@ -819,7 +702,7 @@ void roadmap_main_message_dispatcher( int aMsg )
                         roadmap_log( ROADMAP_DEBUG, "Callback %x. IO %d", RoadMapMainIo[indexIo].callback, RoadMapMainIo[indexIo].io_id );
 
                         // Send the signal to the thread if the IO is valid
-                        roadmap_log( ROADMAP_INFO, "Signaling thread %d", RoadMapMainIo[indexIo].handler_thread );
+//                        roadmap_log( ROADMAP_INFO, "Signaling thread %d", RoadMapMainIo[indexIo].handler_thread );
                         RoadMapMainIo[indexIo].mutex.lock();
 
                         RoadMapMainIo[indexIo].cond.wakeOne();

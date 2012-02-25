@@ -36,7 +36,7 @@ TEMPLATE = app
 TARGET = waze
 CONFIG -= staticlib
 
-LIBS += -lz -ldl -lrt -lssl -lcrypto
+LIBS += -lz -ldl -lrt
 
 !maemo5 {
     QMAKE_CFLAGS += -Wno-unused-result -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable
@@ -50,7 +50,6 @@ SOURCES += \
     unix/roadmap_spawn.c \
     unix/roadmap_serial.c \
     unix/roadmap_path.c \
-    unix/roadmap_net.c \
     unix/roadmap_library.c \
     unix/roadmap_input_type.c \
     unix/roadmap_file.c  \
@@ -294,8 +293,6 @@ SOURCES += \
     tts/tts_db.c \
     tts/tts_cache.c \
     tts/tts.c \
-    unix/resolver.c \
-    unix/roadmap_ssl.c \
     ssd/ssd_segmented_control.c \
     Realtime/RealtimeTrafficDetection.c \
     Realtime/RealtimePopUp.c \
@@ -612,7 +609,6 @@ HEADERS += \
     tts/tts_db.h \
     tts/tts_cache.h \
     tts/tts.h \
-    unix/resolver.h \
     ssd/ssd_segmented_control.h \
     Realtime/RealtimeTrafficDetection.h \
     Realtime/RealtimePopUp.h \
@@ -625,7 +621,6 @@ HEADERS += \
     navigate/navigate_tts.h \
     roadmap_base64.h \
     navigate/navigate_route_events.h \
-    roadmap_ssl.h
 
 OTHER_FILES += \
     qtc_packaging/debian_fremantle/README \
