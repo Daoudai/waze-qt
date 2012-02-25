@@ -78,6 +78,21 @@ typedef enum
 
 #define MSG_ID_MASK			0xFFFF
 
+class QObservableInt : public QObject {
+
+Q_OBJECT
+
+public:
+    QObservableInt();
+    void setValue(int value);
+
+signals:
+    void valueChanged(int newValue);
+
+private:
+    int _value;
+};
+
 class RMapCallback : public QObject {
 
 Q_OBJECT
@@ -168,7 +183,7 @@ public:
    void setFocusToCanvas();
 
 public slots:
-   void handleSignal();
+   void handleSignal(int sig);
    void mouseAreaPressed();
 
 private slots:
@@ -181,7 +196,7 @@ signals:
    void recievedMessage(int message);
 
 private:
-   QSocketNotifier *snSignal;
+   QObservableInt signalFd;
 
 protected:
    RoadMapKeyInput keyCallback;

@@ -31,7 +31,7 @@
 
 #define MAX_SERIAL_ENUMS 10
 
-#if defined (_WIN32) && !defined (__SYMBIAN32__)
+#if defined (_WIN32) && !defined (__SYMBIAN32__) && !defined (QTMOBILITY)
 
 #include <windows.h>
 #include "win32/win32_serial.h"

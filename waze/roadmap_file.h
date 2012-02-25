@@ -33,7 +33,7 @@
 #define INCLUDE__ROADMAP_FILE__H
 
 
-#if defined (_WIN32) && !defined (__SYMBIAN32__)
+#if defined (_WIN32) && !defined (__SYMBIAN32__) && !defined (QTMOBILITY)
 
 #include <windows.h>
 #include <stdio.h>
