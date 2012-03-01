@@ -44,9 +44,6 @@ int roadmap_io_read  (RoadMapIO *io, void *data, int size) {
       case ROADMAP_IO_NET:
          return roadmap_net_receive (io->os.socket, data, size);
 
-      case ROADMAP_IO_SERIAL:
-         return roadmap_serial_read (io->os.serial, data, size);
-
       case ROADMAP_IO_PIPE:
          return roadmap_spawn_read_pipe (io->os.pipe, data, size);
 
@@ -66,9 +63,6 @@ int roadmap_io_write (RoadMapIO *io, const void *data, int length, int wait) {
 
       case ROADMAP_IO_NET:
          return roadmap_net_send (io->os.socket, data, length, wait);
-
-      case ROADMAP_IO_SERIAL:
-         return roadmap_serial_write (io->os.serial, data, length);
 
       case ROADMAP_IO_PIPE:
          return roadmap_spawn_write_pipe (io->os.pipe, data, length);
@@ -111,10 +105,6 @@ void  roadmap_io_close (RoadMapIO *io) {
 
       case ROADMAP_IO_NET:
          roadmap_net_close (io->os.socket);
-         break;
-
-      case ROADMAP_IO_SERIAL:
-         roadmap_serial_close (io->os.serial);
          break;
 
       case ROADMAP_IO_PIPE:

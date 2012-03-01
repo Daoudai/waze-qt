@@ -340,10 +340,6 @@ static void roadmap_main_set_handler( roadmap_main_io* aIO )
         // Handler threads for the IO
         switch ( io->subsystem )
         {
-           case ROADMAP_IO_SERIAL:
-                   roadmap_log ( ROADMAP_ERROR, "Serial IO is roadmap_main_set_handlernot supported" );
-                   retVal = 0;
-                  break;
 //           case ROADMAP_IO_NET:
 //       {
 //            const char *handler_dir;

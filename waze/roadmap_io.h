@@ -39,13 +39,11 @@
 #include "roadmap_file.h"
 #include "roadmap_net.h"
 #include "roadmap_spawn.h"
-#include "roadmap_serial.h"
 
 /* The list of supported subsystems: */
 #define ROADMAP_IO_INVALID 0
 #define ROADMAP_IO_FILE    1
 #define ROADMAP_IO_NET     2
-#define ROADMAP_IO_SERIAL  3
 #define ROADMAP_IO_PIPE    4
 #define ROADMAP_IO_NULL    5 /* Bottomless pitt (i.e., no IO). */
 
@@ -57,7 +55,6 @@ typedef struct {
    union {
       RoadMapFile       file;
       RoadMapSocket     socket;
-      RoadMapSerial     serial;
       RoadMapPipe       pipe;
    } os;
 
