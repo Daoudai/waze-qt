@@ -1,6 +1,7 @@
 #include "qt_network.h"
 
 #include <QSslConfiguration>
+#include <QNetworkRequest>
 
 extern "C" {
 #include "roadmap.h"
@@ -24,12 +25,12 @@ void RNetworkManager::prepareNetworkRequest(QNetworkRequest& req,
     }
 
     req.setUrl(url);
-    req.setRawHeader("Host", url.host());
-    req.setRawHeader("User-Agent", QString.sprintf("FreeMap/%s", roadmap_start_version()));
+    req.setRawHeader(QByteArray("Host"), url.host().toLatin1());
+    req.setRawHeader(QByteArray("User-Agent"), QString().sprintf("FreeMap/%s", roadmap_start_version()).toLatin1());
     if (TEST_NET_COMPRESS( flags )) {
-        req.setRawHeader("Accept-Encoding", "gzip, deflate");
+        req.setRawHeader(QByteArray("Accept-Encoding"), QByteArray("gzip, deflate"));
     }
-    req.setRawHeader("If-Modified-Since", QLocale::c().toString(update_time, QLatin1String("ddd, dd MMM yyyy hh:mm:ss 'GMT'"))
+    req.setRawHeader(QByteArray("If-Modified-Since"), QLocale::c().toString(update_time, QLatin1String("ddd, dd MMM yyyy hh:mm:ss 'GMT'"))
                          .toLatin1());
 }
 
@@ -48,7 +49,7 @@ void RNetworkManager::requestSync(RequestType protocol, QUrl url,
         reply = get(request);
         break;
     case Post:
-        reply = post(request);
+        reply = post(request, QByteArray());
         break;
     }
 
@@ -75,7 +76,7 @@ void RNetworkManager::requestAsync(RequestType protocol, QUrl url,
         reply = get(request);
         break;
     case Post:
-        reply = post(request);
+        reply = post(request, QByteArray());
         break;
     }
 

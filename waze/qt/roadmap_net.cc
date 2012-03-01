@@ -39,6 +39,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <QUrl>
+#include "qt_main.h"
 #include "qt_network.h"
 
 extern "C" {
@@ -58,6 +59,7 @@ static RNetworkManager *networkManager = NULL;
 struct roadmap_socket_t {
    int s;
    QNetworkReply* reply;
+   RoadMapHttpCompCtx compress_ctx;
    int is_compressed;
 };
 
@@ -126,57 +128,57 @@ int roadmap_net_send_async( RoadMapSocket s, const void *data, int length )
 int roadmap_net_send (RoadMapSocket s, const void *data, int length, int wait) {
 
    int total = length;
-   fd_set fds;
-   struct timeval recv_timeout = {0, 0};
+//   fd_set fds;
+//   struct timeval recv_timeout = {0, 0};
 
-   if (s->is_secured) {
-      return roadmap_net_send_ssl( s, data, length, wait);
-   }
+//   if (s->is_secured) {
+//      return roadmap_net_send_ssl( s, data, length, wait);
+//   }
 
-   FD_ZERO(&fds);
-   FD_SET(s->s, &fds);
+//   FD_ZERO(&fds);
+//   FD_SET(s->s, &fds);
 
-   if (wait) {
-      recv_timeout.tv_sec = 60;
-   }
+//   if (wait) {
+//      recv_timeout.tv_sec = 60;
+//   }
 
-   while (length > 0) {
-      int res;
+//   while (length > 0) {
+//      int res;
 
-      res = select(s->s + 1, NULL, &fds, NULL, &recv_timeout);
+//      res = select(s->s + 1, NULL, &fds, NULL, &recv_timeout);
 
-      if(!res) {
-         roadmap_log (ROADMAP_ERROR,
-               "Timeout waiting for select in roadmap_net_send");
+//      if(!res) {
+//         roadmap_log (ROADMAP_ERROR,
+//               "Timeout waiting for select in roadmap_net_send");
 
-         roadmap_net_mon_error("Error in send - timeout.");
+//         roadmap_net_mon_error("Error in send - timeout.");
 
-         if (!wait) return 0;
-         else return -1;
-      }
+//         if (!wait) return 0;
+//         else return -1;
+//      }
 
-      if(res < 0) {
-         roadmap_log (ROADMAP_ERROR,
-               "Error waiting on select in roadmap_net_send");
+//      if(res < 0) {
+//         roadmap_log (ROADMAP_ERROR,
+//               "Error waiting on select in roadmap_net_send");
 
-         roadmap_net_mon_error("Error in send - select.");
-         return -1;
-      }
+//         roadmap_net_mon_error("Error in send - select.");
+//         return -1;
+//      }
 
-      res = send(s->s, data, length, 0);
+//      res = send(s->s, data, length, 0);
 
-      if (res < 0) {
-         roadmap_log (ROADMAP_ERROR, "Error sending data: (%d) %s", errno, strerror(errno));
+//      if (res < 0) {
+//         roadmap_log (ROADMAP_ERROR, "Error sending data: (%d) %s", errno, strerror(errno));
 
-         roadmap_net_mon_error("Error in send - data.");
-         return -1;
-      }
+//         roadmap_net_mon_error("Error in send - data.");
+//         return -1;
+//      }
 
-      length -= res;
-      data = (char *)data + res;
+//      length -= res;
+//      data = (char *)data + res;
 
-      roadmap_net_mon_send(res);
-   }
+//      roadmap_net_mon_send(res);
+//   }
 
    return total;
 }
@@ -197,10 +199,10 @@ int roadmap_net_receive (RoadMapSocket s, void *data, int size) {
 
       roadmap_http_comp_get_buffer(s->compress_ctx, &ctx_buffer, &ctx_buffer_size);
 
-      if (!s->is_secured)
-         received = read(s->s, ctx_buffer, ctx_buffer_size);
-      else
-         received = roadmap_ssl_read(s->ssl_ctx, ctx_buffer, ctx_buffer_size);
+//      if (!s->is_secured)
+//         received = read(s->s, ctx_buffer, ctx_buffer_size);
+//      else
+//         received = roadmap_ssl_read(s->ssl_ctx, ctx_buffer, ctx_buffer_size);
 
       roadmap_http_comp_add_data(s->compress_ctx, received);
 
@@ -215,10 +217,10 @@ int roadmap_net_receive (RoadMapSocket s, void *data, int size) {
          total_received += received;
       }
    } else {
-      if (!s->is_secured)
+//      if (!s->is_secured)
          total_received = read (s->s, data, size);
-      else
-         total_received = roadmap_ssl_read (s->ssl_ctx, data, size);
+//      else
+//         total_received = roadmap_ssl_read (s->ssl_ctx, data, size);
    }
 
    if (total_received < 0) {
@@ -247,10 +249,7 @@ RoadMapSocket roadmap_net_accept(RoadMapSocket server_socket) {
 
 void roadmap_net_close (RoadMapSocket s) {
    roadmap_net_mon_disconnect();
-   if (s->connect_io)
-   free(s->connect_io);
-   if (s->is_secured) roadmap_ssl_close (s->ssl_ctx);
-   close (s->s);
+   ((QNetworkReply*) s->reply)->close();
    if (s->compress_ctx) roadmap_http_comp_close(s->compress_ctx);
    free(s);
 }

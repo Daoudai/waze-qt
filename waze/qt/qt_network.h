@@ -33,8 +33,8 @@ public:
 
 private:
     void prepareNetworkRequest(QNetworkRequest& req,
+                               QUrl url,
                                QDateTime update_time,
-                               int default_port,
                                int flags);
 signals:
     

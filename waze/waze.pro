@@ -36,7 +36,7 @@ TEMPLATE = app
 TARGET = waze
 CONFIG -= staticlib
 
-LIBS += -lz -ldl -lrt
+LIBS += -ldl -lrt
 
 !maemo5 {
     QMAKE_CFLAGS += -Wno-unused-result -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable
@@ -46,17 +46,11 @@ SOURCES += \
     roadmap_tile.c \
     roadmap_gzm.c \
     unix/roadmap_time.c \
-    unix/roadmap_thread.c \
-    unix/roadmap_spawn.c \
-    unix/roadmap_serial.c \
-    unix/roadmap_path.c \
-    unix/roadmap_library.c \
     unix/roadmap_input_type.c \
     unix/roadmap_file.c  \
     unix/roadmap_device_events.c \
     roadmap_dbread.c \
     roadmap_login.c \
-    roadmap_zlib.c \
     roadmap_welcome_wizard.c \
     roadmap_warning.c \
     roadmap_voice.c \
@@ -336,7 +330,6 @@ HEADERS += \
     roadmap_net.h \
     roadmap_spawn.h \
     roadmap_list.h \
-    roadmap_serial.h \
     roadmap_internet.h \
     roadmap_native_keyboard.h \
     roadmap_canvas.h \
@@ -395,7 +388,6 @@ HEADERS += \
     roadmap_tile_model.h \
     roadmap_tile_manager.h \
     roadmap_ticker.h \
-    roadmap_thread.h \
     roadmap_sunrise.h \
     roadmap_strings.h \
     roadmap_string.h \

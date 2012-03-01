@@ -25,15 +25,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef RIMAPI
-#include "rimapi.h"
-#include <device_specific.h>
-#elif defined (J2ME)
-#include "zlib/zlib.h"
-#include <device_specific.h>
-#else
-#include "zlib.h"
-#endif
+#include "roadmap_zlib.h"
 
 #include "roadmap_gzm.h"
 #include "roadmap.h"
