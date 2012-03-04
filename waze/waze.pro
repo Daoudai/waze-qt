@@ -47,7 +47,6 @@ SOURCES += \
     roadmap_gzm.c \
     unix/roadmap_time.c \
     unix/roadmap_input_type.c \
-    unix/roadmap_file.c  \
     unix/roadmap_device_events.c \
     roadmap_dbread.c \
     roadmap_login.c \
