@@ -39,6 +39,7 @@
 extern "C" {
 #include "roadmap.h"
 #include "roadmap_path.h"
+#include "roadmap_file.h"
 }
 
 extern QApplication* app;
@@ -115,14 +116,14 @@ static void roadmap_path_list_create(const char *name,
 
    for (count = 0; items[count] != NULL; ++count) ;
 
-   new_path = malloc (sizeof(struct RoadMapPathRecord));
+   new_path = (RoadMapPathRecord*) malloc (sizeof(struct RoadMapPathRecord));
    roadmap_check_allocated(new_path);
 
    new_path->next  = RoadMapPaths;
    new_path->name  = strdup(name);
    new_path->count = (int)count;
 
-   new_path->items = calloc (count, sizeof(char *));
+   new_path->items = (char**) calloc (count, sizeof(char *));
    roadmap_check_allocated(new_path->items);
 
    for (i = 0; i < count; ++i) {
@@ -223,7 +224,7 @@ static RoadMapPathList roadmap_path_find (const char *name) {
 
 static char *roadmap_path_cat (const char *s1, const char *s2) {
 
-    char *result = malloc (strlen(s1) + strlen(s2) + 4);
+    char *result = (char*) malloc (strlen(s1) + strlen(s2) + 4);
 
     roadmap_check_allocated (result);
 
@@ -338,8 +339,12 @@ const char *roadmap_path_user (void) {
 
     if (RoadMapUser == NULL) {
         RoadMapUser = roadmap_path_cat (roadmap_path_home(), HOME_PREFIX);
-        QDir::mkdir(QString(RoadMapUser));
-        QFile::setPermissions(QString(RoadMapUser), QFile::ReadUser | QFile::WriteUser | QFile::ExeUser |
+        QString qRoadMapUser(RoadMapUser);
+        if (!QFile::exists(qRoadMapUser))
+        {
+            QDir().mkpath(qRoadMapUser);
+        }
+        QFile::setPermissions(qRoadMapUser, QFile::ReadUser | QFile::WriteUser | QFile::ExeUser |
                                            QFile::ReadGroup | QFile::WriteGroup | QFile::ExeGroup);
     }
     return RoadMapUser;
@@ -360,8 +365,12 @@ const char *roadmap_path_trips (void) {
                roadmap_path_cat (roadmap_path_home(), RoadMapDefaultTrips);
         }
 
-        QDir::mkdir(QString(RoadMapTrips));
-        QFile::setPermissions(QString(RoadMapTrips), QFile::ReadUser | QFile::WriteUser | QFile::ExeUser |
+        QString qRoadMapTrips(RoadMapTrips);
+        if (!QFile::exists(qRoadMapTrips))
+        {
+            QDir().mkpath(qRoadMapTrips);
+        }
+        QFile::setPermissions(qRoadMapTrips, QFile::ReadUser | QFile::WriteUser | QFile::ExeUser |
                                            QFile::ReadGroup | QFile::WriteGroup | QFile::ExeGroup);
 
     }
@@ -386,7 +395,7 @@ static char *roadmap_path_expand (const char *item, size_t length) {
    }
    expansion_length = strlen(expansion);
 
-   expanded = malloc (length + expansion_length + 1);
+   expanded = (char*) malloc (length + expansion_length + 1);
    roadmap_check_allocated(expanded);
 
    //strcpy (expanded, expansion);
@@ -437,7 +446,7 @@ void roadmap_path_set (const char *name, const char *path) {
       count += 1;
    }
 
-   path_list->items = calloc (count, sizeof(char *));
+   path_list->items = (char**) calloc (count, sizeof(char *));
    roadmap_check_allocated(path_list->items);
 
 
@@ -548,39 +557,16 @@ const char *roadmap_path_preferred (const char *name) {
 
 void roadmap_path_create ( const char *path )
 {
-    int res, status, stopFlag = 0;
-    struct stat stat_buffer;
-    char parent_path[512] = {0};
-    char *pNext = parent_path;
-    char delim = path_separator;
-
-    strncpy( parent_path, path, 512 );
-
-    while( !stopFlag )
+    QString qParentPath(path);
+    if (!QFile::exists(qParentPath))
     {
-        pNext = strchr( pNext+1, delim );
-        if ( pNext )
-            *pNext = 0;
-        else
-            stopFlag = 1;
+        QDir().mkpath(qParentPath);
 
-        // Check if exists and make dir if necessary
-        status = stat ( parent_path, &stat_buffer );
-        if ( status )
+        if (QFile::setPermissions(qParentPath, QFile::ReadUser | QFile::WriteUser | QFile::ExeUser |
+                                               QFile::ReadGroup | QFile::WriteGroup | QFile::ExeGroup))
         {
-
-            res = QDir::mkdir(QString(parent_path));
-            res &= QFile::setPermissions(QString(parent_path), QFile::ReadUser | QFile::WriteUser | QFile::ExeUser |
-                                                               QFile::ReadGroup | QFile::WriteGroup | QFile::ExeGroup);
-
-            if ( res < 0 && errno != EEXIST )	// Path exists in this case is not an error
-            {
-                roadmap_log( ROADMAP_ERROR, "Error creating path: %s, Error: %d, %s", path, errno, strerror( errno ) );
-                stopFlag = 1;
-            }
+            roadmap_log( ROADMAP_ERROR, "Error creating path: %s", path);
         }
-        if ( pNext )
-            *pNext = delim;
     }
 }
 
@@ -589,51 +575,24 @@ static char *RoadMapPathEmptyList = NULL;
 
 char **roadmap_path_list (const char *path, const char *extension) {
 
-   char  *match;
-   int    length;
-   size_t count;
-   char  **result;
-   char  **cursor;
+    char  **result;
+    if (!QFile::exists(path)) return &RoadMapPathEmptyList;
 
-   DIR *directory;
-   struct dirent *entry;
+    QDir dir(path);
+    QStringList filter;
+    filter << extension;
 
+    QStringList files = dir.entryList(filter);
+    result = (char**) calloc (files.count() + 1, sizeof(char *));
+    roadmap_check_allocated (result);
+    for (int i = 0; i < files.size(); ++i)
+    {
+        result[i] = strdup (files.at(i).toLocal8Bit().data());
+    }
 
-   directory = opendir (path);
-   if (directory == NULL) return &RoadMapPathEmptyList;
+    result[files.count()] = NULL;
 
-   count = 0;
-   while ((entry = readdir(directory)) != NULL) ++count;
-
-   cursor = result = calloc (count+1, sizeof(char *));
-   roadmap_check_allocated (result);
-
-   rewinddir (directory);
-   if (extension != NULL) {
-      length = strlen(extension);
-   } else {
-      length = 0;
-   }
-
-   while ((entry = readdir(directory)) != NULL) {
-
-      if (entry->d_name[0] == '.') continue;
-
-      if (length > 0) {
-
-         match = entry->d_name + strlen(entry->d_name) - length;
-
-         if (! strcmp (match, extension)) {
-            *(cursor++) = strdup (entry->d_name);
-         }
-      } else {
-         *(cursor++) = strdup (entry->d_name);
-      }
-   }
-   *cursor = NULL;
-   closedir(directory);
-
-   return result;
+    return result;
 }
 
 
@@ -672,14 +631,7 @@ int roadmap_path_is_full_path (const char *name) {
 
 
 int roadmap_path_is_directory (const char *name) {
-
-   struct stat file_attributes;
-
-   if (stat (name, &file_attributes) != 0) {
-      return 0;
-   }
-
-   return S_ISDIR(file_attributes.st_mode);
+   return QFileInfo(QString(name)).isDir();
 }
 
 
