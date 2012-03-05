@@ -33,7 +33,9 @@
 #include <errno.h>
 
 #include <QFile>
+#include <QDir>
 #include <QFileInfo>
+#include <QThread>
 
 extern "C" {
 #include "roadmap.h"
@@ -41,11 +43,14 @@ extern "C" {
 #include "roadmap_file.h"
 }
 
+typedef struct roadmap_file_t{
+    QFile* file;
+} roadmap_file_t;
+
 struct RoadMapFileContextStructure {
 
-   int   fd;
-   void *base;
-   int   size;
+   QFile*    file;
+   QByteArray content;
 };
 
 
@@ -80,11 +85,37 @@ FILE *roadmap_file_fopen (const char *path,
 
 void roadmap_file_remove (const char *path, const char *name) {
 
-   const char *full_name = roadmap_path_join (path, name);
+   roadmap_file_rmdir(path, name);
+}
 
-   remove(full_name);
-
-   roadmap_path_free (full_name);
+static bool RemoveDirectory(QDir &aDir)
+{
+    bool has_err = false;
+    if (aDir.exists())//QDir::NoDotAndDotDot
+    {
+        QFileInfoList entries = aDir.entryInfoList(QDir::NoDotAndDotDot |
+                                                   QDir::Dirs | QDir::Files);
+        int count = entries.size();
+        for (int idx = 0; ((idx < count) && (false == has_err)); idx++)
+        {
+            QFileInfo entryInfo = entries[idx];
+            QString path = entryInfo.absoluteFilePath();
+            if (entryInfo.isDir())
+            {
+                QDir subDir(path);
+                has_err = RemoveDirectory(subDir);
+            }
+            else
+            {
+                QFile file(path);
+                if (!file.remove())
+                    has_err = true;
+            }
+        }
+        if (!aDir.rmdir(aDir.absolutePath()))
+            has_err = true;
+    }
+    return(has_err);
 }
 
 /*
@@ -95,7 +126,24 @@ void roadmap_file_rmdir( const char *path, const char *name )
 
    const char *full_name = roadmap_path_join (path, name);
 
-   QFile::remove(QString(full_name));
+   QString filePath(full_name);
+   QFileInfo fileInfo(filePath);
+
+   if (fileInfo.isDir())
+   {
+       QDir dir(filePath);
+       if (!RemoveDirectory(dir))
+       {
+           roadmap_log(ROADMAP_ERROR, "Failed to remove directory %s", full_name);
+       }
+   }
+   else if (fileInfo.isFile())
+   {
+       if (!QFile::remove(filePath))
+       {
+           roadmap_log(ROADMAP_ERROR, "Failed to remove file %s", full_name);
+       }
+   }
 
    roadmap_path_free (full_name);
 }
@@ -115,97 +163,84 @@ int roadmap_file_exists (const char *path, const char *name) {
 
 int roadmap_file_length (const char *path, const char *name) {
 
-   int size;
+   int file_size;
    const char *full_name = roadmap_path_join (path, name);
 
-   QFileInfo info(QString(full_name));
+   file_size = QFileInfo(QString(full_name)).size();
 
-   size = info.size();
    roadmap_path_free (full_name);
 
-   return size;
+   return file_size;
 }
 
 
 void roadmap_file_save (const char *path, const char *name,
                         void *data, int length) {
 
-   int   fd;
-   const char *full_name = roadmap_path_join (path, name);
+    const char *full_name = roadmap_path_join (path, name);
 
-   fd = open (full_name, O_CREAT+O_WRONLY+O_TRUNC, 0666);
-   roadmap_path_free (full_name);
-
-   if (fd >= 0) {
-
-      write (fd, data, length);
-      close(fd);
-   }
+    QString fileName(full_name);
+    QFile file(fileName);
+    file.setPermissions(QFile::ReadUser | QFile::WriteUser |
+                        QFile::ReadGroup | QFile::WriteGroup |
+                        QFile::ReadOther | QFile::WriteOther);
+    if (!file.write((char*) data, length))
+    {
+        roadmap_log(ROADMAP_ERROR, "Failed to save data to file %s", full_name);
+    }
+    file.close();
+    roadmap_path_free (full_name);
 }
 
 
 int roadmap_file_truncate (const char *path, const char *name,
                            int length) {
 
-   int   res;
-   const char *full_name = roadmap_path_join (path, name);
+   /* Never called */
 
-   res = truncate (full_name, length);
-   roadmap_path_free (full_name);
-
-   return res;
+   return 0;
 }
 
 int roadmap_file_rename (const char *old_name, const char *new_name) {
-
-   return rename (old_name, new_name);
+    return QFile(QString(old_name)).rename(QString(new_name));
 }
 
 void roadmap_file_append (const char *path, const char *name,
                           void *data, int length) {
 
-   int   fd;
-   const char *full_name = roadmap_path_join (path, name);
+    const char *full_name = roadmap_path_join (path, name);
+    QString fileName(full_name);
+    QFile file(fileName);
 
-   fd = open (full_name, O_CREAT+O_WRONLY+O_APPEND, 0666);
-   roadmap_path_free (full_name);
+    file.setPermissions(QFile::ReadUser | QFile::WriteUser |
+                        QFile::ReadGroup | QFile::WriteGroup |
+                        QFile::ReadOther | QFile::WriteOther);
 
-   if (fd >= 0) {
+    if (!file.open(QIODevice::Append | QIODevice::ReadWrite))
+    {
+        if (file.seek(file.size()))
+        {
+            if (!file.write((char*) data, length))
+            {
+                roadmap_log(ROADMAP_ERROR, "Failed to write at the end of file %s", full_name);
+            }
+        }
+        else
+        {
+            roadmap_log(ROADMAP_ERROR, "Failed to set location at the end of file %s", full_name);
+        }
 
-      write (fd, data, length);
-      close(fd);
-   }
+        file.close();
+    }
+
+    roadmap_path_free (full_name);
 }
 
 
 const char *roadmap_file_unique (const char *base) {
+    /* Never called */
 
-    static int   UniqueNameCounter = 0;
-    static char *UniqueNameBuffer = NULL;
-    static int   UniqueNameBufferLength = 0;
-
-    int length;
-
-    length = strlen(base + 16);
-
-    if (length > UniqueNameBufferLength) {
-
-        if (UniqueNameBuffer != NULL) {
-            free(UniqueNameBuffer);
-        }
-        UniqueNameBuffer = (char*) malloc (length);
-
-        roadmap_check_allocated(UniqueNameBuffer);
-
-        UniqueNameBufferLength = length;
-    }
-
-    sprintf (UniqueNameBuffer,
-             "%s%d_%d", base, getpid(), UniqueNameCounter);
-
-    UniqueNameCounter += 1;
-
-    return UniqueNameBuffer;
+    return "";
 }
 
 
@@ -217,24 +252,15 @@ const char *roadmap_file_map (const char *set,
 
    RoadMapFileContext context;
 
-   struct stat state_result;
-   int open_mode;
-   int map_mode;
+   QFile::OpenModeFlag open_mode;
 
-
-   context = malloc (sizeof(*context));
+   context = (RoadMapFileContextStructure*) malloc (sizeof(*context));
    roadmap_check_allocated(context);
 
-   context->fd = -1;
-   context->base = NULL;
-   context->size = 0;
-
    if (strcmp(mode, "r") == 0) {
-      open_mode = O_RDONLY;
-      map_mode = PROT_READ;
+      open_mode = QIODevice::ReadOnly;
    } else if (strchr (mode, 'w') != NULL) {
-      open_mode = O_RDWR;
-      map_mode = PROT_READ|PROT_WRITE;
+      open_mode = QIODevice::ReadWrite;
    } else {
       roadmap_log (ROADMAP_ERROR,
                    "%s: invalid file access mode %s", name, mode);
@@ -372,63 +398,57 @@ void roadmap_file_unmap (RoadMapFileContext *file) {
 
 RoadMapFile roadmap_file_open  (const char *name, const char *mode) {
 
-   int unix_mode = 0;
+    QString fileName(name);
+    QFile* file = new QFile(fileName);
+    QFile::OpenMode open_mode;
 
-   if (strcmp(mode, "r") == 0) {
-      unix_mode = O_RDONLY;
-   } else if (strcmp (mode, "rw") == 0) {
-      unix_mode = O_RDWR|O_CREAT;
-   } else if (strchr (mode, 'w') != NULL) {
-      unix_mode = O_RDWR|O_CREAT|O_TRUNC;
-   } else if (strchr (mode, 'a') != NULL) {
-      unix_mode = O_RDWR|O_CREAT|O_APPEND;
-   } else {
+    if (strcmp(mode, "r") == 0) {
+        open_mode = QIODevice::ReadOnly;
+    } else if (strcmp (mode, "rw") == 0) {
+        open_mode = QIODevice::ReadWrite;
+    } else if (strchr (mode, 'w') != NULL) {
+        open_mode = QIODevice::WriteOnly;
+    } else if (strchr (mode, 'a') != NULL) {
+        open_mode = QIODevice::ReadWrite | QIODevice::Append;
+    } else {
       roadmap_log (ROADMAP_ERROR,
                    "%s: invalid file access mode %s", name, mode);
       return -1;
-   }
+    }
 
-   return (RoadMapFile) open (name, unix_mode, 0644);
+    file->open(open_mode);
+    file->setPermissions(QFile::ReadUser | QFile::WriteUser |
+                        QFile::ReadGroup | QFile::ReadOther);
+
+    RoadMapFile rFile = new roadmap_file_t;
+    rFile->file = file;
+
+    return rFile;
 }
 
 
 int roadmap_file_read  (RoadMapFile file, void *data, int size) {
-   return read ((int)file, data, size);
+    return ((roadmap_file_t*) file)->file.read((char*) data, size);
 }
 
 int roadmap_file_write (RoadMapFile file, const void *data, int length) {
-   return write ((int)file, data, length);
+   return ((roadmap_file_t*) file)->file.write((const char *)data, size);
 }
 
 int roadmap_file_seek (RoadMapFile file, int offset, RoadMapSeekWhence whence) {
 
-    int unix_whence;
-
-    switch (whence) {
-        case ROADMAP_SEEK_START:
-            unix_whence = SEEK_SET;
-            break;
-        case ROADMAP_SEEK_CURR:
-            unix_whence = SEEK_CUR;
-            break;
-        case ROADMAP_SEEK_END:
-            unix_whence = SEEK_END;
-            break;
-        default:
-          roadmap_log (ROADMAP_ERROR,
-                       "invalid file seek whence %d", (int)whence);
-          return -1;
-    }
-
-    return lseek ((int)file, offset, unix_whence);
+    return ((roadmap_file_t*) file)->file.seek(offset);
 }
 
 void  roadmap_file_close (RoadMapFile file) {
-   close ((int)file);
+    ((roadmap_file_t*)file)->file.close();
+
+    delete file->file;
+    delete file;
 }
 
 int roadmap_file_free_space (const char *path) {
-   return -1;
+    return -1;
 }
 
 
