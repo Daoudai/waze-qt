@@ -373,33 +373,27 @@ void roadmap_main_set_input ( RoadMapIO *io, RoadMapInput callback )
 {
         int i;
         int retVal;
-        int fd;
 
-        roadmap_log( ROADMAP_DEBUG, "Setting the input for the subsystem : %d\n", io->subsystem );
-
-   if (io->subsystem == ROADMAP_IO_NET) fd = roadmap_net_get_fd(io->os.socket);
-   else fd = io->os.file; /* All the same on UNIX except sockets. */
-
-    for (i = 0; i < ROADMAP_MAX_IO; ++i)
-    {
-        if ( !IO_VALID( RoadMapMainIo[i].io_id ) )
+        for (i = 0; i < ROADMAP_MAX_IO; ++i)
         {
-            RoadMapMainIo[i].io = *io;
-            RoadMapMainIo[i].callback = callback;
-            RoadMapMainIo[i].io_type = _IO_DIR_READ;
-            RoadMapMainIo[i].io_id = i;
+            if ( !IO_VALID( RoadMapMainIo[i].io_id ) )
+            {
+                RoadMapMainIo[i].io = *io;
+                RoadMapMainIo[i].callback = callback;
+                RoadMapMainIo[i].io_type = _IO_DIR_READ;
+                RoadMapMainIo[i].io_id = i;
 
-            break;
-        }
-   }
-   if ( i == ROADMAP_MAX_IO )
-   {
-      roadmap_log ( ROADMAP_FATAL, "Too many set input calls" );
-      return;
-   }
+                break;
+            }
+       }
+       if ( i == ROADMAP_MAX_IO )
+       {
+          roadmap_log ( ROADMAP_FATAL, "Too many set input calls" );
+          return;
+       }
 
-   // Setting the handler
-   roadmap_main_set_handler( &RoadMapMainIo[i] );
+       // Setting the handler
+       roadmap_main_set_handler( &RoadMapMainIo[i] );
 }
 
 
@@ -410,13 +404,9 @@ void roadmap_main_set_input ( RoadMapIO *io, RoadMapInput callback )
 void roadmap_main_set_output ( RoadMapIO *io, RoadMapInput callback, BOOL is_connect )
 {
 
-        int i, retVal;
-        int fd;
+    int i, retVal;
 
-        roadmap_log( ROADMAP_DEBUG, "Setting the output for the subsystem : %d\n", io->subsystem );
-
-   if (io->subsystem == ROADMAP_IO_NET) fd = roadmap_net_get_fd(io->os.socket);
-   else fd = io->os.file; /* All the same on UNIX except sockets. */
+    roadmap_log( ROADMAP_DEBUG, "Setting the output for the subsystem : %d\n", io->subsystem );
 
     for ( i = 0; i < ROADMAP_MAX_IO; ++i )
     {

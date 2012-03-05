@@ -35,6 +35,8 @@
 #include <QDir>
 #include <QFile>
 #include <QApplication>
+#include <QHash>
+#include <QStringList>
 
 extern "C" {
 #include "roadmap.h"
@@ -44,179 +46,88 @@ extern "C" {
 
 extern QApplication* app;
 
-typedef struct RoadMapPathRecord *RoadMapPathList;
-
 struct RoadMapPathRecord {
-
-   RoadMapPathList next;
-
-   char  *name;
-   int    count;
-   char **items;
-   char  *preferred;
+   QStringList items;
+   QString preferred;
 };
 
-static RoadMapPathList RoadMapPaths = NULL;
+typedef QHash<QString, RoadMapPathRecord> RoadMapPathList;
+
+static RoadMapPathList RoadMapPaths;
 
 #define HOME_PREFIX "MyDocs/.waze"
-
-/* This list exist because the user context is a special case
- * that we want to handle in a standard way.
- */
-static const char *RoadMapPathUser[] = {
-   "~/"HOME_PREFIX,
-   NULL
-};
-
-static const char *RoadMapPathUserPreferred = "~/"HOME_PREFIX;
-
-/* Skins directories */
-static const char *RoadMapPathSkin[] = {
-   "~/"HOME_PREFIX"/skins/default/day",
-   "~/"HOME_PREFIX"/skins/default",
-   NULL
-};
-
-static const char *RoadMapPathSkinPreferred = "~/"HOME_PREFIX"/skins";
-
-/* The hardcoded path for configuration files (the "config" path).
- * (Note that the user directory (~/.waze) does not appear here
- * as it is implicitely used by the callers--see above.)
- */
-static const char *RoadMapPathConfig[] = {
-   /* This is for standard Unix configurations. */
-   "~/"HOME_PREFIX,
-    "/opt/waze/data",
-   NULL
-};
-static const char *RoadMapPathConfigPreferred = "~/"HOME_PREFIX;
-
-static const char *RoadMapPathGpsSuffix = "gps/";
-
-/* The default path for the map files (the "maps" path): */
-static const char *RoadMapPathMaps[] = {
-   "~/"HOME_PREFIX"/maps",
-   NULL
-};
-
-static const char *RoadMapPathMapsPreferred = "~/"HOME_PREFIX"/maps";
 
 static char path_separator = QDir::separator().toAscii();
 
 static char *roadmap_path_expand (const char *item, size_t length);
 
-static void roadmap_path_list_create(const char *name,
-                                     const char *items[],
-                                     const char *preferred) {
+static RoadMapPathRecord roadmap_path_find (const char *name) {
+
+    static RoadMapPathRecord defaultRecord;
+
+    if (RoadMapPaths.count() == 0) {
+
+        /* Add the hardcoded configuration. */
+
+        QString appDataPath = app->applicationDirPath() + QDir::separator() +
+                QString("..") + QDir::separator() +
+                QString("data");
+        QString userDataPath = QDir::homePath() + QDir::separator() +
+                QString("MyDocs") + QDir::separator() +
+                QString(".waze");
 
 
-   size_t i;
-   size_t count;
-   RoadMapPathList new_path;
+        QStringList userPaths;
+        userPaths.append(userDataPath);
+        userPaths.append(appDataPath);
+        RoadMapPathRecord userPathRecord;
+        userPathRecord.items = userPaths;
+        userPathRecord.preferred = userDataPath;
+        RoadMapPaths.insert(QString("user"), userPathRecord);
 
-   for (count = 0; items[count] != NULL; ++count) ;
 
-   new_path = (RoadMapPathRecord*) malloc (sizeof(struct RoadMapPathRecord));
-   roadmap_check_allocated(new_path);
+        QStringList configPaths;
+        configPaths.append(userDataPath);
+        configPaths.append(appDataPath);
+        RoadMapPathRecord configPathRecord;
+        configPathRecord.items = configPaths;
+        configPathRecord.preferred = userDataPath;
+        RoadMapPaths.insert(QString("config"), configPathRecord);
 
-   new_path->next  = RoadMapPaths;
-   new_path->name  = strdup(name);
-   new_path->count = (int)count;
 
-   new_path->items = (char**) calloc (count, sizeof(char *));
-   roadmap_check_allocated(new_path->items);
+        QStringList skinPaths;
+        skinPaths.append(userDataPath + QDir::separator() +
+                         QString("skins") + QDir::separator() +
+                         QString("default") + QDir::separator() +
+                         QString("day"));
+        skinPaths.append(appDataPath + QDir::separator() +
+                         QString("skins") + QDir::separator() +
+                         QString("default") + QDir::separator() +
+                         QString("day"));
+        skinPaths.append(userDataPath + QDir::separator() +
+                         QString("skins") + QDir::separator() +
+                         QString("default"));
+        skinPaths.append(appDataPath + QDir::separator() +
+                         QString("skins") + QDir::separator() +
+                         QString("default"));
+        RoadMapPathRecord skinPathRecord;
+        skinPathRecord.items = skinPaths;
+        skinPathRecord.preferred = userDataPath + QDir::separator() + QString("skins");
+        RoadMapPaths.insert(QString("skin"), skinPathRecord);
 
-   for (i = 0; i < count; ++i) {
-      new_path->items[i] = roadmap_path_expand (items[i], strlen(items[i]));
-   }
-   new_path->preferred  = roadmap_path_expand (preferred, strlen(preferred));
 
-   RoadMapPaths = new_path;
-}
+        QStringList mapPaths;
+        mapPaths.append(userDataPath + QDir::separator() +
+                         QString("maps"));
+        mapPaths.append(appDataPath + QDir::separator() +
+                         QString("maps"));
+        RoadMapPathRecord mapsPathRecord;
+        mapsPathRecord.items = mapPaths;
+        mapsPathRecord.preferred = userDataPath + QDir::separator() + QString("maps");
+        RoadMapPaths.insert(QString("maps"), mapsPathRecord);
+    }
 
-static RoadMapPathList roadmap_path_find (const char *name) {
-
-   RoadMapPathList cursor;
-   QString itemName(name);
-
-   if (RoadMapPaths == NULL) {
-
-      /* Add the hardcoded configuration. */
-
-       if (itemName == QString("user"))
-       {
-           QDir::homePath() + QDir::separator() +
-                   QString("MyDocs") + QDir::separator() +
-                   QString(".waze");
-
-           app->applicationDirPath() + QDir::separator() +
-                   QString("..") + QDir::separator() +
-                   QString("data");
-       }
-       else if (itemName == QString("config"))
-       {
-           QDir::homePath() + QDir::separator() +
-                   QString("MyDocs") + QDir::separator() +
-                   QString(".waze");
-
-           app->applicationDirPath() + QDir::separator() +
-                   QString("..") + QDir::separator() +
-                   QString("data");
-       }
-       else if (itemName == QString("skin"))
-       {
-           QDir::homePath() + QDir::separator() +
-                   QString("MyDocs") + QDir::separator() +
-                   QString(".waze") + QDir::separator() +
-                   QString("skins") + QDir::separator() +
-                   QString("default") + QDir::separator() +
-                   QString("day");
-           app->applicationDirPath() + QDir::separator() +
-                   QString("..") + QDir::separator() +
-                   QString("data") + QDir::separator() +
-                   QString("skins") + QDir::separator() +
-                   QString("default") + QDir::separator() +
-                   QString("day");
-           QDir::homePath() + QDir::separator() +
-                   QString("MyDocs") + QDir::separator() +
-                   QString(".waze") + QDir::separator() +
-                   QString("skins") + QDir::separator() +
-                   QString("default");
-           app->applicationDirPath() + QDir::separator() +
-                   QString("..") + QDir::separator() +
-                   QString("data") + QDir::separator() +
-                   QString("skins") + QDir::separator() +
-                   QString("default");
-       }
-       else if (itemName == QString("maps"))
-       {
-           QDir::homePath() + QDir::separator() +
-                   QString("MyDocs") + QDir::separator() +
-                   QString(".waze") + QDir::separator() +
-                   QString("maps");
-           app->applicationDirPath() + QDir::separator() +
-                   QString("..") + QDir::separator() +
-                   QString("data") + QDir::separator() +
-                   QString("maps");
-       }
-
-      roadmap_path_list_create ("user",   RoadMapPathUser,
-                                          RoadMapPathUserPreferred);
-
-      roadmap_path_list_create ("config", RoadMapPathConfig,
-                                          RoadMapPathConfigPreferred);
-
-      roadmap_path_list_create ("skin",   RoadMapPathSkin,
-                                          RoadMapPathSkinPreferred);
-
-      roadmap_path_list_create ("maps",   RoadMapPathMaps,
-                                          RoadMapPathMapsPreferred);
-   }
-
-   for (cursor = RoadMapPaths; cursor != NULL; cursor = cursor->next) {
-      if (strcasecmp(cursor->name, name) == 0) break;
-   }
-   return cursor;
+    return RoadMapPaths.value(QString(name), defaultRecord);
 }
 
 
@@ -417,76 +328,31 @@ void roadmap_path_set (const char *name, const char *path) {
    const char *item;
    const char *next_item;
 
-   RoadMapPathList path_list = roadmap_path_find (name);
+   RoadMapPathRecord path_list = roadmap_path_find (name);
 
-
-   if (path_list == NULL) {
+   if (path_list.preferred == QString()) {
       roadmap_log(ROADMAP_FATAL, "unknown path set '%s'", name);
    }
 
    while (*path == ',') path += 1;
    if (*path == 0) return; /* Ignore empty path: current is better. */
 
-
-   if (path_list->items != NULL) {
-
-      /* This replaces a path that was already set. */
-
-      for (i = path_list->count-1; i >= 0; --i) {
-         free (path_list->items[i]);
-      }
-      free (path_list->items);
-   }
-
-
-   /* Count the number of items in this path string. */
-
-   count = 0;
-   for (item = path-1; item != NULL; item = strchr (item+1, ',')) {
-      count += 1;
-   }
-
-   path_list->items = (char**) calloc (count, sizeof(char *));
-   roadmap_check_allocated(path_list->items);
-
-
-   /* Extract and expand each item of the path.
-    * Ignore directories that do not exist yet.
-    */
-   for (i = 0, item = path-1; item != NULL; item = next_item) {
-
-      item += 1;
-      next_item = strchr (item, ',');
-
-      if (next_item == NULL) {
-         path_list->items[i] = roadmap_path_expand (item, strlen(item));
-      } else {
-         path_list->items[i] =
-            roadmap_path_expand (item, (size_t)(next_item - item));
-      }
-
-      //AviR patch - do not ignore directories that do not exist
-      if (TRUE /*roadmap_file_exists(NULL, path_list->items[i])*/) {
-         ++i;
-      } else {
-         free (path_list->items[i]);
-         path_list->items[i] = NULL;
-      }
-   }
-   path_list->count = i;
+   QString newPaths(path);
+   QStringList newPathList = newPaths.split(",");
+    path_list.items = newPathList;
 }
 
 
 const char *roadmap_path_first (const char *name) {
 
-   RoadMapPathList path_list = roadmap_path_find (name);
+   RoadMapPathRecord path_list = roadmap_path_find (name);
 
-   if (path_list == NULL) {
+   if (path_list.preferred == QString()) {
       roadmap_log (ROADMAP_FATAL, "invalid path set '%s'", name);
    }
 
-   if (path_list->count > 0) {
-      return path_list->items[0];
+   if (!path_list.items.isEmpty()) {
+      return path_list.items.first().toLocal8Bit().data();
    }
 
    return NULL;
@@ -495,15 +361,16 @@ const char *roadmap_path_first (const char *name) {
 
 const char *roadmap_path_next  (const char *name, const char *current) {
 
-   int i;
-   RoadMapPathList path_list = roadmap_path_find (name);
+   RoadMapPathRecord path_list = roadmap_path_find (name);
 
-
-   for (i = 0; i < path_list->count-1; ++i) {
-
-      if (path_list->items[i] == current) {
-         return path_list->items[i+1];
-      }
+   QStringList::const_iterator constIterator;
+   for (constIterator = path_list.items.constBegin(); constIterator != path_list.items.constEnd(); ++constIterator)
+   {
+       if (*constIterator == QString(current))
+       {
+           ++constIterator;
+           return (*constIterator).toLocal8Bit().data();
+       }
    }
 
    return NULL;
@@ -512,31 +379,35 @@ const char *roadmap_path_next  (const char *name, const char *current) {
 
 const char *roadmap_path_last (const char *name) {
 
-   RoadMapPathList path_list = roadmap_path_find (name);
+    RoadMapPathRecord path_list = roadmap_path_find (name);
 
-   if (path_list == NULL) {
-      roadmap_log (ROADMAP_FATAL, "invalid path set '%s'", name);
-   }
+    if (path_list.preferred == QString()) {
+       roadmap_log (ROADMAP_FATAL, "invalid path set '%s'", name);
+    }
 
-   if (path_list->count > 0) {
-      return path_list->items[path_list->count-1];
-   }
-   return NULL;
+    if (!path_list.items.isEmpty()) {
+       return path_list.items.last().toLocal8Bit().data();
+    }
+
+    return NULL;
 }
 
 
 const char *roadmap_path_previous (const char *name, const char *current) {
 
-   int i;
-   RoadMapPathList path_list = roadmap_path_find (name);
+    RoadMapPathRecord path_list = roadmap_path_find (name);
 
-   for (i = path_list->count-1; i > 0; --i) {
+    QStringList::const_iterator constIterator;
+    for (constIterator = path_list.items.constBegin(); constIterator != path_list.items.constEnd(); ++constIterator)
+    {
+        if (*constIterator == QString(current))
+        {
+            --constIterator;
+            return (*constIterator).toAscii().data();
+        }
+    }
 
-      if (path_list->items[i] == current) {
-         return path_list->items[i-1];
-      }
-   }
-   return NULL;
+    return NULL;
 }
 
 
@@ -545,13 +416,13 @@ const char *roadmap_path_previous (const char *name, const char *current) {
  */
 const char *roadmap_path_preferred (const char *name) {
 
-   RoadMapPathList path_list = roadmap_path_find (name);
+   RoadMapPathRecord path_list = roadmap_path_find (name);
 
-   if (path_list == NULL) {
+   if (path_list.preferred == QString()) {
       roadmap_log (ROADMAP_FATAL, "invalid path set '%s'", name);
    }
 
-   return path_list->preferred;
+   return path_list.preferred.toAscii().data();
 }
 
 
@@ -646,7 +517,7 @@ const char *roadmap_path_gps( void )
 
    if (RoadMapPathGps == NULL)
    {
-      RoadMapPathGps = roadmap_path_join( roadmap_path_user(), RoadMapPathGpsSuffix );
+       RoadMapPathGps = roadmap_path_join( roadmap_path_user(), "gps" );
       roadmap_path_create( RoadMapPathGps );
    }
    return RoadMapPathGps;
