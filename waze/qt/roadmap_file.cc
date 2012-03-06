@@ -51,6 +51,7 @@ struct RoadMapFileContextStructure {
 
    QFile*    file;
    QByteArray content;
+   QIODevice::OpenModeFlag open_mode;
 };
 
 
@@ -254,9 +255,6 @@ const char *roadmap_file_map (const char *set,
 
    QFile::OpenModeFlag open_mode;
 
-   context = (RoadMapFileContextStructure*) malloc (sizeof(*context));
-   roadmap_check_allocated(context);
-
    if (strcmp(mode, "r") == 0) {
       open_mode = QIODevice::ReadOnly;
    } else if (strchr (mode, 'w') != NULL) {
@@ -264,87 +262,57 @@ const char *roadmap_file_map (const char *set,
    } else {
       roadmap_log (ROADMAP_ERROR,
                    "%s: invalid file access mode %s", name, mode);
-      free (context);
       return NULL;
    }
 
-   if (name[0] == '/') {
+   QString qName(name);
+   QString qSequence;
+   QFile* qFile;
 
-      context->fd = open (name, open_mode, 0666);
-      sequence = ""; /* Whatever, but NULL. */
+   if (QFile::exists(qName)) {
+
+      qFile = new QFile(qName);
+      sequence = "";
 
    } else {
 
-      char *full_name;
+       if (sequence == NULL) {
+          sequence = roadmap_path_first(set);
+       }
 
-      int full_name_size;
-      int name_size = strlen(name);
-      int size;
+       for (  ; sequence != NULL; sequence = roadmap_path_next(set, sequence))
+       {
+            qSequence = QString::fromLocal8Bit(sequence).append(QDir::separator()).append(qName);
+            if (QFile::exists(qSequence))
+            {
+                break;
+            }
+       }
 
+       if (sequence == NULL)
+       {
+           return NULL;
+       }
 
-      if (sequence == NULL) {
-         sequence = roadmap_path_first(set);
-      } else {
-         sequence = roadmap_path_next(set, sequence);
-      }
-      if (sequence == NULL) {
-         free (context);
-         return NULL;
-      }
-
-      full_name_size = 512;
-      full_name = (char*) malloc (full_name_size);
-      roadmap_check_allocated(full_name);
-
-      do {
-         size = strlen(sequence) + name_size + 2;
-
-         if (size >= full_name_size) {
-            full_name = (char*) realloc (full_name, size);
-            roadmap_check_allocated(full_name);
-            full_name_size = size;
-         }
-
-         strcpy (full_name, sequence);
-         strcat (full_name, "/");
-         strcat (full_name, name);
-
-         context->fd = open (full_name, open_mode, 0666);
-
-         if (context->fd >= 0) break;
-
-         sequence = roadmap_path_next(set, sequence);
-
-      } while (sequence != NULL);
-
-      free (full_name);
+       qFile = new QFile(qSequence);
+       sequence = roadmap_path_next(set, sequence); // ensuring that the next in line is returned
    }
 
-   if (context->fd < 0) {
-      if (sequence == 0) {
-         roadmap_log (ROADMAP_INFO, "cannot open file %s", name);
-      }
-      roadmap_file_unmap (&context);
+   qFile->setPermissions(QFile::ReadUser | QFile::WriteUser |
+                         QFile::ReadGroup | QFile::WriteGroup |
+                         QFile::ReadOther | QFile::WriteOther);
+
+   if (qFile->open(open_mode)) {
+      roadmap_log (ROADMAP_INFO, "cannot open file %s", name);
       return NULL;
    }
 
-   if (fstat (context->fd, &state_result) != 0) {
-      if (sequence == 0) {
-         roadmap_log (ROADMAP_ERROR, "cannot stat file %s", name);
-      }
-      roadmap_file_unmap (&context);
-      return NULL;
-   }
-   context->size = state_result.st_size;
+   context = (RoadMapFileContextStructure*) malloc (sizeof(*context));
+   roadmap_check_allocated(context);
 
-   context->base =
-      mmap (NULL, state_result.st_size, map_mode, MAP_SHARED, context->fd, 0);
-
-   if (context->base == NULL) {
-      roadmap_log (ROADMAP_ERROR, "cannot map file %s", name);
-      roadmap_file_unmap (&context);
-      return NULL;
-   }
+   context->file = qFile;
+   context->content = qFile->readAll();
+   context->open_mode = open_mode;
 
    *file = context;
 
@@ -357,7 +325,7 @@ void *roadmap_file_base (RoadMapFileContext file){
    if (file == NULL) {
       return NULL;
    }
-   return file->base;
+   return ((RoadMapFileContextStructure*) file)->content.data();
 }
 
 
@@ -366,15 +334,13 @@ int roadmap_file_size (RoadMapFileContext file){
    if (file == NULL) {
       return 0;
    }
-   return file->size;
+   return ((RoadMapFileContextStructure*) file)->file->size();
 }
 
 
 int roadmap_file_sync (RoadMapFileContext file) {
 
-   if (file->base != NULL) {
-      return msync (file->base, file->size, MS_SYNC);
-   }
+   /* never called */
 
    return -1;
 }
@@ -382,16 +348,14 @@ int roadmap_file_sync (RoadMapFileContext file) {
 
 void roadmap_file_unmap (RoadMapFileContext *file) {
 
-   RoadMapFileContext context = *file;
+   RoadMapFileContextStructure* context = *file;
 
-   if (context->base != NULL) {
-      munmap (context->base, context->size);
+   if (context->file != NULL) {
+      context->file->close();
    }
 
-   if (context->fd >= 0) {
-      close (context->fd);
-   }
-   free(context);
+   delete (context->file);
+   delete (context);
    *file = NULL;
 }
 
@@ -413,7 +377,7 @@ RoadMapFile roadmap_file_open  (const char *name, const char *mode) {
     } else {
       roadmap_log (ROADMAP_ERROR,
                    "%s: invalid file access mode %s", name, mode);
-      return -1;
+      return ROADMAP_INVALID_FILE;
     }
 
     file->open(open_mode);
@@ -428,20 +392,20 @@ RoadMapFile roadmap_file_open  (const char *name, const char *mode) {
 
 
 int roadmap_file_read  (RoadMapFile file, void *data, int size) {
-    return ((roadmap_file_t*) file)->file.read((char*) data, size);
+    return ((roadmap_file_t*) file)->file->read((char*) data, size);
 }
 
 int roadmap_file_write (RoadMapFile file, const void *data, int length) {
-   return ((roadmap_file_t*) file)->file.write((const char *)data, size);
+   return ((roadmap_file_t*) file)->file->write((const char *)data, length);
 }
 
 int roadmap_file_seek (RoadMapFile file, int offset, RoadMapSeekWhence whence) {
 
-    return ((roadmap_file_t*) file)->file.seek(offset);
+    return ((roadmap_file_t*) file)->file->seek(offset);
 }
 
 void  roadmap_file_close (RoadMapFile file) {
-    ((roadmap_file_t*)file)->file.close();
+    ((roadmap_file_t*)file)->file->close();
 
     delete file->file;
     delete file;

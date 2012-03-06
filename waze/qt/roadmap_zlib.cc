@@ -64,7 +64,7 @@ int roadmap_zlib_uncompress(void *raw_data, unsigned long *raw_data_size, void *
 
     memcpy(raw_data, outData.data(), *raw_data_size);
 
-    return 0;
+    return outData.length() == 0; //returns Z_OK(0) on success, !=0 otherwise
 }
 
 ///////////////////////////////////////////////////////
