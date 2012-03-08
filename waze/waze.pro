@@ -302,13 +302,11 @@ SOURCES += \
     zlib/zutil.c \
     zlib/uncompr.c \
     zlib/trees.c \
-    zlib/minigzip.c \
     zlib/inftrees.c \
     zlib/inflate.c \
     zlib/inffast.c \
     zlib/infback.c \
     zlib/gzio.c \
-    zlib/example.c \
     zlib/deflate.c \
     zlib/crc32.c \
     zlib/compress.c \

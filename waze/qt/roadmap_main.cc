@@ -814,6 +814,10 @@ time_s roadmap_time_get_current()
     return current_time;
 }
 
+time_t roadmap_time_translate(const char *hhmmss, const char *ddmmyy) {
+    return QDateTime::fromString(QString(ddmmyy).append(QString(hhmmss)), QString("HHmmssddMMyy")).toTime_t();
+}
+
 void roadmap_main_show_contacts() {
     mainWindow->showContactList();
 }

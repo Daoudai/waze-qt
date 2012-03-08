@@ -114,8 +114,11 @@ void *roadmap_net_connect_async (const char *protocol, const char *name, const c
    /* TODO */
 }
 
-void roadmap_net_cancel_connect (RoadMapIO *io) {
-    // never called
+void roadmap_net_cancel_connect (void *context) {
+    RoadMapIO* io = (RoadMapIO *) context;
+    RoadMapSocket s = io->os.socket;
+
+    ((roadmap_socket_t*) s)->reply->abort();
 }
 
 int roadmap_net_send_async( RoadMapSocket s, const void *data, int length )

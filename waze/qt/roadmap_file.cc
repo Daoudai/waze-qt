@@ -282,7 +282,7 @@ const char *roadmap_file_map (const char *set,
 
        for (  ; sequence != NULL; sequence = roadmap_path_next(set, sequence))
        {
-            qSequence = QString::fromLocal8Bit(sequence).append(QDir::separator()).append(qName);
+            qSequence = QString::fromLocal8Bit(sequence).append("/").append(qName);
             if (QFile::exists(qSequence))
             {
                 break;
