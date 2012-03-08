@@ -566,7 +566,7 @@ const char *roadmap_db_map_path (void) {
 	#ifdef J2ME
       map_path = "recordstore:/";
 		//strncpy_safe (map_path_static, map_path, sizeof (map_path_static));
-	#elif defined (WIN32)
+#elif defined (WIN32) && !defined (QTMOBILITY)
 		map_path = roadmap_path_join (roadmap_path_user(), "maps");
 		strncpy_safe (map_path_static, map_path, sizeof (map_path_static));
 		roadmap_path_free (map_path);

@@ -1026,7 +1026,7 @@ void roadmap_gps_initialize (void) {
 
    static int RoadMapGpsInitialized = 0;
 
-#if defined (_WIN32) && !defined (__SYMBIAN32__)
+#if defined (_WIN32) && !defined (__SYMBIAN32__) && !defined (QTMOBILITY)
    const int *serial_ports;
    static const char **speeds;
    RoadMapConfigItem *source_item = NULL;

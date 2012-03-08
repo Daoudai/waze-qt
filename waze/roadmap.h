@@ -188,6 +188,10 @@ typedef struct {
 } time_s;
 
 time_s roadmap_time_get_current();
+
+time_t roadmap_time_translate(const char *hhmmss,
+                              const char *ddmmyy);
+
 #endif
 
 #ifndef J2ME

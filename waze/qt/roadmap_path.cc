@@ -36,6 +36,7 @@
 #include <QFile>
 #include <QApplication>
 #include <QHash>
+#include <QList>
 #include <QStringList>
 
 extern "C" {
@@ -46,9 +47,70 @@ extern "C" {
 
 extern QApplication* app;
 
+class WazeString {
+public:
+    explicit WazeString() {
+
+    }
+
+    WazeString(const QString str) {
+        _str = str.toLocal8Bit();
+    }
+
+    WazeString(const WazeString& other) {
+        if (&other != this)
+        {
+            _str = other._str;
+        }
+    }
+
+    WazeString &operator=(const WazeString &other)
+    {
+        if (&other != this)
+        {
+            _str = other._str;
+        }
+
+        return *this;
+    }
+
+    WazeString &operator=(const QString &str)
+    {
+        _str = str.toLocal8Bit().data();
+
+        return *this;
+    }
+
+    bool operator==(const WazeString &other) const
+    {
+        if (&other == this)
+        {
+            return true;
+        }
+
+        return _str == other._str;
+    }
+
+    bool operator==(const QString &str) const
+    {
+        return _str == str.toLocal8Bit();
+    }
+
+    int length() const {
+        return _str.length();
+    }
+
+    const char *getStr() const {
+        return _str.data();
+    }
+
+private:
+    QByteArray _str;
+};
+
 struct RoadMapPathRecord {
-   QStringList items;
-   QString preferred;
+   QList<WazeString> items;
+   WazeString preferred;
 };
 
 typedef QHash<QString, RoadMapPathRecord> RoadMapPathList;
@@ -57,7 +119,7 @@ static RoadMapPathList RoadMapPaths;
 
 #define HOME_PREFIX "MyDocs/.waze"
 
-static char path_separator = QDir::separator().toAscii();
+static char path_separator = '/';
 
 static char *roadmap_path_expand (const char *item, size_t length);
 
@@ -69,15 +131,11 @@ static RoadMapPathRecord roadmap_path_find (const char *name) {
 
         /* Add the hardcoded configuration. */
 
-        QString appDataPath = app->applicationDirPath() + QDir::separator() +
-                QString("..") + QDir::separator() +
-                QString("data");
-        QString userDataPath = QDir::homePath() + QDir::separator() +
-                QString("MyDocs") + QDir::separator() +
-                QString(".waze");
+        QString appDataPath = app->applicationDirPath().append("/").append(QString("..")).append("/").append(QString("data"));
+        QString userDataPath = QDir::homePath().append("/").append(QString(HOME_PREFIX));
 
 
-        QStringList userPaths;
+        QList<WazeString> userPaths;
         userPaths.append(userDataPath);
         userPaths.append(appDataPath);
         RoadMapPathRecord userPathRecord;
@@ -86,7 +144,7 @@ static RoadMapPathRecord roadmap_path_find (const char *name) {
         RoadMapPaths.insert(QString("user"), userPathRecord);
 
 
-        QStringList configPaths;
+        QList<WazeString> configPaths;
         configPaths.append(userDataPath);
         configPaths.append(appDataPath);
         RoadMapPathRecord configPathRecord;
@@ -95,35 +153,35 @@ static RoadMapPathRecord roadmap_path_find (const char *name) {
         RoadMapPaths.insert(QString("config"), configPathRecord);
 
 
-        QStringList skinPaths;
-        skinPaths.append(userDataPath + QDir::separator() +
-                         QString("skins") + QDir::separator() +
-                         QString("default") + QDir::separator() +
-                         QString("day"));
-        skinPaths.append(appDataPath + QDir::separator() +
-                         QString("skins") + QDir::separator() +
-                         QString("default") + QDir::separator() +
-                         QString("day"));
-        skinPaths.append(userDataPath + QDir::separator() +
-                         QString("skins") + QDir::separator() +
-                         QString("default"));
-        skinPaths.append(appDataPath + QDir::separator() +
-                         QString("skins") + QDir::separator() +
-                         QString("default"));
+        QList<WazeString> skinPaths;
+        skinPaths.append(QString(userDataPath).append("/")
+                .append(QString("skins")).append("/")
+                .append(QString("default")).append("/")
+                .append(QString("day")));
+        skinPaths.append(QString(appDataPath).append("/")
+                         .append(QString("skins")).append("/")
+                         .append(QString("default")).append("/")
+                         .append(QString("day")));
+        skinPaths.append(QString(userDataPath).append("/")
+                         .append(QString("skins")).append("/")
+                         .append(QString("default")));
+        skinPaths.append(QString(appDataPath).append("/")
+                         .append(QString("skins")).append("/")
+                         .append(QString("default")));
         RoadMapPathRecord skinPathRecord;
         skinPathRecord.items = skinPaths;
-        skinPathRecord.preferred = userDataPath + QDir::separator() + QString("skins");
+        skinPathRecord.preferred = QString(userDataPath).append("/").append(QString("skins"));
         RoadMapPaths.insert(QString("skin"), skinPathRecord);
 
 
-        QStringList mapPaths;
-        mapPaths.append(userDataPath + QDir::separator() +
-                         QString("maps"));
-        mapPaths.append(appDataPath + QDir::separator() +
-                         QString("maps"));
+        QList<WazeString> mapPaths;
+        mapPaths.append(QString(userDataPath).append("/")
+                         .append(QString("maps")));
+        mapPaths.append(QString(appDataPath).append("/")
+                         .append(QString("maps")));
         RoadMapPathRecord mapsPathRecord;
         mapsPathRecord.items = mapPaths;
-        mapsPathRecord.preferred = userDataPath + QDir::separator() + QString("maps");
+        mapsPathRecord.preferred = QString(userDataPath).append("/").append(QString("maps"));
         RoadMapPaths.insert(QString("maps"), mapsPathRecord);
     }
 
@@ -140,7 +198,7 @@ static char *roadmap_path_cat (const char *s1, const char *s2) {
     roadmap_check_allocated (result);
 
     strcpy (result, s1);
-    strcat (result, QString(path_separator).toAscii().data());
+    strcat (result, "/");
     strcat (result, s2);
 
     return result;
@@ -330,7 +388,7 @@ void roadmap_path_set (const char *name, const char *path) {
 
    RoadMapPathRecord path_list = roadmap_path_find (name);
 
-   if (path_list.preferred == QString()) {
+   if (path_list.preferred.length() == 0) {
       roadmap_log(ROADMAP_FATAL, "unknown path set '%s'", name);
    }
 
@@ -338,8 +396,14 @@ void roadmap_path_set (const char *name, const char *path) {
    if (*path == 0) return; /* Ignore empty path: current is better. */
 
    QString newPaths(path);
-   QStringList newPathList = newPaths.split(",");
-    path_list.items = newPathList;
+   QList<WazeString> newPathList;
+   QStringList paths = newPaths.split(",");
+   QStringList::const_iterator constIterator;
+   for (constIterator = paths.constBegin(); constIterator != paths.constEnd(); ++constIterator)
+   {
+       newPathList.append(WazeString(*constIterator));
+   }
+   path_list.items = newPathList;
 }
 
 
@@ -347,12 +411,12 @@ const char *roadmap_path_first (const char *name) {
 
    RoadMapPathRecord path_list = roadmap_path_find (name);
 
-   if (path_list.preferred == QString()) {
+   if (path_list.preferred.length() == 0) {
       roadmap_log (ROADMAP_FATAL, "invalid path set '%s'", name);
    }
 
    if (!path_list.items.isEmpty()) {
-      return path_list.items.first().toLocal8Bit().data();
+       return path_list.items.first().getStr();
    }
 
    return NULL;
@@ -363,13 +427,17 @@ const char *roadmap_path_next  (const char *name, const char *current) {
 
    RoadMapPathRecord path_list = roadmap_path_find (name);
 
-   QStringList::const_iterator constIterator;
+   QList<WazeString>::const_iterator constIterator;
    for (constIterator = path_list.items.constBegin(); constIterator != path_list.items.constEnd(); ++constIterator)
    {
        if (*constIterator == QString(current))
        {
-           ++constIterator;
-           return (*constIterator).toLocal8Bit().data();
+           constIterator++;
+           if (constIterator == path_list.items.constEnd())
+           {
+               break;
+           }
+           return (*constIterator).getStr();
        }
    }
 
@@ -381,12 +449,12 @@ const char *roadmap_path_last (const char *name) {
 
     RoadMapPathRecord path_list = roadmap_path_find (name);
 
-    if (path_list.preferred == QString()) {
+    if (path_list.preferred.length() == 0) {
        roadmap_log (ROADMAP_FATAL, "invalid path set '%s'", name);
     }
 
     if (!path_list.items.isEmpty()) {
-       return path_list.items.last().toLocal8Bit().data();
+       return path_list.items.last().getStr();
     }
 
     return NULL;
@@ -397,13 +465,17 @@ const char *roadmap_path_previous (const char *name, const char *current) {
 
     RoadMapPathRecord path_list = roadmap_path_find (name);
 
-    QStringList::const_iterator constIterator;
+    QList<WazeString>::const_iterator constIterator;
     for (constIterator = path_list.items.constBegin(); constIterator != path_list.items.constEnd(); ++constIterator)
     {
         if (*constIterator == QString(current))
         {
+            if (constIterator == path_list.items.constBegin())
+            {
+                break;
+            }
             --constIterator;
-            return (*constIterator).toAscii().data();
+            return (*constIterator).getStr();
         }
     }
 
@@ -418,11 +490,11 @@ const char *roadmap_path_preferred (const char *name) {
 
    RoadMapPathRecord path_list = roadmap_path_find (name);
 
-   if (path_list.preferred == QString()) {
+   if (path_list.preferred.length() == 0) {
       roadmap_log (ROADMAP_FATAL, "invalid path set '%s'", name);
    }
 
-   return path_list.preferred.toAscii().data();
+   return path_list.preferred.getStr();
 }
 
 
