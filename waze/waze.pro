@@ -36,7 +36,9 @@ TEMPLATE = app
 TARGET = waze
 CONFIG -= staticlib
 
+linux {
 LIBS += -ldl -lrt
+}
 
 !maemo5 {
     QMAKE_CFLAGS += -Wno-unused-result -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable
@@ -295,7 +297,22 @@ SOURCES += \
     roadmap_recorder.c \
     navigate/navigate_tts.c \
     roadmap_base64.c \
-    navigate/navigate_route_events.c
+    navigate/navigate_route_events.c \
+    roadmap_zlib.c \
+    zlib/zutil.c \
+    zlib/uncompr.c \
+    zlib/trees.c \
+    zlib/minigzip.c \
+    zlib/inftrees.c \
+    zlib/inflate.c \
+    zlib/inffast.c \
+    zlib/infback.c \
+    zlib/gzio.c \
+    zlib/example.c \
+    zlib/deflate.c \
+    zlib/crc32.c \
+    zlib/compress.c \
+    zlib/adler32.c
 
 HEADERS += \
     roadmap_types.h \
@@ -612,6 +629,17 @@ HEADERS += \
     navigate/navigate_tts.h \
     roadmap_base64.h \
     navigate/navigate_route_events.h \
+    zlib/zutil.h \
+    zlib/zlib.h \
+    zlib/zconf.in.h \
+    zlib/zconf.h \
+    zlib/trees.h \
+    zlib/inftrees.h \
+    zlib/inflate.h \
+    zlib/inffixed.h \
+    zlib/inffast.h \
+    zlib/deflate.h \
+    zlib/crc32.h
 
 OTHER_FILES += \
     qtc_packaging/debian_fremantle/README \
@@ -628,7 +656,16 @@ OTHER_FILES += \
     qtc_packaging/debian_harmattan/copyright \
     qtc_packaging/debian_harmattan/manifest.aegis \
     qtc_packaging/debian_harmattan/postinst \
-    qtc_packaging/debian_harmattan/rules
+    qtc_packaging/debian_harmattan/rules \
+    zlib/zlib.3 \
+    zlib/README \
+    zlib/Makefile.in \
+    zlib/Makefile \
+    zlib/INDEX \
+    zlib/FAQ \
+    zlib/configure \
+    zlib/ChangeLog \
+    zlib/algorithm.txt
 
 
 # Please do not modify the following two lines. Required for deployment.

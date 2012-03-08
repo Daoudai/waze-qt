@@ -1061,7 +1061,7 @@ void roadmap_gps_initialize (void) {
          ("preferences", &RoadMapConfigGpsAcceptCoarseFixSeconds, "10", NULL);
 
 
-#if defined (_WIN32) && !defined (__SYMBIAN32__)
+#if defined (_WIN32) && !defined (__SYMBIAN32__) && !defined(QTMOBILITY)
 
       virtual_item = roadmap_config_declare_enumeration
                ("preferences", &RoadMapConfigGPSVirtual, NULL, "", NULL);
@@ -1245,7 +1245,7 @@ void roadmap_gps_open (void) {
    url = roadmap_gps_source ();
 
    if (url == NULL) {
-#if defined (_WIN32) && !defined (__SYMBIAN32__)
+#if defined (_WIN32) && !defined (__SYMBIAN32__) && !defined (QTMOBILITY)
       url = roadmap_main_get_virtual_serial ();
       if (!url) {
          url = roadmap_config_get (&RoadMapConfigGPSSource);
@@ -1822,7 +1822,7 @@ int roadmap_gps_satelite_count(void){
    return RoadMapGpsActiveSatelliteCount;
 }
 /* GPS auto detection - win32 only */
-#if defined (_WIN32) && !defined (__SYMBIAN32__)
+#if defined (_WIN32) && !defined (__SYMBIAN32__) && !defined (QTMOBILITY)
 static RoadMapCallback g_callback;
 
 static void roadmap_gps_detect_finalize(void){

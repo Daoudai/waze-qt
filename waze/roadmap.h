@@ -182,6 +182,14 @@ static inline void do_assert(char *text) {
 
 typedef void (*roadmap_log_msgbox_handler) (const char *title, const char *msg);
 
+#ifdef QTMOBILITY
+typedef struct {
+    int year, month, day, hour, min, sec, msec;
+} time_s;
+
+time_s roadmap_time_get_current();
+#endif
+
 #ifndef J2ME
 void roadmap_log_push        (const char *description);
 void roadmap_log_pop         (void);

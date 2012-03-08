@@ -84,7 +84,9 @@ int roadmap_io_write_async (RoadMapIO *io, const void *data, int length) {
 #endif
       
       case ROADMAP_IO_FILE:
+#ifndef QTMOBILITY
       case ROADMAP_IO_SERIAL:
+#endif
       case ROADMAP_IO_PIPE:
          return -1;
          
@@ -129,9 +131,11 @@ void  roadmap_io_invalidate (RoadMapIO *io) {
          io->os.socket = ROADMAP_INVALID_SOCKET;
          break;
 
+#ifndef QTMOBILITY
       case ROADMAP_IO_SERIAL:
          io->os.serial = ROADMAP_INVALID_SERIAL;
          break;
+#endif
 
       case ROADMAP_IO_PIPE:
          io->os.pipe = ROADMAP_SPAWN_INVALID_PIPE;
@@ -161,9 +165,11 @@ int roadmap_io_same (RoadMapIO *io1, RoadMapIO *io2) {
          if (io1->os.socket != io2->os.socket) return 0;
          break;
 
+#ifndef QTMOBILITY
       case ROADMAP_IO_SERIAL:
          if (io1->os.serial != io2->os.serial) return 0;
          break;
+#endif
 
       case ROADMAP_IO_PIPE:
          if (io1->os.pipe != io2->os.pipe) return 0;

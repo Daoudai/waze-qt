@@ -47,7 +47,7 @@
 #include "Realtime/Realtime.h"
 static FILE *sgLogFile = NULL;
 
-#if defined(IPHONE) || defined(unix) && !defined(J2ME)
+#if defined(IPHONE) || defined(unix) && !defined(J2ME) && !defined(QTMOBILITY)
 #include <sys/timeb.h>
 #endif
 #undef FREEZE_ON_FATAL_ERROR
@@ -203,10 +203,11 @@ static void roadmap_log_one (struct roadmap_message_descriptor *category,
                              const char *format,
                              va_list ap) {
 
-
-#if (defined (_WIN32) && !defined (__SYMBIAN32__))
+#if (defined (_WIN32) && !defined (__SYMBIAN32__) && !defined(QTMOBILITY))
 SYSTEMTIME st;
 #endif
+
+#ifndef QTMOBILITY
 int i;
 struct tm *tms;
 time_t now;
@@ -216,10 +217,18 @@ tms = localtime( &now );
 GET_2_DIGIT_STRING( tms->tm_mday, day );
 GET_2_DIGIT_STRING( tms->tm_mon+1, month );	// Zero based from January
 GET_2_DIGIT_STRING( tms->tm_year-100, year ); // Year from 1900
+#endif // QTMOBILITY
 
 #ifdef J2ME
    fprintf (file, "%d %c%s %s, line %d ",
          time(NULL), saved, category->prefix, source, line);
+#elif defined(QTMOBILITY)
+    int i;
+    time_s time = roadmap_time_get_current();
+
+    fprintf (file, "%02d:%02d:%02d.%03d %c%s %s, line %d ",
+          time.hour, time.min, time.sec, time.msec,
+          saved, category->prefix, source, line);
 #elif defined (__SYMBIAN32__)
 
 
@@ -243,13 +252,12 @@ GET_2_DIGIT_STRING( tms->tm_year-100, year ); // Year from 1900
 		   date_buf, tms->tm_hour, tms->tm_min, tms->tm_sec,
          saved, category->prefix, source, line);
 
-#elif defined (_WIN32)
+#elif defined (_WIN32) && !defined(QTMOBILITY)
    GetLocalTime(&st);
 
    fprintf (file, "%02d/%02d %02d:%02d:%02d %s\t",
          st.wDay, st.wMonth, st.wHour, st.wMinute, st.wSecond,
          category->prefix);
-
 #else
    //struct tm *tms;
    struct timeb tp;
@@ -295,7 +303,6 @@ GET_2_DIGIT_STRING( tms->tm_year-100, year ); // Year from 1900
       const char* title = "Fatal Error";
 
 #endif   // FREEZE_ON_FATAL_ERROR
-
       vsprintf(msg, format, ap);
       sprintf (str, "%c%s %s, line %d %s",
          saved, category->prefix, source, line, msg);
