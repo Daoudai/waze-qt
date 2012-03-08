@@ -1110,7 +1110,7 @@ void PerformVersionUpgrade( int exit_code, void *context)
 //   assert( gs_VU.NewVersion[0]);
 //   assert( gs_VU.URL[0]);
 
-#if defined (_WIN32) || defined (__SYMBIAN32__)
+#if (defined (_WIN32) || defined (__SYMBIAN32__)) && !defined (QTMOBILITY)
    if( dec_yes == exit_code)
       roadmap_internet_open_browser( gs_VU.URL);
 #endif

@@ -51,7 +51,17 @@
 #include <stdarg.h>
 
 #include "roadmap_file.h"
-#include "roadmap_zlib.h"
+
+#ifdef RIMAPI
+#include "rimapi.h"
+#include <device_specific.h>
+#elif defined (J2ME)
+#include "zlib/zlib.h"
+#include <device_specific.h>
+#else
+#include "zlib/zlib.h"
+#endif
+
 #include "roadmap.h"
 #include "roadmap_path.h"
 #include "roadmap_data_format.h"
@@ -314,7 +324,7 @@ static int roadmap_db_fill_data (roadmap_db_database *database, void *base, unsi
 #ifdef RIMAPI
 	status = RIMAPI_ZLib_uncompress (raw_data, &raw_data_size, compressed_data, tile_header->compressed_data_size);
 #else
-    status = roadmap_zlib_uncompress (raw_data, &raw_data_size, compressed_data, tile_header->compressed_data_size) == Z_OK;
+	status = uncompress (raw_data, &raw_data_size, compressed_data, tile_header->compressed_data_size) == Z_OK;
 #endif
 
 	if (!status) {

@@ -1413,11 +1413,9 @@ void roamdmap_search_address_book(void){
 #ifdef IPHONE_NATIVE
 
    address_book_dlg_show(NULL, NULL);
-#endif //IPHONE_NATIVE
-#if defined(ANDROID) || defined(QTMOBILITY)
+#elif defined(ANDROID) || defined(QTMOBILITY)
    roadmap_main_show_contacts();
-#endif
-#if defined (_WIN32) && !defined (EMBEDDED_CE)
+#elif defined (_WIN32) && !defined (EMBEDDED_CE)
    roadmap_main_search_contacts();
 #endif
 

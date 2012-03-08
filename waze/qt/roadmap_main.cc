@@ -798,6 +798,22 @@ double atof_locale_safe(const char *str) {
 
 }
 
+time_s roadmap_time_get_current()
+{
+    QDateTime qTime = QDateTime::currentDateTime();
+    time_s current_time;
+
+    current_time.year = qTime.date().year();
+    current_time.month = qTime.date().month();
+    current_time.day = qTime.date().day();
+    current_time.hour = qTime.time().hour();
+    current_time.min = qTime.time().minute();
+    current_time.sec = qTime.time().second();
+    current_time.msec = qTime.time().msec();
+
+    return current_time;
+}
+
 void roadmap_main_show_contacts() {
     mainWindow->showContactList();
 }
