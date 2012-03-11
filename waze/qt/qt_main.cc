@@ -311,16 +311,6 @@ void RMapMainWindow::setFocusToCanvas() {
     canvas->setFocus();
 }
 
-void RMapMainWindow::dispatchMessage(int message) {
-    roadmap_log(ROADMAP_INFO, "dispatch thread id: %d ", this->thread()->currentThreadId());
-    emit recievedMessage(message);
-}
-
-void RMapMainWindow::onRecievedMessage(int message) {
-    roadmap_log(ROADMAP_INFO, "dispatcher receiver thread id: %d ", this->thread()->currentThreadId());
-    roadmap_main_message_dispatcher(message);
-}
-
 void RMapMainWindow::setStatus(const char* text) {
    statusBar()->showMessage(text);
 }

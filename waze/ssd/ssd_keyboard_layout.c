@@ -576,7 +576,6 @@ static void calc_layout( buttons_layout_info* layout, RoadMapGuiRect *rect, BOOL
 #endif   // PROFILING
    }
 }
-extern long roadmap_main_time_msec();
 
 static void draw( SsdWidget this, RoadMapGuiRect *rect, int flags)
 {

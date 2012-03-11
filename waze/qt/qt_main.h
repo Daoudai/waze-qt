@@ -169,7 +169,6 @@ public:
    void addToolSpace(void);
    void addCanvas(void);
    void setStatus(const char* text);
-   void dispatchMessage(int message);
 
    void toggleFullScreen();
 
@@ -187,7 +186,6 @@ public slots:
    void mouseAreaPressed();
 
 private slots:
-   void onRecievedMessage(int message);
    void contactsDialogOkPressed(QString address);
    void contactsDialogCancelPressed();
 

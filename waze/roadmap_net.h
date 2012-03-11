@@ -34,8 +34,7 @@
 
 #if defined QTMOBILITY
 
-struct roadmap_socket_t;
-typedef struct roadmap_socket_t *RoadMapSocket;
+typedef void *RoadMapSocket;
 #define ROADMAP_INVALID_SOCKET ((RoadMapSocket) NULL)
 
 #elif defined (_WIN32) && !defined (__SYMBIAN32__)

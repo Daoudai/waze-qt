@@ -9,6 +9,70 @@ extern "C" {
 #include "roadmap_net.h"
 }
 
+RNetworkSocket::RNetworkSocket(QNetworkReply* reply, bool isCompressed, RoadMapNetConnectCallback callback)
+    : _reply(reply), _isCompressed(isCompressed), _callback(callback)
+{
+    connect(reply, SIGNAL(finished()), this, SLOT(invokeCallback()));
+    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(invokeCallback()));
+}
+
+RNetworkSocket::~RNetworkSocket()
+{
+    delete _reply;
+}
+
+void RNetworkSocket::invokeCallback()
+{
+    roadmap_result roadmap_error;
+    QByteArray data;
+
+    if (_reply->error() != QNetworkReply::NoError)
+    {
+        roadmap_log(ROADMAP_WARNING, "Reply finished with error <%d>", _reply->error());
+    }
+    else
+    {
+        data = _reply->readAll();
+    }
+
+    switch (_reply->error()) {
+    case QNetworkReply::NoError:
+        roadmap_error = succeeded;
+        break;
+    case QNetworkReply::ProtocolUnknownError:
+    case QNetworkReply::ProtocolInvalidOperationError:
+    case QNetworkReply::ProtocolFailure:
+        roadmap_error = err_net_unknown_protocol;
+        break;
+
+    case QNetworkReply::ConnectionRefusedError:
+    case QNetworkReply::RemoteHostClosedError:
+    case QNetworkReply::TimeoutError:
+    case QNetworkReply::SslHandshakeFailedError:
+    case QNetworkReply::TemporaryNetworkFailureError:
+
+    // also content related
+    case QNetworkReply::ContentAccessDenied:
+    case QNetworkReply::ContentOperationNotPermittedError:
+    case QNetworkReply::ContentNotFoundError:
+    case QNetworkReply::AuthenticationRequiredError:
+    case QNetworkReply::ContentReSendError:
+    case QNetworkReply::UnknownContentError:
+        roadmap_error = err_net_remote_error;
+        break;
+
+    case QNetworkReply::HostNotFoundError:
+        roadmap_error = err_net_no_path_to_destination;
+        break;
+
+    default:
+        roadmap_error = err_net_failed;
+        break;
+    }
+
+    _callback(this, data.data(),roadmap_error);
+}
+
 RNetworkManager::RNetworkManager(QObject *parent) :
     QNetworkAccessManager(parent)
 {
@@ -34,7 +98,7 @@ void RNetworkManager::prepareNetworkRequest(QNetworkRequest& req,
                          .toLatin1());
 }
 
-void RNetworkManager::requestSync(RequestType protocol, QUrl url,
+RNetworkSocket* RNetworkManager::requestSync(RequestType protocol, QUrl url,
                  QDateTime update_time,
                  int flags,
                  roadmap_result* err)
@@ -53,14 +117,14 @@ void RNetworkManager::requestSync(RequestType protocol, QUrl url,
         break;
     }
 
-    connect(reply, SIGNAL(readyRead()), this, SLOT(slotReadyRead()));
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)),
-            this, SLOT(slotError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(sslErrors(QList<QSslError>)),
-            this, SLOT(slotSslErrors(QList<QSslError>)));
+    connect(reply, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
+//    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)),
+//            this, SLOT(slotError(QNetworkReply::NetworkError)));
+//    connect(reply, SIGNAL(sslErrors(QList<QSslError>)),
+//            this, SLOT(slotSslErrors(QList<QSslError>)));
 }
 
-void RNetworkManager::requestAsync(RequestType protocol, QUrl url,
+RNetworkSocket* RNetworkManager::requestAsync(RequestType protocol, QUrl url,
                   QDateTime update_time,
                   int flags,
                   RoadMapNetConnectCallback callback,
@@ -80,9 +144,14 @@ void RNetworkManager::requestAsync(RequestType protocol, QUrl url,
         break;
     }
 
-    connect(reply, SIGNAL(readyRead()), this, SLOT(slotReadyRead()));
+    connect(reply, SIGNAL(readyRead(QNetworkReply*)), this, SLOT(slotReadyRead()));
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)),
             this, SLOT(slotError(QNetworkReply::NetworkError)));
     connect(reply, SIGNAL(sslErrors(QList<QSslError>)),
             this, SLOT(slotSslErrors(QList<QSslError>)));
+}
+
+void RNetworkManager::replyFinished(RNetworkSocket* reply)
+{
+
 }
