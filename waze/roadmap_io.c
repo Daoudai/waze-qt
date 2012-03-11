@@ -77,7 +77,7 @@ int roadmap_io_write_async (RoadMapIO *io, const void *data, int length) {
    
    switch (io->subsystem) {
       case ROADMAP_IO_NET:
-#if defined(IPHONE_NATIVE) || defined(GTK) || defined(ANDROID)
+#if defined(IPHONE_NATIVE) || defined(GTK) || defined(ANDROID) || defined(QTMOBILITY)
          return roadmap_net_send_async( io->os.socket, data, length );
 #else
          return roadmap_net_send (io->os.socket, data, length, 0); //Change this to async once implemented

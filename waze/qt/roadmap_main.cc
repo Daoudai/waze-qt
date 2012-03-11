@@ -62,38 +62,12 @@ time_t timegm(struct tm *tm) { return 0; }
 
 static BOOL sgFirstRun = FALSE;	// The indicator if current application run is after the upgrade (first execution)
 
-//======= IO section ========
-
-#define IO_VALID( ioId ) ( ( ioId ) >= 0 )
-#define IO_INVALID_VAL (-1)
-
-typedef struct roadmap_main_io {
-   RoadMapIO io;
-   RoadMapInput callback;
-
-   int io_id;						// If is not valid < 0
-//   pthread_t handler_thread;
-   QMutex mutex;			// Mutex for the condition variable
-   QWaitCondition cond;				// Condition variable for the thread
-   io_direction_type io_type;
-   int pending_close;				// Indicator for the IO to be closed
-   time_t start_time;
-} roadmap_main_io;
-
-const struct timeval SOCKET_READ_SELECT_TIMEOUT = {30, 0}; // {sec, u sec}
-const struct timeval SOCKET_WRITE_SELECT_TIMEOUT = {30, 0}; // {sec, u sec}
-#define MESSAGE_DISPATCHER_TIMEOUT 10000 // {10 sec}
-
 #define CRASH_DUMP_ADDR_NUM		200		/* The number of addresses to dump when crash is occured */
 #define CRASH_DUMP_ADDR_NUM_ON_SHUTDOWN      20      /* The number of addresses to dump when crash is occured on shutdown
                                                       * to not blow up the log on each exit
                                                      */
-#define ROADMAP_MAX_IO 64
-static struct roadmap_main_io RoadMapMainIo[ROADMAP_MAX_IO];
 
-static void roadmap_main_reset_IO( roadmap_main_io *data );
 static void roadmap_start_event (int event);
-static BOOL roadmap_main_is_pending_close( roadmap_main_io *data );
 
 //===============================================================
 
@@ -126,79 +100,24 @@ void roadmap_main_open_url( const char* url )
    /* TODO */
 }
 
-/*************************************************************************************************
- * roadmap_main_handler_post_wait( int ioMsg, roadmap_main_io *aIO )
- * Causes calling thread to wait on the condition variable for this IO
- * Returns error code
- */
-static int roadmap_main_handler_post_wait( int ioMsg, roadmap_main_io *aIO )
+void roadmap_main_set_input    (RoadMapIO *io, RoadMapInput callback)
 {
-        aIO->mutex.lock();
 
-        // POST THE MESSAGE TO THE MAIN LOOP
-        // The main application thread has its message loop implemented
-        // at the Java side calling JNI functions for handling
-        // Supposed to be very small and efficient code.
-        // Called inside the mutex to prevent signaling before waitin
-        // TODO :: Check possibility to implement this message queue at the lower level
-        // TODO :: Start POSIX thread as the main thread
-        mainWindow->dispatchMessage(ioMsg);
-
-        // Waiting for the callback to finish
-        aIO->cond.wait(&aIO->mutex, MESSAGE_DISPATCHER_TIMEOUT );
-
-        aIO->mutex.unlock();
-
-        return 0;
 }
 
-/*************************************************************************************************
- * BOOL roadmap_main_invalidate_pending_close( roadmap_main_io *data )
- * Thread safe, invalidating the IO pending for close
- * Returns TRUE if the IO was invalidated
- */
-static BOOL roadmap_main_invalidate_pending_close( roadmap_main_io *data )
+void roadmap_main_set_output   (RoadMapIO *io, RoadMapInput callback, BOOL is_connect)
 {
-        BOOL res = FALSE;
-        data->mutex.lock();
-        if ( data->pending_close )
-        {
-            data->pending_close = 0;
-            res = TRUE;
-        }
-        data->mutex.unlock();
 
-        return res;
 }
 
-/*************************************************************************************************
- * BOOL roadmap_main_is_pending_close( roadmap_main_io *data )
- * Thread safe, reading the IO pending close
- * (Necessary for the non-atomic integer reads (M-Core cache implementations) and optimizer caching
- */
-static BOOL roadmap_main_is_pending_close( roadmap_main_io *data )
+void roadmap_main_remove_input (RoadMapIO *io)
 {
-    BOOL res = FALSE;
-    data->mutex.lock();
-    res = data->pending_close;
-    data->mutex.unlock();
 
-    return res;
 }
 
-/*************************************************************************************************
- * void roadmap_main_init_IO()
- * Initialization of the IO pool
- * void
- */
-static void roadmap_main_init_IO()
+RoadMapIO *roadmap_main_output_timedout(time_t timeout)
 {
-
-    for(int i = 0; i < ROADMAP_MAX_IO; ++i )
-    {
-        RoadMapMainIo[i].io_id = IO_INVALID_VAL;
-        RoadMapMainIo[i].pending_close = 0;
-    }
+    /* never called */
 }
 
 void roadmap_main_new(const char* title, int width, int height) {
@@ -216,12 +135,6 @@ void roadmap_main_set_keyboard(struct RoadMapFactoryKeyMap *bindings, RoadMapKey
    if (mainWindow) {
           mainWindow->setKeyboardCallback(callback);
    }
-}
-
-void roadmap_main_post_resolver_result( int entry_id )
-{
-   int msg = ( MSG_CATEGORY_RESOLVER | ( entry_id & MSG_ID_MASK ) );
-   mainWindow->dispatchMessage( msg );
 }
 
 RoadMapMenu roadmap_main_new_menu () {
@@ -327,181 +240,6 @@ void roadmap_main_show(void) {
    }
 }
 
-
-/*************************************************************************************************
- * roadmap_main_set_handler()
- * Creates the handler thread matching the io subsystem
- */
-static void roadmap_main_set_handler( roadmap_main_io* aIO )
-{
-        RoadMapIO *io = &aIO->io;
-        int retVal = 0;
-
-        // Handler threads for the IO
-        switch ( io->subsystem )
-        {
-//           case ROADMAP_IO_NET:
-//       {
-//            const char *handler_dir;
-//                handler_dir = ( aIO->io_type & _IO_DIR_WRITE ) ? "WRITE" : "READ";
-
-//                   retVal = pthread_create( &aIO->handler_thread, NULL,
-//                                                                                roadmap_main_socket_handler, aIO );
-
-//                   roadmap_log ( ROADMAP_DEBUG, "Creating handler thread for the net subsystem. ID: %d. Socket: %d. Thread: %d. Direction: %s",
-//                                                                                                           aIO->io_id, aIO->io.os.socket, aIO->handler_thread, handler_dir );
-//                   break;
-//           }
-
-           case ROADMAP_IO_FILE:
-                   roadmap_log ( ROADMAP_ERROR, "FILE IO is not supported" );
-                   retVal = 0;
-                   break;
-        }
-        // Check the handler creation status
-        if ( retVal != 0 )
-        {
-           aIO->io_id = IO_INVALID_VAL;
-           roadmap_log ( ROADMAP_ERROR, "handler thread creation has failed with error # %d, %s", errno, strerror( errno ) );
-        }
-}
-/*************************************************************************************************
- * roadmap_main_set_input()
- * Allocates the entry for the io and creates the handler thread
- */
-void roadmap_main_set_input ( RoadMapIO *io, RoadMapInput callback )
-{
-        int i;
-        int retVal;
-
-        for (i = 0; i < ROADMAP_MAX_IO; ++i)
-        {
-            if ( !IO_VALID( RoadMapMainIo[i].io_id ) )
-            {
-                RoadMapMainIo[i].io = *io;
-                RoadMapMainIo[i].callback = callback;
-                RoadMapMainIo[i].io_type = _IO_DIR_READ;
-                RoadMapMainIo[i].io_id = i;
-
-                break;
-            }
-       }
-       if ( i == ROADMAP_MAX_IO )
-       {
-          roadmap_log ( ROADMAP_FATAL, "Too many set input calls" );
-          return;
-       }
-
-       // Setting the handler
-       roadmap_main_set_handler( &RoadMapMainIo[i] );
-}
-
-
-/*************************************************************************************************
- * roadmap_main_set_output()
- * Allocates the entry for the io and creates the handler thread
- */
-void roadmap_main_set_output ( RoadMapIO *io, RoadMapInput callback, BOOL is_connect )
-{
-
-    int i, retVal;
-
-    roadmap_log( ROADMAP_DEBUG, "Setting the output for the subsystem : %d\n", io->subsystem );
-
-    for ( i = 0; i < ROADMAP_MAX_IO; ++i )
-    {
-        if ( !IO_VALID( RoadMapMainIo[i].io_id ) )
-        {
-            RoadMapMainIo[i].io = *io;
-            RoadMapMainIo[i].callback = callback;
-            RoadMapMainIo[i].io_id = i;
-            RoadMapMainIo[i].io_type = _IO_DIR_WRITE;
-                        if ( is_connect )
-                        {
-                            int type = RoadMapMainIo[i].io_type | _IO_DIR_CONNECT;
-                            RoadMapMainIo[i].io_type = (io_direction_type) type;
-                        }
-            RoadMapMainIo[i].start_time = time(NULL);
-            break;
-        }
-    }
-
-    if ( i == ROADMAP_MAX_IO )
-    {
-       roadmap_log ( ROADMAP_FATAL, "Too many set output calls" );
-       return;
-    }
-
-    // Setting the handler
-    roadmap_main_set_handler( &RoadMapMainIo[i] );
-
-}
-
-
-RoadMapIO *roadmap_main_output_timedout(time_t timeout) {
-   int i;
-
-   for (i = 0; i < ROADMAP_MAX_IO; ++i) {
-      if ( IO_VALID( RoadMapMainIo[i].io_id ) &&
-            ( RoadMapMainIo[i].io_type & _IO_DIR_CONNECT ) )
-      {
-         if ( RoadMapMainIo[i].start_time &&
-               ( timeout > RoadMapMainIo[i].start_time ) )
-         {
-            return &RoadMapMainIo[i].io;
-         }
-      }
-   }
-
-   return NULL;
-}
-
-
-/*************************************************************************************************
- * roadmap_main_remove_input()
- * The IO entry is marked for deallocation. Will be available again when the thread will finish
- */
-void roadmap_main_remove_input ( RoadMapIO *io )
-{
-        int i;
-
-        for (i = 0; i < ROADMAP_MAX_IO; ++i)
-        {
-           if ( IO_VALID( RoadMapMainIo[i].io_id ) && roadmap_io_same(&RoadMapMainIo[i].io, io))
-           {
-                 // Cancel the thread and set is valid to zero
-                 //roadmap_log( ROADMAP_DEBUG, "Canceling IO # %d thread %d\n", i, RoadMapMainIo[i].handler_thread );
-                 RoadMapMainIo[i].mutex.lock();
-                 RoadMapMainIo[i].pending_close = 1;
-                 RoadMapMainIo[i].start_time = 0;
-                 roadmap_io_invalidate( &RoadMapMainIo[i].io );
-                 RoadMapMainIo[i].mutex.unlock();
-
-                 roadmap_log( ROADMAP_DEBUG, "Removing the input id %d for the subsystem : %d \n", i, io->subsystem );
-                 break;
-           }
-        }
-        if ( i == ROADMAP_MAX_IO )
-        {
-           roadmap_log ( ROADMAP_ERROR, "Can't find input to remove! System: %d. FD: %d", io->subsystem, io->os.file );
-        }
-}
-
-
-/*************************************************************************************************
- * roadmap_main_reset_IO()
- * Resetting the IO entry fields
- */
-static void roadmap_main_reset_IO( roadmap_main_io *data )
-{
-    roadmap_log( ROADMAP_DEBUG, "Reset IO: %d \n", data->io_id );
-
-    data->callback = NULL;
-    //data->handler_thread = 0;
-    roadmap_io_invalidate( &data->io );
-    data->io_id = IO_INVALID_VAL;
-    data->pending_close = 0;
-}
 
 /*************************************************************************************************
  * roadmap_main_timeout()
@@ -664,95 +402,6 @@ void roadmap_main_minimize (void) {
 }
 
 /*************************************************************************************************
- * roadmap_main_message_dispatcher()
- * Main thread messages dispatching routine. Calls the appropriate callback
- * according to the message information
- */
-// Main loop message dispatcher
-void roadmap_main_message_dispatcher( int aMsg )
-{
-        //roadmap_log( ROADMAP_DEBUG, "Dispatching the message: %d", aMsg );
-        // Dispatching process
-        //roadmap_main_time_interval( 0 );
-        if ( aMsg & MSG_CATEGORY_IO_CALLBACK )	// IO callback message type
-        {
-                int indexIo = aMsg & MSG_ID_MASK;
-                //roadmap_log( ROADMAP_DEBUG, "Dispatching the message for IO %d", indexIo );
-                // Call the handler
-                if ( IO_VALID( RoadMapMainIo[indexIo].io_id ) && RoadMapMainIo[indexIo].callback &&
-                                !roadmap_main_is_pending_close( &RoadMapMainIo[indexIo] ) )
-                {
-                        RoadMapIO *io = &RoadMapMainIo[indexIo].io;
-
-                        RoadMapMainIo[indexIo].callback( io );
-                        roadmap_log( ROADMAP_DEBUG, "Callback %x. IO %d", RoadMapMainIo[indexIo].callback, RoadMapMainIo[indexIo].io_id );
-
-                        // Send the signal to the thread if the IO is valid
-//                        roadmap_log( ROADMAP_INFO, "Signaling thread %d", RoadMapMainIo[indexIo].handler_thread );
-                        RoadMapMainIo[indexIo].mutex.lock();
-
-                        RoadMapMainIo[indexIo].cond.wakeOne();
-
-                        RoadMapMainIo[indexIo].mutex.unlock();
-                }
-                else
-                {
-                        roadmap_log( ROADMAP_INFO, "The IO %d is undefined (Index: %d). Dispatching is impossible for message %d",RoadMapMainIo[indexIo].io_id, indexIo, aMsg );
-                }
-        }
-        // IO close message type - the thread was finalized
-        if ( aMsg & MSG_CATEGORY_IO_CLOSE )
-        {
-                int indexIo = aMsg & MSG_ID_MASK;
-                roadmap_main_reset_IO( &RoadMapMainIo[indexIo] );
-        }
-        if ( aMsg & MSG_CATEGORY_TIMER )	// Timer message type
-        {
-                int indexTimer = aMsg & MSG_ID_MASK;
-                //roadmap_log( ROADMAP_DEBUG, "Dispatching the message for Timer %d", indexTimer );
-                // Handle timeout
-                roadmap_main_timeout( indexTimer );
-        }
-        // Menu events message type
-        if ( aMsg & MSG_CATEGORY_MENU )	// Timer message type
-        {
-                /* TODO */
-//                int itemId = aMsg & MSG_ID_MASK;
-//                roadmap_androidmenu_handler( itemId );
-        }
-        // DNS resolver message
-        if ( aMsg & MSG_CATEGORY_RESOLVER )
-        {
-           int itemId = aMsg & MSG_ID_MASK;
-     //      resolver_handler( itemId );
-        }
-}
-
-
-/*************************************************************************************************
- * int roadmap_main_time_msec()
- * Returns time in millisec
- *
- *
- */
-long roadmap_main_time_msec()
-{
-        static struct timeval last_time = {0,-1};
-        struct timezone tz;
-        struct timeval cur_time;
-        long val;
-        // Get the current time
-        if ( gettimeofday( &cur_time, &tz ) == -1 )
-        {
-                roadmap_log( ROADMAP_ERROR, "Error in obtaining current time\n" );
-                return -1;
-        }
-        val = ( cur_time.tv_sec * 1000 + cur_time.tv_usec / 1000 );
-        return val;
-}
-
-
-/*************************************************************************************************
  * void on_auto_hide_dialog_close( int exit_code, void* context )
  * Auto hide dialog on close callback
  *
@@ -827,8 +476,6 @@ int main(int argc, char* argv[]) {
    app = new QApplication(argc, argv);
 
    roadmap_option (argc, argv, NULL);
-
-   roadmap_main_init_IO();
 
    roadmap_start_subscribe ( roadmap_start_event );
 
