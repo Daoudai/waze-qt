@@ -13,11 +13,7 @@ extern "C" {
 KeyboardDialog::KeyboardDialog(RMapMainWindow *parent) :
     QDeclarativeView(parent), mainWindow(parent)
 {
-#ifdef Q_WS_SIMULATOR
     setSource(QUrl::fromLocalFile(mainWindow->getApplicationPath() + QString("/qml/TextBox.qml")));
-#else
-    setSource(QUrl::fromLocalFile("/opt/waze/qml/TextBox.qml"));
-#endif
     setAttribute(Qt::WA_TranslucentBackground);
 
     QObject *item = dynamic_cast<QObject*>(rootObject());

@@ -244,11 +244,7 @@ void RMapMainWindow::showContactList() {
         contactsDialog = new QDeclarativeView(this);
         contactsDialog->setGeometry(0, 0, canvas->width(), canvas->height());
         contactsDialog->engine()->rootContext()->setContextProperty("contactModel", contactListModel);
-#ifdef Q_WS_SIMULATOR
         contactsDialog->setSource(QUrl::fromLocalFile(applicationPath + QString("/qml/Contacts.qml")));
-#else
-        contactsDialog->setSource(QUrl::fromLocalFile("/opt/waze/qml/Contacts.qml"));
-#endif
         contactsDialog->setAttribute(Qt::WA_TranslucentBackground);
         item = dynamic_cast<QObject*>(contactsDialog->rootObject());
 

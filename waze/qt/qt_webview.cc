@@ -8,11 +8,7 @@
 WazeWebView::WazeWebView(RMapMainWindow *parent) :
     QDeclarativeView(parent), mainWindow(parent)
 {
-#ifdef Q_WS_SIMULATOR
     setSource(QUrl::fromLocalFile(mainWindow->getApplicationPath() + QString("/qml/WazeBrowser.qml")));
-#else
-    setSource(QUrl::fromLocalFile("/opt/waze/qml/WazeBrowser.qml"));
-#endif
     setAttribute(Qt::WA_TranslucentBackground);
 }
 

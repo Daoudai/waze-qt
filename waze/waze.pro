@@ -23,7 +23,7 @@ symbian:TARGET.UID3 = 0xE6919A30
 #symbian:DEPLOYMENT.installer_header = 0x2002CCCF
 
 # Allow network access on Symbian
-symbian:TARGET.CAPABILITY += NetworkServices
+symbian:TARGET.CAPABILITY += NetworkServices ReadUserData LocalServices NetworkServices UserEnvironment Location ReadDeviceData
 
 # If your application uses the Qt Mobility libraries, uncomment
 # the following lines and add the respective components to the 
@@ -40,6 +40,12 @@ LIBS += -lz -ldl -lrt -lssl -lcrypto
 
 !maemo5 {
     QMAKE_CFLAGS += -Wno-unused-result -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable
+}
+
+maemo5 {
+    DEFINES += HOME_PREFIX=\"MyDocs/.waze\"
+} else:!isEmpty(MEEGO_VERSION_MAJOR) {
+    DEFINES += HOME_PREFIX=\"MyDocs/.waze\"
 }
 
 SOURCES += \

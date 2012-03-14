@@ -45,9 +45,7 @@
 #ifdef IPHONE
 #include "roadmap_main.h"
 #define HOME_PREFIX ""
-#elif defined(QTMOBILITY)
-#define HOME_PREFIX "MyDocs/.waze"
-#else
+#elif !defined(HOME_PREFIX)
 #define HOME_PREFIX ".waze"
 #endif
 

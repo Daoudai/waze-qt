@@ -80,7 +80,7 @@ void roadmap_device_set_backlight( int alwaysOn ) {
 
 int roadmap_device_get_battery_level( void ) {
     QSystemDeviceInfo devInfo;
-    return devInfo.batteryLevel();
+    return devInfo.currentPowerState() == QSystemDeviceInfo::WallPower? 100 : devInfo.batteryLevel();
 }
 
 void roadmap_device_call_start_callback( void ) {
