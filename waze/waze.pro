@@ -36,7 +36,9 @@ TEMPLATE = app
 TARGET = waze
 CONFIG -= staticlib
 
-LIBS += -lz -ldl -lrt -lssl -lcrypto
+linux {
+LIBS += -ldl -lrt
+}
 
 !maemo5 {
     QMAKE_CFLAGS += -Wno-unused-result -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable
@@ -52,18 +54,10 @@ SOURCES += \
     roadmap_tile.c \
     roadmap_gzm.c \
     unix/roadmap_time.c \
-    unix/roadmap_thread.c \
-    unix/roadmap_spawn.c \
-    unix/roadmap_serial.c \
-    unix/roadmap_path.c \
-    unix/roadmap_net.c \
-    unix/roadmap_library.c \
     unix/roadmap_input_type.c \
-    unix/roadmap_file.c  \
     unix/roadmap_device_events.c \
     roadmap_dbread.c \
     roadmap_login.c \
-    roadmap_zlib.c \
     roadmap_welcome_wizard.c \
     roadmap_warning.c \
     roadmap_voice.c \
@@ -300,8 +294,6 @@ SOURCES += \
     tts/tts_db.c \
     tts/tts_cache.c \
     tts/tts.c \
-    unix/resolver.c \
-    unix/roadmap_ssl.c \
     ssd/ssd_segmented_control.c \
     Realtime/RealtimeTrafficDetection.c \
     Realtime/RealtimePopUp.c \
@@ -311,7 +303,20 @@ SOURCES += \
     roadmap_recorder.c \
     navigate/navigate_tts.c \
     roadmap_base64.c \
-    navigate/navigate_route_events.c
+    navigate/navigate_route_events.c \
+    roadmap_zlib.c \
+    zlib/zutil.c \
+    zlib/uncompr.c \
+    zlib/trees.c \
+    zlib/inftrees.c \
+    zlib/inflate.c \
+    zlib/inffast.c \
+    zlib/infback.c \
+    zlib/gzio.c \
+    zlib/deflate.c \
+    zlib/crc32.c \
+    zlib/compress.c \
+    zlib/adler32.c
 
 HEADERS += \
     roadmap_types.h \
@@ -345,7 +350,6 @@ HEADERS += \
     roadmap_net.h \
     roadmap_spawn.h \
     roadmap_list.h \
-    roadmap_serial.h \
     roadmap_internet.h \
     roadmap_native_keyboard.h \
     roadmap_canvas.h \
@@ -404,7 +408,6 @@ HEADERS += \
     roadmap_tile_model.h \
     roadmap_tile_manager.h \
     roadmap_ticker.h \
-    roadmap_thread.h \
     roadmap_sunrise.h \
     roadmap_strings.h \
     roadmap_string.h \
@@ -618,7 +621,6 @@ HEADERS += \
     tts/tts_db.h \
     tts/tts_cache.h \
     tts/tts.h \
-    unix/resolver.h \
     ssd/ssd_segmented_control.h \
     Realtime/RealtimeTrafficDetection.h \
     Realtime/RealtimePopUp.h \
@@ -631,7 +633,17 @@ HEADERS += \
     navigate/navigate_tts.h \
     roadmap_base64.h \
     navigate/navigate_route_events.h \
-    roadmap_ssl.h
+    zlib/zutil.h \
+    zlib/zlib.h \
+    zlib/zconf.in.h \
+    zlib/zconf.h \
+    zlib/trees.h \
+    zlib/inftrees.h \
+    zlib/inflate.h \
+    zlib/inffixed.h \
+    zlib/inffast.h \
+    zlib/deflate.h \
+    zlib/crc32.h
 
 OTHER_FILES += \
     qtc_packaging/debian_fremantle/README \
@@ -648,7 +660,16 @@ OTHER_FILES += \
     qtc_packaging/debian_harmattan/copyright \
     qtc_packaging/debian_harmattan/manifest.aegis \
     qtc_packaging/debian_harmattan/postinst \
-    qtc_packaging/debian_harmattan/rules
+    qtc_packaging/debian_harmattan/rules \
+    zlib/zlib.3 \
+    zlib/README \
+    zlib/Makefile.in \
+    zlib/Makefile \
+    zlib/INDEX \
+    zlib/FAQ \
+    zlib/configure \
+    zlib/ChangeLog \
+    zlib/algorithm.txt
 
 
 # Please do not modify the following two lines. Required for deployment.

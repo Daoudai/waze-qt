@@ -32,7 +32,12 @@
 #define NET_RESOLVED 0x00000002
 #define TEST_NET_COMPRESS( flags ) ( roadmap_net_get_compress_enabled() ? (flags & NET_COMPRESS) : 0 )
 
-#if defined (_WIN32) && !defined (__SYMBIAN32__)
+#if defined QTMOBILITY
+
+typedef void *RoadMapSocket;
+#define ROADMAP_INVALID_SOCKET ((RoadMapSocket) NULL)
+
+#elif defined (_WIN32) && !defined (__SYMBIAN32__)
 
 #include <winsock.h>
 
@@ -93,6 +98,8 @@ RoadMapSocket roadmap_net_listen(int port);
 RoadMapSocket roadmap_net_accept(RoadMapSocket server_socket);
 
 int roadmap_net_unique_id (unsigned char *buffer, unsigned int size);
+
+void roadmap_net_cancel_connect (void * context);
 
 void roadmap_net_close  (RoadMapSocket s);
 

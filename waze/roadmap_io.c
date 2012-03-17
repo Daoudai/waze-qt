@@ -44,9 +44,6 @@ int roadmap_io_read  (RoadMapIO *io, void *data, int size) {
       case ROADMAP_IO_NET:
          return roadmap_net_receive (io->os.socket, data, size);
 
-      case ROADMAP_IO_SERIAL:
-         return roadmap_serial_read (io->os.serial, data, size);
-
       case ROADMAP_IO_PIPE:
          return roadmap_spawn_read_pipe (io->os.pipe, data, size);
 
@@ -67,9 +64,6 @@ int roadmap_io_write (RoadMapIO *io, const void *data, int length, int wait) {
       case ROADMAP_IO_NET:
          return roadmap_net_send (io->os.socket, data, length, wait);
 
-      case ROADMAP_IO_SERIAL:
-         return roadmap_serial_write (io->os.serial, data, length);
-
       case ROADMAP_IO_PIPE:
          return roadmap_spawn_write_pipe (io->os.pipe, data, length);
 
@@ -83,14 +77,16 @@ int roadmap_io_write_async (RoadMapIO *io, const void *data, int length) {
    
    switch (io->subsystem) {
       case ROADMAP_IO_NET:
-#if defined(IPHONE_NATIVE) || defined(GTK) || defined(ANDROID)
+#if defined(IPHONE_NATIVE) || defined(GTK) || defined(ANDROID) || defined(QTMOBILITY)
          return roadmap_net_send_async( io->os.socket, data, length );
 #else
          return roadmap_net_send (io->os.socket, data, length, 0); //Change this to async once implemented
 #endif
       
       case ROADMAP_IO_FILE:
+#ifndef QTMOBILITY
       case ROADMAP_IO_SERIAL:
+#endif
       case ROADMAP_IO_PIPE:
          return -1;
          
@@ -111,10 +107,6 @@ void  roadmap_io_close (RoadMapIO *io) {
 
       case ROADMAP_IO_NET:
          roadmap_net_close (io->os.socket);
-         break;
-
-      case ROADMAP_IO_SERIAL:
-         roadmap_serial_close (io->os.serial);
          break;
 
       case ROADMAP_IO_PIPE:
@@ -139,9 +131,11 @@ void  roadmap_io_invalidate (RoadMapIO *io) {
          io->os.socket = ROADMAP_INVALID_SOCKET;
          break;
 
+#ifndef QTMOBILITY
       case ROADMAP_IO_SERIAL:
          io->os.serial = ROADMAP_INVALID_SERIAL;
          break;
+#endif
 
       case ROADMAP_IO_PIPE:
          io->os.pipe = ROADMAP_SPAWN_INVALID_PIPE;
@@ -171,9 +165,11 @@ int roadmap_io_same (RoadMapIO *io1, RoadMapIO *io2) {
          if (io1->os.socket != io2->os.socket) return 0;
          break;
 
+#ifndef QTMOBILITY
       case ROADMAP_IO_SERIAL:
          if (io1->os.serial != io2->os.serial) return 0;
          break;
+#endif
 
       case ROADMAP_IO_PIPE:
          if (io1->os.pipe != io2->os.pipe) return 0;

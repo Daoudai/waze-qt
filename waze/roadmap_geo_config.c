@@ -955,7 +955,7 @@ void roadmap_geo_config (RoadMapCallback callback) {
    const char *force_location;
    static int has_run;
    GeoConfigContext.callback = callback;
-#if (defined(_WIN32) && !defined(__SYMBIAN32__))
+#if (defined(_WIN32) && !defined(__SYMBIAN32__) && !defined (QTMOBILITY))
    if (!has_run){
 	   has_run = TRUE;
 	   roadmap_gps_detect_receiver_callback(after_detect_reciever);

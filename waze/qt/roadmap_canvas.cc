@@ -248,7 +248,8 @@ int  roadmap_canvas_image_height (const RoadMapImage image) {
 
 RoadMapImage roadmap_canvas_load_image (const char *path,
                                         const char* file_name) {
-    QFile file(QString(path).append("/").append(file_name));
+    QString qPath = QString(path).append("/").append(file_name);
+    QFile file(qPath);
     RoadMapImage image = NULL;
 
     if (file.exists())
