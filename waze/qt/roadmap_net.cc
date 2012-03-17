@@ -272,8 +272,6 @@ static RoadMapSocket roadmap_net_connect_internal (const char *protocol, const c
 
         if(ROADMAP_INVALID_SOCKET == res_socket) return ROADMAP_INVALID_SOCKET;
 
-        res_socket->is_compressed = TEST_NET_COMPRESS( flags );
-
         if (async) {
             data = (RoadMapNetData *)malloc(sizeof(RoadMapNetData));
             strncpy_safe(data->packet, packet, sizeof(data->packet));
@@ -299,7 +297,8 @@ static RoadMapSocket roadmap_net_connect_internal (const char *protocol, const c
 
     } else {
 
-        /* Blocking connect */
+        res_socket->connectToHost(QString::fromAscii(name), default_port);
+
         if (create_connection(res_socket, &addr) == -1) {
             roadmap_net_close(res_socket);
             return ROADMAP_INVALID_SOCKET;
