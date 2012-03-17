@@ -44,7 +44,7 @@ public:
         _compressContext = context;
     }
 
-    connectToHost(QString host, int port);
+    void connectToHost(QString host, int port);
 public slots:
     void invokeCallback();
 
