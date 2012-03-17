@@ -34,7 +34,7 @@
 #ifdef __SYMBIAN32__
 typedef   unsigned int      uint32_t;
 typedef unsigned short      uint16_t;
-#elif defined _WIN32
+#elif defined _WIN32 && !defined QTMOBILITY
 
    #define INVALID_THREAD_ID        (0xFFFFFFFF)
 
@@ -62,7 +62,7 @@ typedef unsigned short      uint16_t;
 #define  CLIENT_VERSION_CFG         (26)	/* Build number for internal use only */
 
 #include "roadmap_types.h"
-#if defined (_WIN32) && !defined (__SYMBIAN32__)
+#if defined (_WIN32) && !defined (__SYMBIAN32__) && !defined (QTMOBILITY)
 #include "win32/roadmap_win32.h"
 #elif defined (__SYMBIAN32__)
 #include "symbian/roadmap_symbian_porting.h"
@@ -78,6 +78,8 @@ typedef unsigned short      uint16_t;
    #define   BOOL_DEFINED
    typedef signed char   BOOL;
 #endif   //   BOOL_DEFINED
+#elif defined (QTMOBILITY)
+typedef int BOOL;
 #elif defined (IPHONE)
 #include <objc/objc.h>
 #endif
@@ -179,6 +181,18 @@ static inline void do_assert(char *text) {
 #endif   // WIN32_DEBUG
 
 typedef void (*roadmap_log_msgbox_handler) (const char *title, const char *msg);
+
+#ifdef QTMOBILITY
+typedef struct {
+    int year, month, day, hour, min, sec, msec;
+} time_s;
+
+time_s roadmap_time_get_current();
+
+time_t roadmap_time_translate(const char *hhmmss,
+                              const char *ddmmyy);
+
+#endif
 
 #ifndef J2ME
 void roadmap_log_push        (const char *description);

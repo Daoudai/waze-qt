@@ -33,7 +33,7 @@
 #define INCLUDE__ROADMAP_FILE__H
 
 
-#if defined (_WIN32) && !defined (__SYMBIAN32__)
+#if defined (_WIN32) && !defined (__SYMBIAN32__) && !defined (QTMOBILITY)
 
 #include <windows.h>
 #include <stdio.h>
@@ -62,10 +62,19 @@ typedef void* RoadMapFile;
 
 #include <stdio.h>
 
+#ifdef QTMOBILITY
+struct roadmap_file_t;
+typedef struct roadmap_file_t *RoadMapFile;
+
+#define ROADMAP_FILE_IS_VALID(f) (f != NULL)
+#define ROADMAP_INVALID_FILE NULL
+
+#else
 typedef int RoadMapFile; /* UNIX style. */
+
 #define ROADMAP_FILE_IS_VALID(f) (f != (RoadMapFile)-1)
 #define ROADMAP_INVALID_FILE -1
-
+#endif /* QTMOBILITY */
 #endif
 
 typedef enum {

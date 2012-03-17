@@ -4352,6 +4352,13 @@ int seconds = 0;
 timeStruct curTimeOnPhone;
 #ifdef J2ME
    // how do you find the time in J2ME?
+#elif defined (QTMOBILITY)
+    time_s current_time = roadmap_time_get_current();
+
+    hours = current_time.hour;
+    minutes = current_time.min;
+    seconds = current_time.sec;
+
 #elif defined (__SYMBIAN32__)
 
    time_t now;

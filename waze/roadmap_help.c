@@ -394,7 +394,7 @@ void roadmap_help_about (void) {
 }
 
 void roadmap_open_help(void){
-#if defined (_WIN32) || defined (__SYMBIAN32__)
+#if (defined (_WIN32) || defined (__SYMBIAN32__)) && !defined (QTMOBILITY)
 	roadmap_internet_open_browser(roadmap_config_get(&RoadMapConfigBrowserOptions));
 #endif
 }

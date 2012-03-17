@@ -89,7 +89,7 @@ static int dec2bin (char c) {
 
 static time_t roadmap_nmea_decode_time (const char *hhmmss,
                                         const char *ddmmyy) {
-
+#ifndef QTMOBILITY
    static struct tm tm;
 
 #ifdef J2ME
@@ -158,6 +158,9 @@ static time_t roadmap_nmea_decode_time (const char *hhmmss,
    /* FIXME: th time zone might change if we are moving !. */
 
    return timegm(&tm);
+#else
+    return roadmap_time_translate(hhmmss, ddmmyy);
+#endif // QTMOBILITY
 }
 
 
