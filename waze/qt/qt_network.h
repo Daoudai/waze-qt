@@ -9,6 +9,7 @@
 #include <QUrl>
 #include <QSignalMapper>
 #include <QAbstractSocket>
+#include <QSemaphore>
 
 extern "C" {
 #include "roadmap_main.h"
@@ -20,13 +21,16 @@ class RNetworkSocket : public QObject {
     Q_OBJECT
 
 public:
-    RNetworkSocket(QAbstractSocket* socket, bool isCompressed, RoadMapNetConnectCallback callback);
+    RNetworkSocket(QObject* parent);
 
-    virtual ~RNetworkSocket();
-
-    inline QAbstractSocket* socket()
+    virtual ~RNetworkSocket()
     {
-        return _socket;
+        delete _reply;
+    }
+
+    inline QNetworkReply* reply()
+    {
+        return _reply;
     }
 
     inline bool isCompressed()
@@ -44,16 +48,28 @@ public:
         _compressContext = context;
     }
 
-    void connectToHost(QString host, int port);
+    inline void setCallback(RoadMapInput callback)
+    {
+        _callback = callback;
+
+        if (_reply->bytesAvailable() > 0)
+        {
+            RoadMapIO io;
+            io.subsystem = ROADMAP_IO_NET;
+            io.os.socket = this;
+            _callback(&io);
+        }
+    }
+
 public slots:
     void invokeCallback();
 
 private:
-    RoadMapNetConnectCallback _callback;
+    RoadMapInput _callback;
 
     RoadMapHttpCompCtx _compressContext;
     bool _isCompressed;
-    QAbstractSocket* _socket;
+    QNetworkReply* _reply;
 };
 
 class RNetworkManager : public QNetworkAccessManager
@@ -62,7 +78,7 @@ class RNetworkManager : public QNetworkAccessManager
 public:
     explicit RNetworkManager(QObject *parent = 0);
 
-    enum RequestType { Get, Post };
+    enum RequestType { Get, Post, Unknown };
 
     RNetworkSocket* requestSync(RequestType protocol, QUrl url,
                      QDateTime update_time,

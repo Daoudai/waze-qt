@@ -101,25 +101,9 @@ static int roadmap_gpsd2_decode_coordinate (const char *input) {
 
 RoadMapSocket roadmap_gpsd2_connect (const char *name) {
 
-   RoadMapSocket socket = roadmap_net_connect ("tcp", name, 0, 2947, 0, NULL);
+    /* Never called */
 
-   if (ROADMAP_NET_IS_VALID(socket)) {
-
-      /* Start watching what happens. */
-
-      static const char request[] = "w+\n";
-
-      if (roadmap_net_send
-            (socket, request, sizeof(request)-1, 1) != sizeof(request)-1) {
-
-         roadmap_log (ROADMAP_WARNING, "Lost gpsd server session");
-         roadmap_net_close (socket);
-
-         return ROADMAP_INVALID_SOCKET;
-      }
-   }
-
-   return socket;
+   return NULL;
 }
 
 
