@@ -2719,12 +2719,14 @@ static void roadmap_start_periodic (void) {
 
 static void roadmap_start_add_gps (RoadMapIO *io) {
 
-   roadmap_main_set_input (io, roadmap_gps_input);
+    // deprecated
+//   roadmap_main_set_input (io, roadmap_gps_input);
 }
 
 static void roadmap_start_remove_gps (RoadMapIO *io) {
 
-   roadmap_main_remove_input(io);
+    // deprecated
+//   roadmap_main_remove_input(io);
 }
 
 
