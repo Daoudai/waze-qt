@@ -144,7 +144,7 @@ static int on_ok( SsdWidget this, const char *new_value) {
    roadmap_config_set ( &RoadMapConfigShowTicker,
                               (const char *)ssd_dialog_get_data ("show_ticker") );
 
-#if (defined(_WIN32) || defined(ANDROID))
+#if (defined(_WIN32) || defined(ANDROID)) && !defined(QTMOBILITY)
    roadmap_config_set ( &RoadMapConfigUseNativeKeyboard,
                               (const char *) ssd_dialog_get_data ( "Native keyboard" ) );
 #endif
@@ -676,7 +676,7 @@ void roadmap_general_settings_show(void) {
       ssd_widget_add (container, ssd_separator_new("separator", SSD_END_ROW));
 
       // Native keyboard - for android only at this time
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(QTMOBILITY)
       box = ssd_checkbox_row_new ("Native keyboard", roadmap_lang_get ("Use native keyboard"),
                                   TRUE, NULL, NULL, NULL, CHECKBOX_STYLE_ON_OFF);
 
@@ -846,7 +846,7 @@ void roadmap_general_settings_show(void) {
       ssd_dialog_set_data ("Prompts", (void *) roadmap_prompts_get_prompt_value(roadmap_prompts_get_name()));
       ssd_dialog_set_data ("TTS Voices", tts_ui_voice_value( tts_voice_id() ) );
 
-#if (defined(_WIN32) || defined(ANDROID))
+#if (defined(_WIN32) || defined(ANDROID)) && !defined(QTMOBILITY)
       if ( roadmap_config_match(&RoadMapConfigUseNativeKeyboard, "yes")) pVal = yesno[0];
       else pVal = yesno[1];
 

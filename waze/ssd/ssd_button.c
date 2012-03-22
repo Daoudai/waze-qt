@@ -464,7 +464,7 @@ SsdWidget ssd_button_label (const char *name, const char *label,
    SsdWidget button = ssd_button_new (name, "", button_icon, 3,
                                       flags, callback);
 
-   #if defined (_WIN32) && !defined (OPENGL)
+   #if defined (_WIN32) && !defined (OPENGL) && !defined(QTMOBILITY)
       text = ssd_text_new ("label", label, 12, SSD_ALIGN_VCENTER| SSD_ALIGN_CENTER) ;
    #else
       text = ssd_text_new ("label", label, 14, SSD_ALIGN_VCENTER|SSD_ALIGN_CENTER) ;

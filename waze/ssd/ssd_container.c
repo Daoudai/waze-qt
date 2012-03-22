@@ -450,7 +450,7 @@ static void draw (SsdWidget widget, RoadMapGuiRect *rect, int flags) {
             }
             else
                roadmap_canvas_erase_area (rect);
-#if defined(OPENGL) && !defined(_WIN32)
+#if defined(OPENGL) && !defined(_WIN32) && !defined(QTMOBILITY)
             if (widget->in_focus && widget->focus_highlight ){
                if (!focus_image)
                   focus_image = roadmap_res_get( RES_BITMAP, RES_SKIN, "focus" );

@@ -55,7 +55,7 @@
 #include "roadmap_httpcopy.h"
 
 
-#if !defined (_WIN32) && !defined (__SYMBIAN32__)
+#if defined(QTMOBILITY) || (!defined (_WIN32) && !defined (__SYMBIAN32__))
 #define ROADMAP_HTTP_MAX_CHUNK 32768
 #else
 #define ROADMAP_HTTP_MAX_CHUNK 4096

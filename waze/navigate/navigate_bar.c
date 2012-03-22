@@ -176,7 +176,9 @@ BOOL navigate_bar_is_hidden(void){
 
 
 static BOOL show_ETA_box(){
-#if (defined(__SYMBIAN32__)  && !defined (TOUCH_SCREEN))
+#ifdef QTMOBILITY
+    return TRUE;
+#elif (defined(__SYMBIAN32__)  && !defined (TOUCH_SCREEN))
   if (is_screen_wide())
     return FALSE;
   else
