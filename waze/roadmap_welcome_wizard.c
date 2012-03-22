@@ -217,7 +217,7 @@ static void set_first_time_no(){
 static SsdWidget space(int height){
    SsdWidget space;
 
-#if (defined(_WIN32))
+#if (defined(_WIN32)) && !defined(QTMOBILITY)
    height = height / 2;
 #endif
    space = ssd_container_new ("spacer", NULL, SSD_MAX_SIZE, height, SSD_WIDGET_SPACE|SSD_END_ROW);
@@ -828,7 +828,7 @@ static void create_intro_screen(){
 //////////////////////////////////////////////////////////////
 static void on_terms_accepted( void )
 {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(QTMOBILITY)
          const char *age_restriction_checkbox   = ssd_dialog_get_data( "age_restriction_checkbox" );
          BOOL  bAgeRestrictionAccepted = !strcmp( age_restriction_checkbox, "yes" );
          if (!bAgeRestrictionAccepted){
@@ -998,7 +998,7 @@ static void add_disclaimer_texts(SsdWidget group, int tab_flag){
 void term_of_use_dialog(void){
    SsdWidget   dialog;
    SsdWidget   group;
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(QTMOBILITY)
    SsdWidget   age_group;
    SsdWidget   label_cnt;
 #endif
@@ -1026,7 +1026,7 @@ void term_of_use_dialog(void){
 
    add_disclaimer_texts(group, tab_flag);
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(QTMOBILITY)
    age_group = ssd_container_new ("Age restriction group", NULL, SSD_MAX_SIZE,
              SSD_MIN_SIZE, SSD_WIDGET_SPACE | SSD_END_ROW | tab_flag);
    ssd_widget_set_color ( age_group, NULL, NULL );

@@ -273,7 +273,7 @@ void roadmap_browser_show (const char* title, const char* url, RoadMapCallback o
  */
 void roadmap_browser_show_extended ( const char* url, int browser_flags, const RMBrowserAttributes* attrs )
 {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(QTMOBILITY)
    char temp[1024];
 #endif
    // Set the attributes

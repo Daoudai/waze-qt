@@ -61,7 +61,7 @@ typedef struct
 
 #ifdef IPHONE_NATIVE
 #define VOICE_UPLOAD_CONTENT_TYPE            "audio/ima4"
-#elif defined (_WIN32)
+#elif defined (_WIN32) && !defined(QTMOBILITY)
 #define VOICE_UPLOAD_CONTENT_TYPE            "audio/wav"
 #elif defined (ANDROID)
 #define VOICE_UPLOAD_CONTENT_TYPE            "audio/mp4"

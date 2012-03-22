@@ -363,7 +363,7 @@ void RealtimeExternalPoi_Init(void){
 
    static RealtimeIdleScroller scroller = {RealtimeExternalPoi_ShowPromotions, RealtimeExternalPoi_StopPromotionScrolling, RealtimeExternalPoi_IsPromotionsScrolling};
 
-#ifdef _WIN32
+#if defined (_WIN32) && !defined(QTMOBILITY)
    roadmap_config_declare_enumeration ("preferences", &RoadMapConfigExternalPoisFeatureEnabled, NULL, "no",
                   "yes", NULL);
 #else
@@ -1427,7 +1427,7 @@ static const char *create_nearby_coupons_and_games_url() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 BOOL RealtimeExternalPoi_MyCouponsEnabled(void){
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(QTMOBILITY)
    return FALSE;
 #else
    if (RealtimeExternalPoi_FeatureEnabled() && !strcmp (roadmap_config_get (&RoadMapConfigExternalPoisMyCouponsEnabled), "yes"))

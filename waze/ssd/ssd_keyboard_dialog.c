@@ -400,7 +400,7 @@ void ssd_show_keyboard_dialog_ext( const char*       title,		/* Title at the top
 	  ssd_widget_add( note_cnt, ssd_text_new( s_notetext_name, "", -1, SSD_TEXT_LABEL|SSD_ALIGN_VCENTER ) );
 	  ssd_widget_add( box, note_cnt );
 
-#if !defined(__SYMBIAN32__) && !defined (_WIN32)
+#if (!defined(__SYMBIAN32__) && !defined (_WIN32)) || defined(QTMOBILITY)
 	  ssd_dialog_add_hspace( box, SSD_KB_DLG_FIELDS_HOFFSET, SSD_END_ROW );
 
       //// Next button
@@ -462,7 +462,7 @@ void ssd_show_keyboard_dialog_ext( const char*       title,		/* Title at the top
    else
       ssd_text_set_text( edit, "");
 
-#if !defined(__SYMBIAN32__) && !defined (_WIN32)
+#if (!defined(__SYMBIAN32__) && !defined (_WIN32)) || defined(QTMOBILITY)
    /* Test flags */
    btn_next = ssd_widget_get( s_dialog, s_nextbtn_name );
    if ( kb_dlg_flags & SSD_KB_DLG_SHOW_NEXT_BTN )

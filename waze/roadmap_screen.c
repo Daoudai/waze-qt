@@ -235,7 +235,7 @@ static RoadMapScreenSubscriber RoadMapScreenAfterRefresh =
 
 static RoadMapScreenSubscriber RoadMapScreenAfterFlowControlRefresh = NULL;
 
-#if defined(IPHONE) || defined(ANDROID) || (defined(OPENGL) && defined(_WIN32))
+#if defined(IPHONE) || defined(ANDROID) || (defined(OPENGL) && defined(_WIN32) && !defined(QTMOBILITY))
 static int CordingEvent = 0;
 static RoadMapPosition CordingAnchors[MAX_CORDING_POINTS];
 static BOOL CordingRotationEnabled = TRUE;
@@ -3286,7 +3286,7 @@ static int roadmap_screen_drag_start (RoadMapGuiPoint *point) {
    RoadMapScreenFastRefresh |= SCREEN_FAST_DRAG;
    cancel_screen_animation();
 
-#if defined(IPHONE) || defined(ANDROID) || (defined(OPENGL) && defined(_WIN32))
+#if defined(IPHONE) || defined(ANDROID) || (defined(OPENGL) && defined(_WIN32) && !defined(QTMOBILITY))
    DragLastTime = roadmap_time_get_millis();
    DragSpeedX = DragSpeedY = 0;
    if (roadmap_canvas_is_cording() && !CordingEvent) {
@@ -3326,7 +3326,7 @@ static int roadmap_screen_drag_end (RoadMapGuiPoint *point) {
    int distance;
    BOOL animate = FALSE;
 
-#if defined(IPHONE) || defined(ANDROID) || (defined(OPENGL) && defined(_WIN32))
+#if defined(IPHONE) || defined(ANDROID) || (defined(OPENGL) && defined(_WIN32) && !defined(QTMOBILITY))
    if (CordingEvent) {
       CordingEvent = 0;
 
@@ -3395,7 +3395,7 @@ static int roadmap_screen_drag_end (RoadMapGuiPoint *point) {
 }
 
 static int roadmap_screen_drag_motion (RoadMapGuiPoint *point) {
-#if defined(IPHONE) || defined(ANDROID) || (defined(OPENGL) && defined(_WIN32))
+#if defined(IPHONE) || defined(ANDROID) || (defined(OPENGL) && defined(_WIN32) && !defined(QTMOBILITY))
    RoadMapGuiPoint CordingPt[MAX_CORDING_POINTS];
    RoadMapPosition CordingPos[MAX_CORDING_POINTS];
    int i;

@@ -59,7 +59,7 @@
 #define	TM_MAX_CONCURRENT		3
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(QTMOBILITY)
 #ifdef OPENGL
 #define TM_MAX_QUEUE                256
 #else

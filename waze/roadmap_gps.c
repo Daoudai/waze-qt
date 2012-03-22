@@ -118,7 +118,7 @@ static RoadMapConfigDescriptor RoadMapConfigGpsCoarseSwitchTO =
 static RoadMapConfigDescriptor RoadMapConfigGpsAcceptCoarseFixSeconds =
                         ROADMAP_CONFIG_ITEM("GPS", "Coarse fix seconds");
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(QTMOBILITY)
 static RoadMapConfigDescriptor RoadMapConfigGPSVirtual =
                         ROADMAP_CONFIG_ITEM("GPS", "Virtual");
 
@@ -1113,7 +1113,7 @@ void roadmap_gps_initialize (void) {
 #elif defined(J2ME) || defined(QTMOBILITY)
       roadmap_config_declare
          ("preferences", &RoadMapConfigGPSSource, "", NULL);
-#elif defined(_WIN32)
+#elif defined(_WIN32) && !defined(QTMOBILITY)
       roadmap_config_declare
          ("preferences", &RoadMapConfigGPSSource, "com1:", NULL);
 #else

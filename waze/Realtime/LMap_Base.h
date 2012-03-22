@@ -30,7 +30,9 @@
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-#if defined (__SYMBIAN32__)
+#if defined(QTMOBILITY)
+#define	RT_DEVICE_ID							(90)
+#elif defined (__SYMBIAN32__)
 #ifndef TOUCH_SCREEN
 #define  RT_DEVICE_ID                     (10)
 #else

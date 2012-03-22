@@ -199,7 +199,7 @@ void recorder_dlg(const char *textMsg){
    button_bitmap = ssd_bitmap_new("Record_button.bitmap", "recorder_record", SSD_ALIGN_CENTER);
    ssd_widget_add(button, button_bitmap);
 
-    #if defined (_WIN32) && !defined (OPENGL)
+    #if defined (_WIN32) && !defined (OPENGL) && !defined(QTMOBILITY)
        text = ssd_text_new ("Record_button.label", roadmap_lang_get("Record"), 9, SSD_ALIGN_VCENTER| SSD_ALIGN_CENTER) ;
     #else
        text = ssd_text_new ("Record_button.label", roadmap_lang_get("Record"), 11, SSD_ALIGN_VCENTER|SSD_ALIGN_CENTER) ;

@@ -7216,7 +7216,7 @@ static void report_dialog(int iAlertType){
    if (!sub_type_container)
       txtbox_height = ADJ_SCALE(83);
 
-#if (!defined(__SYMBIAN32__) && !defined(_WIN32))
+#if defined(QTMOBILITY) || (!defined(__SYMBIAN32__) && !defined(_WIN32))
 //#ifndef __SYMBIAN32__
    icon[0] = "button_record";
    icon[1] = "button_record";
