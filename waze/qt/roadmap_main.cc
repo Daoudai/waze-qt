@@ -41,6 +41,7 @@
 #include <QWaitCondition>
 #include "qt_main.h"
 #include "roadmap_qtbrowser.h"
+#include "qt_network.h"
 
 extern "C" {
 #include "roadmap.h"
@@ -102,12 +103,24 @@ void roadmap_main_open_url( const char* url )
 
 void roadmap_main_set_input    (RoadMapIO *io, RoadMapInput callback)
 {
-
+    if (io != NULL &&
+        io->subsystem == ROADMAP_IO_NET &&
+        io->os.socket != NULL)
+    {
+        RNetworkSocket* socket = (RNetworkSocket*) io->os.socket;
+        socket->setCallback(callback);
+    }
 }
 
 void roadmap_main_set_output   (RoadMapIO *io, RoadMapInput callback, BOOL is_connect)
 {
-
+    if (io != NULL &&
+        io->subsystem == ROADMAP_IO_NET &&
+        io->os.socket != NULL)
+    {
+        RNetworkSocket* socket = (RNetworkSocket*) io->os.socket;
+        socket->setCallback(callback);
+    }
 }
 
 void roadmap_main_remove_input (RoadMapIO *io)
