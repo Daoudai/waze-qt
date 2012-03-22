@@ -103,8 +103,7 @@ RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) : QMainWindow(par
    canvas->setFocus();
    //setToolBarsMovable(FALSE);
 
-   connect(&signalFd, SIGNAL(intValueChanged(int)), this, SLOT(handleSignal(int)));
-   connect(this, SIGNAL(recievedMessage(int)), this, SLOT(onRecievedMessage(int)));
+   connect(&signalFd, SIGNAL(valueChanged(int)), this, SLOT(handleSignal(int)));
 
    QContactManager contactManager;
    contactListModel = new ContactsList(contactManager, this);

@@ -7,9 +7,9 @@
 #include <QNetworkReply>
 #include <QDateTime>
 #include <QUrl>
-#include <QSignalMapper>
 #include <QAbstractSocket>
 #include <QSemaphore>
+#include <QTimerEvent>
 
 extern "C" {
 #include "roadmap_main.h"
@@ -21,10 +21,11 @@ class RNetworkSocket : public QObject {
     Q_OBJECT
 
 public:
-    RNetworkSocket(QObject* parent);
+    RNetworkSocket(QObject* parent, QNetworkReply* reply);
 
     virtual ~RNetworkSocket()
     {
+        _reply->close();
         delete _reply;
     }
 
@@ -52,17 +53,47 @@ public:
     {
         _callback = callback;
 
-        if (_reply->bytesAvailable() > 0)
+        emit callbackChanged();
+    }
+
+    void waitUntilFinished();
+
+public slots:
+    inline void invokeCallback() {
+        if (_callback != NULL)
         {
-            RoadMapIO io;
-            io.subsystem = ROADMAP_IO_NET;
-            io.os.socket = this;
-            _callback(&io);
+            _callback(&_io);
+            finished();
         }
     }
 
-public slots:
-    void invokeCallback();
+private slots:
+    inline void finished()
+    {
+        killTimer(_timerId);
+        _pendingFinish.release();
+        emit finished(this);
+    }
+
+    inline void onCallbackChanged()
+    {
+        if (_reply->isFinished())
+        {
+            invokeCallback();
+        }
+    }
+
+    void timerEvent(QTimerEvent *te)
+    {
+        killTimer(_timerId);
+        _reply->abort();
+        emit timedout();
+    }
+
+signals:
+    void timedout();
+    void finished(RNetworkSocket* socket);
+    void callbackChanged();
 
 private:
     RoadMapInput _callback;
@@ -70,6 +101,9 @@ private:
     RoadMapHttpCompCtx _compressContext;
     bool _isCompressed;
     QNetworkReply* _reply;
+    RoadMapIO _io;
+    int _timerId;
+    QSemaphore _pendingFinish;
 };
 
 class RNetworkManager : public QNetworkAccessManager
@@ -77,6 +111,8 @@ class RNetworkManager : public QNetworkAccessManager
     Q_OBJECT
 public:
     explicit RNetworkManager(QObject *parent = 0);
+
+    virtual ~RNetworkManager();
 
     enum RequestType { Get, Post, Unknown };
 
@@ -96,13 +132,6 @@ private:
                                QUrl url,
                                QDateTime update_time,
                                int flags);
-
-    QSignalMapper _callbacksMapper;
-
-signals:
-    
-public slots:
-    void replyFinished(RNetworkSocket* callback);
 };
 
 #endif // QT_NETWORK_H

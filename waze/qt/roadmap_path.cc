@@ -117,8 +117,9 @@ typedef QHash<QString, RoadMapPathRecord> RoadMapPathList;
 
 static RoadMapPathList RoadMapPaths;
 
-#define HOME_PREFIX "MyDocs/.waze"
-
+#ifndef HOME_PREFIX
+#define HOME_PREFIX ".waze"
+#endif
 static char path_separator = '/';
 
 static char *roadmap_path_expand (const char *item, size_t length);

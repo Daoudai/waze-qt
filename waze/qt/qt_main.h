@@ -189,10 +189,6 @@ private slots:
    void contactsDialogOkPressed(QString address);
    void contactsDialogCancelPressed();
 
-
-signals:
-   void recievedMessage(int message);
-
 private:
    QObservableInt signalFd;
 
