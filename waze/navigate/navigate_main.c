@@ -1896,7 +1896,7 @@ void navigate_update (RoadMapPosition *position, PluginLine *current, int speed,
                                            {-1, 800,0,999,NAV_ANNOUNCE_STATE_FIRST}, {-1, 400,0,70,NAV_ANNOUNCE_STATE_FIRST},
                                            {-1, 400,70,999,NAV_ANNOUNCE_STATE_SECOND}, {-1, 200,0,999,NAV_ANNOUNCE_STATE_SECOND}, {-1, 40,0,999,NAV_ANNOUNCE_STATE_LAST} };
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) && !defined(QTMOBILITY)
    const int ANNOUNCE_PREPARE_FACTORS[] = {400, 400,400,400,400, 400,150 };
 #else
    const int ANNOUNCE_PREPARE_FACTORS[] = {200, 200,200,200,200, 200,50 };

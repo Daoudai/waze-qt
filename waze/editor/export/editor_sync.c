@@ -302,7 +302,7 @@ int export_sync (void) {
 
    res = roadmap_file_free_space (roadmap_path_user());
 
-#ifndef __SYMBIAN32__
+#if !defined(__SYMBIAN32__) || defined(QTMOBILITY)
    if ((res >= 0) && (res < MIN_FREE_SPACE)) {
       roadmap_messagebox ("Error",
                   "Please free at least 5MB of space before synchronizing.");

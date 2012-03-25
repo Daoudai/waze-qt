@@ -85,7 +85,7 @@
 #define FILTER_MIN_SECONDS		10
 #define FILTER_MAX_ACCURACY   70
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) && !defined(QTMOBILITY)
 #include "roadmap_gpssymbian.h"
 #elif IPHONE
 #include "iphone/roadmap_location.h"
@@ -229,7 +229,7 @@ static roadmap_gps_link_control RoadMapGpsLinkRemove =
 
 int roadmap_gps_reception_state (void) {
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) && !defined(QTMOBILITY)
    if (RoadMapGpsReception == GPS_RECEPTION_POOR)
       RoadMapGpsReception = GPS_RECEPTION_GOOD;
 #endif
@@ -1149,7 +1149,7 @@ void roadmap_gps_shutdown (void) {
 
    roadmap_gps_csv_tracker_shutdown();
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) && !defined(QTMOBILITY)
    roadmap_gpssymbian_shutdown();
 #elif defined(QTMOBILITY)
    roadmap_gpsqtm_shutdown();
@@ -1285,7 +1285,7 @@ void roadmap_gps_open (void) {
    RoadMapGpsLink.subsystem = ROADMAP_IO_NULL;
 #else
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) && !defined(QTMOBILITY)
       roadmap_gpssymbian_open();
       RoadMapGpsProtocol = ROADMAP_GPS_SYMBIAN;
       RoadMapGpsLink.subsystem = ROADMAP_IO_NULL;
@@ -1511,7 +1511,7 @@ void roadmap_gps_open (void) {
          //roadmap_gpsj2me_subscribe_to_satellites (roadmap_gps_satellites);
          //roadmap_gpsj2me_subscribe_to_dilution   (roadmap_gps_dilution);
          break;
-#elif defined (__SYMBIAN32__)
+#elif defined(__SYMBIAN32__) && !defined(QTMOBILITY)
       case ROADMAP_GPS_SYMBIAN:
 
          roadmap_gpssymbian_subscribe_to_navigation (roadmap_gps_navigation);
@@ -1594,7 +1594,7 @@ void roadmap_gps_input (RoadMapIO *io) {
 
          break;
 
-#ifndef __SYMBIAN32__
+#if !defined(__SYMBIAN32__) || defined(QTMOBILITY)
 #if !defined(J2ME) && !defined(QTMOBILITY)
       case ROADMAP_GPS_GPSD2:
 
@@ -1978,7 +1978,7 @@ void roadmap_gps_detect_receiver (void) {
    NOPH_GpsManager_searchGps(gps_mgr, m, wait_msg, not_found_msg);
 #endif
 }
-#elif defined (__SYMBIAN32__)
+#elif defined(__SYMBIAN32__) && !defined(QTMOBILITY)
 
 void roadmap_gps_detect_receiver()
 {

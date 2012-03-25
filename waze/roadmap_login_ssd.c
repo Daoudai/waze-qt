@@ -79,7 +79,7 @@
 
 
 #define RM_SIGNUP_DLG_LABEL_HOFFSET		5			// Horizontal offset for the label
-#if (defined(__SYMBIAN32__) && defined(TOUCH_SCREEN))
+#if (defined(__SYMBIAN32__) && defined(TOUCH_SCREEN)) && !defined(QTMOBILITY)
 #define RM_SIGNUP_DLG_LABEL_CNT_WIDTH  120      // Base width of the label container
 #else
 #define RM_SIGNUP_DLG_LABEL_CNT_WIDTH  160      // Base width of the label container

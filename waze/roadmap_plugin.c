@@ -337,7 +337,7 @@ int roadmap_plugin_override_line (int line, int cfcc, int fips) {
 
 	int i;
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) && !defined(QTMOBILITY)
   return 0;
 #elif defined (J2ME)
    return 0;

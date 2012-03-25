@@ -50,7 +50,7 @@ typedef FILE* RoadMapFile;
 #define ROADMAP_FILE_IS_VALID(f) (f != NULL)
 #define ROADMAP_INVALID_FILE NULL
 
-#elif defined __SYMBIAN32__
+#elif defined(__SYMBIAN32__) && !defined(QTMOBILITY)
 
 #include <stdio.h>
 

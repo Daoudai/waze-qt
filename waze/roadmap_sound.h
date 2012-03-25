@@ -26,7 +26,7 @@
 
 #define MAX_SOUND_LIST 20
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) && !defined(QTMOBILITY)
 //TODO temp
 #define MAX_SOUND_NAME 300
 #elif defined(IPHONE) || defined(ANDROID)

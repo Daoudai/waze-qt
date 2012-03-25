@@ -509,7 +509,7 @@ static void on_search(void)
       return;
    }
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) && !defined(QTMOBILITY)
    if ( !strcmp( "##@opera",  txt ) )
    {
       roadmap_browser_set_show_external(NULL);

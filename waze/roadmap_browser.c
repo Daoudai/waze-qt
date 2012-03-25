@@ -55,7 +55,7 @@ static int button_id( int flag );
 static void on_resize( device_event event, void* context );
 static BOOL get_rect( RoadMapGuiRect* rect );
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) && !defined(QTMOBILITY)
 static RoadMapConfigDescriptor RoadMapConfigShowExternal =
       ROADMAP_CONFIG_ITEM("Browser", "Show external browser");
 
