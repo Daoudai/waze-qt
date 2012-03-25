@@ -41,7 +41,7 @@
 
 #include "roadmap_res.h"
 
-#if defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN)
+#if defined(__SYMBIAN32__) && !defined(TOUCH_SCREEN) && !defined(QTMOBILITY)
 #define RES_CACHE_SIZE 30	// Symbian non touch
 #elif defined(ANDROID) || defined(IPHONE) || defined(QTMOBILITY)
 #define RES_CACHE_SIZE 600	// Default

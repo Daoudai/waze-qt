@@ -120,7 +120,7 @@ static int on_ok( SsdWidget this, const char *new_value) {
    if (prompts)
       roadmap_prompts_set_name(prompts);
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) && !defined(QTMOBILITY)
    roadmap_config_set(&RoadMapConfigConnectionAuto, ( const char* ) ssd_dialog_get_data("AutoConnect"));
 #endif
 
@@ -581,7 +581,7 @@ void roadmap_general_settings_show(void) {
       container = ssd_container_new ("Conatiner Group", NULL, width, SSD_MIN_SIZE,
                                      SSD_WIDGET_SPACE|SSD_END_ROW|SSD_CONTAINER_FLAGS|SSD_POINTER_NONE|SSD_CONTAINER_BORDER|SSD_ALIGN_CENTER);
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) && !defined(QTMOBILITY)
 
 
       //////////// Automatic connection selection box /////////////
@@ -794,7 +794,7 @@ void roadmap_general_settings_show(void) {
 
    if (!DialogShowsShown) {
       // Case insensitive comparison
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) && !defined(QTMOBILITY)
       pVal = roadmap_config_match( &RoadMapConfigConnectionAuto, yesno[0] ) ? yesno[0] : yesno[1];
       ssd_dialog_set_data("AutoConnect", pVal );
 #endif

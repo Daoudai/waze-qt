@@ -2752,7 +2752,7 @@ static int roadmap_start_long_click (RoadMapGuiPoint *point) {
 
 
 static void roadmap_start_realtime (void) {
-#if defined(__SYMBIAN32__) || defined(IPHONE_NATIVE)
+#if !defined(QTMOBILITY) && (defined(__SYMBIAN32__) || defined(IPHONE_NATIVE))
    roadmap_main_remove_periodic(roadmap_start_realtime);
 #endif
    if(!Realtime_Initialize())
@@ -3051,7 +3051,7 @@ extern int do_alloc_trace;
 
 void roadmap_start_after_intro_screen(void){
    // Start 'realtime':
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) && !defined(QTMOBILITY)
    roadmap_main_set_periodic(4000, roadmap_start_realtime);
 #elif defined (IPHONE_NATIVE)
    roadmap_main_set_periodic(1000, roadmap_start_realtime);
@@ -3383,7 +3383,7 @@ void roadmap_start_exit (void) {
 #endif
     roadmap_history_save ();
     roadmap_screen_shutdown ();
-#ifndef __SYMBIAN32__
+#if !defined(__SYMBIAN32__) || defined(QTMOBILITY)
     roadmap_start_save_trip ();
 #endif
 #ifdef J2ME
@@ -3392,7 +3392,7 @@ void roadmap_start_exit (void) {
     roadmap_config_save (0);
 #endif
     editor_main_shutdown ();
-#ifndef __SYMBIAN32__
+#if !defined(__SYMBIAN32__) || defined(QTMOBILITY)
     roadmap_db_end ();
 #endif
     roadmap_gps_shutdown ();

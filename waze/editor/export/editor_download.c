@@ -70,7 +70,7 @@ static int editor_download_map (RoadMapDownloadCallbacks *callbacks) {
    roadmap_screen_get_center (&center);
    count = roadmap_locator_by_position (&center, &fips);
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) && !defined(QTMOBILITY)
    fips[0] = 77001;
    count = 1;
 #else

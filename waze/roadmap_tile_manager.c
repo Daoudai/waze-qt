@@ -51,7 +51,7 @@
 #include "ssd/ssd_progress_msg_dialog.h"
 #include "navigate/navigate_main.h"
 
-#if defined(__SYMBIAN32__) || defined(J2ME)
+#if (defined(__SYMBIAN32__) || defined(J2ME)) && !defined(QTMOBILITY)
 #define	TM_MAX_CONCURRENT		1
 #elif defined(IPHONE) || defined(ANDROID)
 #define	TM_MAX_CONCURRENT		6
