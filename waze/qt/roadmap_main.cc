@@ -488,6 +488,9 @@ int main(int argc, char* argv[]) {
 
    app = new QApplication(argc, argv);
 
+   QCoreApplication::setOrganizationName("Waze");
+   QCoreApplication::setApplicationName("Waze");
+
    roadmap_option (argc, argv, NULL);
 
    roadmap_start_subscribe ( roadmap_start_event );

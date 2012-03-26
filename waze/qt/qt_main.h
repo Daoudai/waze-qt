@@ -40,7 +40,7 @@
 #include <QTcpSocket>
 #include <QMutex>
 #include <QDeclarativeView>
-
+#include <QSettings>
 #define ROADMAP_MAX_TIMER 64
 
 extern "C" {
@@ -181,6 +181,33 @@ public:
 
    void setFocusToCanvas();
 
+   inline void saveAllSettings()
+   {
+       userSettings.sync();
+       sessionSettings.sync();
+       preferencesSettings.sync();
+   }
+
+   inline QSettings* getSettings(const QString file) {
+
+       if (QString::fromAscii("user") == file)
+       {
+           return &userSettings;
+       }
+       if (QString::fromAscii("session") == file)
+       {
+           return &sessionSettings;
+       }
+       if (QString::fromAscii("preferences") == file)
+       {
+           return &preferencesSettings;
+       }
+
+       roadmap_log(ROADMAP_FATAL, "Unsupported settings file <%s>", file.toAscii().data());
+
+       return NULL;
+   }
+
 public slots:
    void handleSignal(int sig);
    void mouseAreaPressed();
@@ -206,6 +233,10 @@ protected:
    virtual void closeEvent(QCloseEvent* ev);
 
    QString applicationPath;
+
+   QSettings userSettings;
+   QSettings sessionSettings;
+   QSettings preferencesSettings;
 };
 
 extern RMapMainWindow* mainWindow;
