@@ -143,7 +143,6 @@ SOURCES += \
     roadmap_county.c \
     roadmap_copy.c \
     roadmap_coord.c \
-    roadmap_config.c \
     roadmap_city_combobox.c \
     roadmap_city.c \
     roadmap_car.c \

@@ -96,7 +96,13 @@ int  RMapTimerCallback::same(RoadMapCallback cb) {
 }
 
 // Implementation of RMapMainWindow class
-RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) : QMainWindow(parent, f), contactsDialog(NULL) {
+RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) :
+    QMainWindow(parent, f),
+    contactsDialog(NULL),
+    userSettings(QSettings::IniFormat, QSettings::UserScope, "Waze", "user"),
+    preferencesSettings(QSettings::IniFormat, QSettings::UserScope, "Waze", "preferences"),
+    sessionSettings(QSettings::IniFormat, QSettings::UserScope, "Waze", "session")
+{
    spacePressed = false;
    canvas = new RMapCanvas(this);
    setCentralWidget(canvas);
