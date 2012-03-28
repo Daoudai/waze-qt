@@ -98,10 +98,7 @@ int  RMapTimerCallback::same(RoadMapCallback cb) {
 // Implementation of RMapMainWindow class
 RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) :
     QMainWindow(parent, f),
-    contactsDialog(NULL),
-    userSettings(QSettings::IniFormat, QSettings::UserScope, "Waze", "user"),
-    preferencesSettings(QSettings::IniFormat, QSettings::UserScope, "Waze", "preferences"),
-    sessionSettings(QSettings::IniFormat, QSettings::UserScope, "Waze", "session")
+    contactsDialog(NULL)
 {
    spacePressed = false;
    canvas = new RMapCanvas(this);
@@ -120,6 +117,12 @@ RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) :
 RMapMainWindow::~RMapMainWindow() {
     delete contactsDialog;
     delete contactListModel;
+
+    QList<void*>::iterator it = leakingItems.begin();
+    for (; it != leakingItems.end(); it++)
+    {
+        delete *it;
+    }
 }
 
 void RMapMainWindow::setKeyboardCallback(RoadMapKeyInput c) {

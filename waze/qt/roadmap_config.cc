@@ -33,26 +33,31 @@
 #include <QList>
 #include "qt_main.h"
 #include "qt_global.h"
+#include "qt_config.h"
 
 extern "C" {
 #include "roadmap.h"
-#include "roadmap_path.h"
-#include "roadmap_file.h"
 #include "roadmap_config.h"
 }
 
 extern RMapMainWindow *mainWindow;
+static RMapConfig *config;
 
 struct RoadMapConfigItemRecord {
-    QSettings* settingsFile;
+    QString file;
     QVariant default_value;
     WazeString strValue;
     unsigned char type;
+
+    const char* name;
+    const char* category;
 
     RoadMapCallback callback;
 
     QList<WazeString> enumeration_values;
     QList<WazeString>::const_iterator enum_iter;
+
+    QHash<QString, RoadMapConfigItem*>::const_iterator items_iter;
 };
 
 static QString roadmap_config_property_name(RoadMapConfigDescriptor *descriptor)
@@ -68,20 +73,27 @@ void roadmap_config_declare
 {
     if (descriptor->reference == NULL)
     {
-        // SEVERE - leaking stuff :(
-        // TODO
-        descriptor->reference = new RoadMapConfigItemRecord;
+        QString configName = roadmap_config_property_name(descriptor);
+        RoadMapConfigItemRecord* item = config->getConfigItem(file, configName);
+
+        if (item == NULL)
+        {
+            item = new RoadMapConfigItemRecord;
+            item->name = descriptor->name;
+            item->category = descriptor->category;
+            config->addConfigItem(file, configName, item);
+        }
     }
 
     descriptor->reference->default_value = QVariant(QString::fromLocal8Bit(default_value));
-    descriptor->reference->settingsFile = mainWindow->getSettings(file);
+    descriptor->reference->file = file;
 }
 
 void roadmap_config_declare_password
         (const char *file,
          RoadMapConfigDescriptor *descriptor, const char *default_value)
 {
-    roadmap_config_declare(file, descriptor, default_value, 0);
+    roadmap_config_declare(file, descriptor, default_value, NULL);
 }
 
 RoadMapConfigItem *roadmap_config_declare_enumeration
@@ -93,7 +105,7 @@ RoadMapConfigItem *roadmap_config_declare_enumeration
     char *p;
     va_list ap;
 
-    roadmap_config_declare(file, descriptor, enumeration_value, 0);
+    roadmap_config_declare(file, descriptor, enumeration_value, NULL);
     roadmap_config_add_enumeration_value (descriptor->reference, enumeration_value);
 
     descriptor->reference->callback = callback;
@@ -118,7 +130,7 @@ void roadmap_config_declare_color
         (const char *file,
          RoadMapConfigDescriptor *descriptor, const char *default_value)
 {
-    // TODO
+    roadmap_config_declare(file, descriptor, default_value, NULL);
 }
 
 
@@ -152,17 +164,47 @@ char *roadmap_config_extract_data (char *line, int size) {
     return line;
 }
 
-int roadmap_config_first (const char *config,
+int roadmap_config_first (const char *file,
                           RoadMapConfigDescriptor *descriptor)
 {
-    // TODO
-    return 0;
+    RMapConfig::ItemsHash::const_iterator begin = config->getItemsConstBegin(file);
+    RMapConfig::ItemsHash::const_iterator end = config->getItemsConstEnd(file);
+
+    if (begin == end) {
+        descriptor->category = NULL;
+        descriptor->name = NULL;
+        descriptor->reference = NULL;
+        return 0;
+    }
+
+    RoadMapConfigItemRecord* item = (*begin);
+    descriptor->category = item->category;
+    descriptor->name = item->name;
+    descriptor->reference = item;
+    item->items_iter = begin;
+
+    return 1;
 }
 
 int roadmap_config_next (RoadMapConfigDescriptor *descriptor)
 {
-    // TODO
-    return 0;
+    RMapConfig::ItemsHash::const_iterator next = descriptor->reference->items_iter++;
+    RMapConfig::ItemsHash::const_iterator end = config->getItemsConstEnd(descriptor->reference->file);
+
+    if (next == end) {
+        descriptor->category = NULL;
+        descriptor->name = NULL;
+        descriptor->reference = NULL;
+        return 0;
+    }
+
+    RoadMapConfigItemRecord* item = (*next);
+    descriptor->category = item->category;
+    descriptor->name = item->name;
+    descriptor->reference = item;
+    item->items_iter = next;
+
+    return 1;
 }
 
 
@@ -199,12 +241,12 @@ void *roadmap_config_get_enumeration_next (void *enumeration)
 
 void  roadmap_config_initialize (void)
 {
-
+    config = new RMapConfig(mainWindow);
 }
 
 void  roadmap_config_save       (int force)
 {
-    mainWindow->saveAllSettings();
+    config->saveAllSettings();
 }
 
 
@@ -215,7 +257,7 @@ int   roadmap_config_get_type (RoadMapConfigDescriptor *descriptor)
 
 const char *roadmap_config_get (RoadMapConfigDescriptor *descriptor)
 {
-    QSettings* settings = descriptor->reference->settingsFile;
+    QSettings* settings = config->getSettings(descriptor->reference->file);
     descriptor->reference->strValue = settings->value(roadmap_config_property_name(descriptor),
                                                       descriptor->reference->default_value).toString();
     return descriptor->reference->strValue.getStr();
@@ -224,7 +266,7 @@ const char *roadmap_config_get (RoadMapConfigDescriptor *descriptor)
 void roadmap_config_set
                 (RoadMapConfigDescriptor *descriptor, const char *value)
 {
-    QSettings* settings = descriptor->reference->settingsFile;
+    QSettings* settings = config->getSettings(descriptor->reference->file);
     QString qValue = QString::fromLocal8Bit(value);
     descriptor->reference->strValue = qValue;
     settings->setValue(roadmap_config_property_name(descriptor), QVariant(qValue));
@@ -236,12 +278,26 @@ void roadmap_config_set
 
 int roadmap_config_get_list (RoadMapConfigDescriptor *descriptor, const char* delimiters, const char* list_out[], int list_size )
 {
-    // TODO
+    int count = 0;
+    const char* value = roadmap_config_get( descriptor );
+    char* list_copy = strdup( value );
+    const char* pCh;
+
+    pCh  = strtok( list_copy, delimiters );
+    while ( pCh != NULL && *pCh != 0 && count < list_size )
+    {
+       list_out[count] = strdup( pCh );
+       pCh = strtok( NULL, delimiters );
+       count++;
+    }
+    free( list_copy );
+
+    return count;
 }
 
 int   roadmap_config_get_integer (RoadMapConfigDescriptor *descriptor)
 {
-    QSettings* settings = descriptor->reference->settingsFile;
+    QSettings* settings = config->getSettings(descriptor->reference->file);
     QVariant value = settings->value(roadmap_config_property_name(descriptor), descriptor->reference->default_value);
     descriptor->reference->strValue = value.toString();
     return value.toInt();
@@ -249,7 +305,7 @@ int   roadmap_config_get_integer (RoadMapConfigDescriptor *descriptor)
 
 void  roadmap_config_set_integer (RoadMapConfigDescriptor *descriptor, int x)
 {
-    QSettings* settings = descriptor->reference->settingsFile;
+    QSettings* settings = config->getSettings(descriptor->reference->file);
     QVariant qValue = QVariant(x);
     settings->setValue(roadmap_config_property_name(descriptor), qValue);
     descriptor->reference->strValue = qValue.toString();
@@ -262,25 +318,61 @@ void  roadmap_config_set_integer (RoadMapConfigDescriptor *descriptor, int x)
 int   roadmap_config_match
         (RoadMapConfigDescriptor *descriptor, const char *text)
 {
-    QSettings* settings = descriptor->reference->settingsFile;
+    QSettings* settings = config->getSettings(descriptor->reference->file);
     return settings->value(roadmap_config_property_name(descriptor)).toString().compare(QString::fromLocal8Bit(text), Qt::CaseInsensitive);
 }
 
 BOOL  roadmap_config_get_position
         (RoadMapConfigDescriptor *descriptor, RoadMapPosition *position)
 {
-     // TODO
-    return FALSE;
+    BOOL found = TRUE;
+
+    if (descriptor->reference == NULL)
+    {
+        roadmap_config_declare("session", descriptor, "", NULL);
+    }
+
+    QString positionPropName = roadmap_config_property_name(descriptor);
+    QSettings* settings = config->getSettings(descriptor->reference->file);
+    QString strPosition = settings->value(positionPropName).toString();
+
+    if (strPosition.isEmpty() && !descriptor->reference->default_value.toString().isEmpty())
+    {
+        strPosition = descriptor->reference->default_value.toString();
+    }
+
+    if (strPosition.isEmpty())
+    {
+        position->longitude = 0;
+        position->latitude  = 0;
+        found = FALSE;
+    }
+    else
+    {
+        QStringList lonLat = strPosition.split(QString::fromAscii(","));
+        position->longitude = QVariant(lonLat.at(0)).toInt();
+        position->latitude  = QVariant(lonLat.at(1)).toInt();
+    }
+
+    return found;
 }
 
 void  roadmap_config_set_position
         (RoadMapConfigDescriptor *descriptor, const RoadMapPosition *position)
 {
-    // TODO
+    if (descriptor->reference == NULL)
+    {
+        roadmap_config_declare("session", descriptor, "", NULL);
+    }
+
+    QString strPosition = QString().sprintf("%d,%d", position->longitude, position->latitude);
+
+    roadmap_config_set(descriptor, strPosition.toAscii().data());
 }
 
 int  roadmap_config_reload (const char *name)
 {
-    QSettings* settings = mainWindow->getSettings(name);
+    QSettings* settings = config->getSettings(name);
     settings->sync();
+    return 1;
 }

@@ -181,31 +181,9 @@ public:
 
    void setFocusToCanvas();
 
-   inline void saveAllSettings()
+   inline void addLeakingItem(void* item)
    {
-       userSettings.sync();
-       sessionSettings.sync();
-       preferencesSettings.sync();
-   }
-
-   inline QSettings* getSettings(const QString file) {
-
-       if (QString::fromAscii("user") == file)
-       {
-           return &userSettings;
-       }
-       if (QString::fromAscii("session") == file)
-       {
-           return &sessionSettings;
-       }
-       if (QString::fromAscii("preferences") == file)
-       {
-           return &preferencesSettings;
-       }
-
-       roadmap_log(ROADMAP_FATAL, "Unsupported settings file <%s>", file.toAscii().data());
-
-       return NULL;
+       leakingItems.append(item);
    }
 
 public slots:
@@ -234,9 +212,7 @@ protected:
 
    QString applicationPath;
 
-   QSettings userSettings;
-   QSettings sessionSettings;
-   QSettings preferencesSettings;
+   QList<void*> leakingItems;
 };
 
 extern RMapMainWindow* mainWindow;
