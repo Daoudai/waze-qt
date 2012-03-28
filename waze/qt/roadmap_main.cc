@@ -371,6 +371,10 @@ void roadmap_main_exit(void) {
 
    roadmap_start_exit();
 
+   delete timers;
+   delete mainWindow;
+
+   app->quit();
    exit(0);
 }
 
