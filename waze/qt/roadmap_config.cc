@@ -31,14 +31,12 @@
 #include <QSettings>
 #include <QVariant>
 #include <QList>
-#include <QApplication>
 #include "qt_main.h"
 #include "qt_global.h"
 #include "qt_config.h"
 
 extern "C" {
 #include "roadmap.h"
-#include "roadmap_path.h"
 #include "roadmap_config.h"
 }
 
@@ -228,8 +226,7 @@ void *roadmap_config_get_enumeration_next (void *enumeration)
 
 void  roadmap_config_initialize (void)
 {
-    QApplication::applicationDirPath();
-    config = new RMapConfig(mainWindow, QApplication::applicationDirPath()+ QString("/.."), roadmap_path_user());
+    config = new RMapConfig(mainWindow);
 }
 
 void  roadmap_config_save       (int force)
@@ -428,7 +425,7 @@ void  roadmap_config_set_position
 
 int  roadmap_config_reload (const char *name)
 {
-    QSettings* settings = config->getSettings(name);
-    settings->sync();
+    config->reloadConfig(name);
+
     return 1;
 }
