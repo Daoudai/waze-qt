@@ -32,7 +32,7 @@ class RMapConfig : public QObject
 {
     Q_OBJECT
 public:
-    typedef QHash<QString, struct RoadMapConfigItemRecord* > ItemsHash;
+    typedef QHash<QString, RoadMapConfigItem* > ItemsHash;
 
     explicit RMapConfig(QObject *parent);
     virtual ~RMapConfig();
@@ -40,8 +40,9 @@ public:
     void saveAllSettings();
     QSettings* getSettings(QString file);
 
-    void addConfigItem(QString file, QString name, struct RoadMapConfigItemRecord* item);
-    struct RoadMapConfigItemRecord* getConfigItem(QString file, QString name);
+    void addConfigItem(QString file, QString name, RoadMapConfigItem* item);
+    RoadMapConfigItem* getConfigItem(QString file, QString name);
+    RoadMapConfigItem* getConfigItem(QString name);
 
     ItemsHash::const_iterator getItemsConstBegin(QString file);
     ItemsHash::const_iterator getItemsConstEnd(QString file);
