@@ -1,10 +1,9 @@
 #include "qt_config.h"
+#include <QStringList>
 
-RMapConfig::RMapConfig(RMapMainWindow *parent) :
+RMapConfig::RMapConfig(QObject *parent) :
     QObject(parent)
 {
-    parent->addLeakingItem(this);
-
     _settings["user"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Waze", "user");
     _settings["preferences"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Waze", "preferences");
     _settings["session"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Waze", "session");
@@ -15,14 +14,15 @@ RMapConfig::~RMapConfig()
     QStringList::iterator fileIt = _settings.keys().begin();
     for (; fileIt != _settings.keys().end(); fileIt++)
     {
-        delete _settings[*fileIt];
+        delete _settings.value(*fileIt);
 
-        ItemsHash::iterator itemsIt = _configItems[*fileIt].begin();
-        for (; itemsIt != _configItems[*fileIt].end(); itemsIt++)
+        ItemsHash configItems = _configItems.value(*fileIt);
+        ItemsHash::iterator itemsIt = configItems.begin();
+        for (; itemsIt != configItems.end(); itemsIt++)
         {
-            delete (*itemsIt);
+            delete itemsIt.value();
         }
-        _configItems[*itemsIt].clear();
+        configItems.clear();
     }
 
     _settings.clear();
@@ -61,12 +61,12 @@ RoadMapConfigItemRecord* RMapConfig::getConfigItem(QString file, QString name)
     return _configItems[file].value(name, NULL);
 }
 
-RMapConfig::ItemsHash::iterator RMapConfig::getItemsConstBegin(QString file)
+RMapConfig::ItemsHash::const_iterator RMapConfig::getItemsConstBegin(QString file)
 {
     return _configItems[file].constBegin();
 }
 
-RMapConfig::ItemsHash::iterator RMapConfig::getItemsConstEnd(QString file)
+RMapConfig::ItemsHash::const_iterator RMapConfig::getItemsConstEnd(QString file)
 {
     return _configItems[file].constEnd();
 }

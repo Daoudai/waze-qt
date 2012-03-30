@@ -43,23 +43,6 @@ extern "C" {
 extern RMapMainWindow *mainWindow;
 static RMapConfig *config;
 
-struct RoadMapConfigItemRecord {
-    QString file;
-    QVariant default_value;
-    WazeString strValue;
-    unsigned char type;
-
-    const char* name;
-    const char* category;
-
-    RoadMapCallback callback;
-
-    QList<WazeString> enumeration_values;
-    QList<WazeString>::const_iterator enum_iter;
-
-    QHash<QString, RoadMapConfigItem*>::const_iterator items_iter;
-};
-
 static QString roadmap_config_property_name(RoadMapConfigDescriptor *descriptor)
 {
     QString name;
