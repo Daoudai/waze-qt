@@ -64,8 +64,10 @@ void roadmap_config_declare
             item = new RoadMapConfigItemRecord;
             item->name = descriptor->name;
             item->category = descriptor->category;
+            item->callback = NULL;
             config->addConfigItem(file, configName, item);
         }
+        descriptor->reference = item;
     }
 
     descriptor->reference->default_value = QVariant(QString::fromLocal8Bit(default_value));
@@ -240,8 +242,19 @@ int   roadmap_config_get_type (RoadMapConfigDescriptor *descriptor)
 
 const char *roadmap_config_get (RoadMapConfigDescriptor *descriptor)
 {
+    QString itemName = roadmap_config_property_name(descriptor);
+    if (descriptor->reference == NULL)
+    {
+        descriptor->reference = config->getConfigItem(itemName);
+
+        if (descriptor->reference == NULL)
+        {
+            return "";
+        }
+    }
+
     QSettings* settings = config->getSettings(descriptor->reference->file);
-    descriptor->reference->strValue = settings->value(roadmap_config_property_name(descriptor),
+    descriptor->reference->strValue = settings->value(itemName,
                                                       descriptor->reference->default_value).toString();
     return descriptor->reference->strValue.getStr();
 }
@@ -249,10 +262,21 @@ const char *roadmap_config_get (RoadMapConfigDescriptor *descriptor)
 void roadmap_config_set
                 (RoadMapConfigDescriptor *descriptor, const char *value)
 {
+    QString itemName = roadmap_config_property_name(descriptor);
+    if (descriptor->reference == NULL)
+    {
+        descriptor->reference = config->getConfigItem(itemName);
+
+        if (descriptor->reference == NULL)
+        {
+            return;
+        }
+    }
+
     QSettings* settings = config->getSettings(descriptor->reference->file);
     QString qValue = QString::fromLocal8Bit(value);
     descriptor->reference->strValue = qValue;
-    settings->setValue(roadmap_config_property_name(descriptor), QVariant(qValue));
+    settings->setValue(itemName, QVariant(qValue));
     if (descriptor->reference->callback != NULL)
     {
         descriptor->reference->callback();
@@ -280,17 +304,39 @@ int roadmap_config_get_list (RoadMapConfigDescriptor *descriptor, const char* de
 
 int   roadmap_config_get_integer (RoadMapConfigDescriptor *descriptor)
 {
+    QString itemName = roadmap_config_property_name(descriptor);
+    if (descriptor->reference == NULL)
+    {
+        descriptor->reference = config->getConfigItem(itemName);
+
+        if (descriptor->reference == NULL)
+        {
+            return 0;
+        }
+    }
+
     QSettings* settings = config->getSettings(descriptor->reference->file);
-    QVariant value = settings->value(roadmap_config_property_name(descriptor), descriptor->reference->default_value);
+    QVariant value = settings->value(itemName, descriptor->reference->default_value);
     descriptor->reference->strValue = value.toString();
     return value.toInt();
 }
 
 void  roadmap_config_set_integer (RoadMapConfigDescriptor *descriptor, int x)
 {
+    QString itemName = roadmap_config_property_name(descriptor);
+    if (descriptor->reference == NULL)
+    {
+        descriptor->reference = config->getConfigItem(itemName);
+
+        if (descriptor->reference == NULL)
+        {
+            return;
+        }
+    }
+
     QSettings* settings = config->getSettings(descriptor->reference->file);
     QVariant qValue = QVariant(x);
-    settings->setValue(roadmap_config_property_name(descriptor), qValue);
+    settings->setValue(itemName, qValue);
     descriptor->reference->strValue = qValue.toString();
     if (descriptor->reference->callback != NULL)
     {
@@ -301,8 +347,19 @@ void  roadmap_config_set_integer (RoadMapConfigDescriptor *descriptor, int x)
 int   roadmap_config_match
         (RoadMapConfigDescriptor *descriptor, const char *text)
 {
+    QString itemName = roadmap_config_property_name(descriptor);
+    if (descriptor->reference == NULL)
+    {
+        descriptor->reference = config->getConfigItem(itemName);
+
+        if (descriptor->reference == NULL)
+        {
+            return 0;
+        }
+    }
+
     QSettings* settings = config->getSettings(descriptor->reference->file);
-    return settings->value(roadmap_config_property_name(descriptor)).toString().compare(QString::fromLocal8Bit(text), Qt::CaseInsensitive);
+    return settings->value(itemName).toString().compare(QString::fromLocal8Bit(text), Qt::CaseInsensitive);
 }
 
 BOOL  roadmap_config_get_position
