@@ -42,6 +42,7 @@
 #include <QDeclarativeProperty>
 #include <QObject>
 #include <QGraphicsObject>
+#include <QApplication>
 #include "qt_main.h"
 #include "qt_contactslistmodel.h"
 
@@ -256,7 +257,7 @@ void RMapMainWindow::showContactList() {
         contactsDialog = new QDeclarativeView(this);
         contactsDialog->setGeometry(0, 0, canvas->width(), canvas->height());
         contactsDialog->engine()->rootContext()->setContextProperty("contactModel", contactListModel);
-        contactsDialog->setSource(QUrl::fromLocalFile(applicationPath + QString("/qml/Contacts.qml")));
+        contactsDialog->setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/qml/Contacts.qml")));
         contactsDialog->setAttribute(Qt::WA_TranslucentBackground);
         item = dynamic_cast<QObject*>(contactsDialog->rootObject());
 
@@ -405,14 +406,6 @@ void RMapMainWindow::handleSignal(int sig)
   }
   roadmap_log(ROADMAP_WARNING,"received signal %s",action.toUtf8().constData());
   roadmap_main_exit();
-}
-
-void RMapMainWindow::setApplicationPath(QString path) {
-    applicationPath = path;
-}
-
-QString RMapMainWindow::getApplicationPath() {
-    return applicationPath;
 }
 
 // Implementation of the RMapTimers class

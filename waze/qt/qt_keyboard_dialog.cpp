@@ -4,6 +4,7 @@
 #include <QDeclarativeProperty>
 #include <QGraphicsObject>
 #include <QObject>
+#include <QApplication>
 
 extern "C" {
 #include "roadmap_lang.h"
@@ -13,7 +14,7 @@ extern "C" {
 KeyboardDialog::KeyboardDialog(RMapMainWindow *parent) :
     QDeclarativeView(parent), mainWindow(parent)
 {
-    setSource(QUrl::fromLocalFile(mainWindow->getApplicationPath() + QString("/qml/TextBox.qml")));
+    setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/qml/TextBox.qml")));
     setAttribute(Qt::WA_TranslucentBackground);
 
     QObject *item = dynamic_cast<QObject*>(rootObject());

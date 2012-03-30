@@ -34,11 +34,10 @@
 #include <QString>
 #include <QDir>
 #include <QFile>
-#include <QApplication>
 #include <QHash>
 #include <QList>
 #include <QStringList>
-#include <QSettings>
+#include <QApplication>
 #include "qt_global.h"
 
 extern "C" {
@@ -46,8 +45,6 @@ extern "C" {
 #include "roadmap_path.h"
 #include "roadmap_file.h"
 }
-
-extern QApplication* app;
 
 struct RoadMapPathRecord {
    QList<WazeString> items;
@@ -73,11 +70,8 @@ static RoadMapPathRecord roadmap_path_find (const char *name) {
 
         /* Add the hardcoded configuration. */
 
-        QString appDataPath = app->applicationDirPath().append("/").append(QString("..")).append("/").append(QString("data"));
+        QString appDataPath = QApplication::applicationDirPath() + QString("../data");
         QString userDataPath = QDir::homePath().append("/").append(QString(HOME_PREFIX));
-
-        QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, appDataPath);
-        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, userDataPath);
 
         QList<WazeString> userPaths;
         userPaths.append(userDataPath);

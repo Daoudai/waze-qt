@@ -174,9 +174,6 @@ public:
 
    void showContactList();
 
-   void setApplicationPath(QString path);
-   QString getApplicationPath();
-
    static void signalHandler(int sig);
 
    void setFocusToCanvas();
@@ -209,8 +206,6 @@ protected:
    virtual void keyPressEvent(QKeyEvent* event);
    virtual void keyReleaseEvent(QKeyEvent* event);
    virtual void closeEvent(QCloseEvent* ev);
-
-   QString applicationPath;
 
    QList<void*> leakingItems;
 };
