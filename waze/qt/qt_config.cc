@@ -26,13 +26,14 @@ RMapConfig::~RMapConfig()
     {
         delete _settings.value(*fileIt);
 
-        ItemsHash configItems = _configItems.value(*fileIt);
-        ItemsHash::iterator itemsIt = configItems.begin();
-        for (; itemsIt != configItems.end(); itemsIt++)
+        ItemsHash* configItems = _configItems.value(*fileIt);
+        ItemsHash::iterator itemsIt = configItems->begin();
+        for (; itemsIt != configItems->end(); itemsIt++)
         {
             delete itemsIt.value();
         }
-        configItems.clear();
+        configItems->clear();
+        delete configItems;
     }
 
     _settings.clear();
@@ -61,22 +62,35 @@ QSettings* RMapConfig::getSettings(const QString file)
     return settings;
 }
 
-void RMapConfig::addConfigItem(QString file, QString name, RoadMapConfigItemRecord* item)
+void RMapConfig::addConfigItem(QString file, QString name, RoadMapConfigItem* item)
 {
-    _configItems[file][name] = item;
+    ItemsHash* items = _configItems.value(file, NULL);
+
+    if (items == NULL)
+    {
+        items = new ItemsHash();
+        _configItems.insert(file, items);
+    }
+
+    items->insert(name, item);
 }
 
-RoadMapConfigItemRecord* RMapConfig::getConfigItem(QString file, QString name)
+RoadMapConfigItem* RMapConfig::getConfigItem(QString file, QString name)
 {
-    return _configItems[file].value(name, NULL);
+    ItemsHash* items = _configItems.value(file, NULL);
+    if (items == NULL)
+    {
+        return NULL;
+    }
+    return items->value(name, NULL);
 }
 
-RoadMapConfigItemRecord* RMapConfig::getConfigItem(QString name)
+RoadMapConfigItem* RMapConfig::getConfigItem(QString name)
 {
-    QHash<QString, ItemsHash>::iterator itemsIt = _configItems.begin();
+    QHash<QString, ItemsHash*>::iterator itemsIt = _configItems.begin();
     for (; itemsIt != _configItems.end(); itemsIt++)
     {
-        RoadMapConfigItem* item = (*itemsIt).value(name, NULL);
+        RoadMapConfigItem* item = (*itemsIt)->value(name, NULL);
         if (item != NULL)
         {
             return item;
@@ -87,12 +101,28 @@ RoadMapConfigItemRecord* RMapConfig::getConfigItem(QString name)
 
 RMapConfig::ItemsHash::const_iterator RMapConfig::getItemsConstBegin(QString file)
 {
-    return _configItems[file].constBegin();
+    ItemsHash* items = _configItems.value(file, NULL);
+
+    if (items == NULL)
+    {
+        items = new ItemsHash();
+        _configItems.insert(file, items);
+    }
+
+    return items->constBegin();
 }
 
 RMapConfig::ItemsHash::const_iterator RMapConfig::getItemsConstEnd(QString file)
 {
-    return _configItems[file].constEnd();
+    ItemsHash* items = _configItems.value(file, NULL);
+
+    if (items == NULL)
+    {
+        items = new ItemsHash();
+        _configItems.insert(file, items);
+    }
+
+    return items->constEnd();
 }
 
 void RMapConfig::reloadConfig(QString file)

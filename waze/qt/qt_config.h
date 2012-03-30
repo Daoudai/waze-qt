@@ -52,7 +52,7 @@ public:
 private:
 
     QHash<QString, QSettings*> _settings;
-    QHash<QString, ItemsHash> _configItems;
+    QHash<QString, ItemsHash*> _configItems;
 };
 
 #endif // QT_RCONFIG_H
