@@ -70,7 +70,7 @@ static RoadMapPathRecord roadmap_path_find (const char *name) {
 
         /* Add the hardcoded configuration. */
 
-        QString appDataPath = QApplication::applicationDirPath() + QString("../data");
+        QString appDataPath = QApplication::applicationDirPath() + QString("/../data");
         QString userDataPath = QDir::homePath().append("/").append(QString(HOME_PREFIX));
 
         QList<WazeString> userPaths;

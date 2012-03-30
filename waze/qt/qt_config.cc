@@ -1,15 +1,22 @@
 #include "qt_config.h"
 #include <QStringList>
+#include <QFile>
+#include <QApplication>
 
-RMapConfig::RMapConfig(QObject *parent, QString appDataPath, QString userDataPath) :
+extern "C" {
+#include "roadmap_path.h"
+}
+
+RMapConfig::RMapConfig(QObject *parent) :
     QObject(parent)
 {
-    QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, appDataPath);
-    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, userDataPath);
+    QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, QApplication::applicationDirPath()+ QString("/.."));
+    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, roadmap_path_user());
 
     _settings["user"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "data", "user");
     _settings["preferences"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "data", "preferences");
     _settings["session"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "data", "session");
+    reloadConfig("schema");
 }
 
 RMapConfig::~RMapConfig()
@@ -86,4 +93,45 @@ RMapConfig::ItemsHash::const_iterator RMapConfig::getItemsConstBegin(QString fil
 RMapConfig::ItemsHash::const_iterator RMapConfig::getItemsConstEnd(QString file)
 {
     return _configItems[file].constEnd();
+}
+
+void RMapConfig::reloadConfig(QString file)
+{
+    // schema is a special case as it is composed with more than user & system scopes (themes)
+    if (file != QString("schema"))
+    {
+        _settings.value(file)->sync();
+        return;
+    }
+
+    // schema
+    QSettings* settings = _settings.value(QString(file), NULL);
+    if (settings != NULL)
+    {
+        // save and release current settings
+        settings->sync();
+        delete settings;
+    }
+
+    // serach for the proper schema file in the skin dirs
+    QString path;
+    const char* cursor = NULL;
+    for ( cursor = roadmap_path_first ("skin");
+          cursor != NULL;
+          cursor = roadmap_path_next ("skin", cursor))
+    {
+        path = QString::fromLocal8Bit(cursor).append("/").append(file);
+        if (QFile::exists(path))
+        {
+            break;
+        }
+    }
+
+    if (cursor == NULL)
+    {
+        // Not found - use default
+        path = QString::fromLocal8Bit(roadmap_path_config()).append("/").append(file);
+    }
+
+    _settings[file] = new QSettings(path, QSettings::IniFormat);
 }

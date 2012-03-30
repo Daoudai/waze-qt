@@ -34,11 +34,13 @@ class RMapConfig : public QObject
 public:
     typedef QHash<QString, RoadMapConfigItem* > ItemsHash;
 
-    explicit RMapConfig(QObject *parent, QString appDataPath, QString userDataPath);
+    explicit RMapConfig(QObject *parent);
     virtual ~RMapConfig();
 
     void saveAllSettings();
     QSettings* getSettings(QString file);
+
+    void reloadConfig(QString file);
 
     void addConfigItem(QString file, QString name, RoadMapConfigItem* item);
     RoadMapConfigItem* getConfigItem(QString file, QString name);
