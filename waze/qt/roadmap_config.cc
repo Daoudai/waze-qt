@@ -45,8 +45,9 @@ static RMapConfig *config;
 
 static QString roadmap_config_property_name(RoadMapConfigDescriptor *descriptor)
 {
-    QString name;
-    return name.sprintf("%s/%s",descriptor->category, descriptor->name);
+    QString qCategory = QString::fromLocal8Bit(descriptor->category);
+    QString qName = QString::fromLocal8Bit(descriptor->name);
+    return QString("%1/%2").arg(qCategory).arg(qName);
 }
 
 void roadmap_config_declare
