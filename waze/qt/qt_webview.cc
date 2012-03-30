@@ -4,11 +4,12 @@
 #include <QDeclarativeProperty>
 #include <QGraphicsObject>
 #include <QObject>
+#include <QApplication>
 
 WazeWebView::WazeWebView(RMapMainWindow *parent) :
     QDeclarativeView(parent), mainWindow(parent)
 {
-    setSource(QUrl::fromLocalFile(mainWindow->getApplicationPath() + QString("/qml/WazeBrowser.qml")));
+    setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/qml/WazeBrowser.qml")));
     setAttribute(Qt::WA_TranslucentBackground);
 }
 

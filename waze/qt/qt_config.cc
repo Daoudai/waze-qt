@@ -1,12 +1,15 @@
 #include "qt_config.h"
 #include <QStringList>
 
-RMapConfig::RMapConfig(QObject *parent) :
+RMapConfig::RMapConfig(QObject *parent, QString appDataPath, QString userDataPath) :
     QObject(parent)
 {
-    _settings["user"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Waze", "user");
-    _settings["preferences"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Waze", "preferences");
-    _settings["session"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Waze", "session");
+    QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, appDataPath);
+    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, userDataPath);
+
+    _settings["user"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "data", "user");
+    _settings["preferences"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "data", "preferences");
+    _settings["session"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "data", "session");
 }
 
 RMapConfig::~RMapConfig()
