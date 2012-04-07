@@ -44,7 +44,7 @@ void RMapConfig::saveAllSettings()
     QHash<QString, QSettings*>::iterator it = _settings.begin();
     for (; it != _settings.end(); it++)
     {
-        QSettings* settings = (*it);
+        QSettings* settings = it.value();
         settings->sync();
     }
 }
@@ -56,7 +56,7 @@ QSettings* RMapConfig::getSettings(const QString file)
 
     if (settings == NULL)
     {
-        roadmap_log(ROADMAP_FATAL, "Unsupported settings file <%s>", file.toAscii().data());
+        roadmap_log(ROADMAP_ERROR, "Unsupported settings file <%s>", file.toAscii().data());
     }
 
     return settings;
@@ -90,7 +90,7 @@ RoadMapConfigItem* RMapConfig::getConfigItem(QString name)
     QHash<QString, ItemsHash*>::iterator itemsIt = _configItems.begin();
     for (; itemsIt != _configItems.end(); itemsIt++)
     {
-        RoadMapConfigItem* item = (*itemsIt)->value(name, NULL);
+        RoadMapConfigItem* item = itemsIt.value()->value(name, NULL);
         if (item != NULL)
         {
             return item;

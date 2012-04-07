@@ -1,6 +1,8 @@
 #ifndef QT_GLOBAL_H
 #define QT_GLOBAL_H
 
+#include <QByteArray>
+
 class WazeString {
 public:
     explicit WazeString() {
