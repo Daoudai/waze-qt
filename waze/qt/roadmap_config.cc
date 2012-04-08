@@ -50,13 +50,8 @@ static QString roadmap_config_property_name(RoadMapConfigDescriptor *descriptor)
     return QString("%1/%2").arg(qCategory).arg(qName);
 }
 
-static QVariant roadmap_config_get_variant(RoadMapConfigDescriptor* descriptor, bool *found)
+static QVariant roadmap_config_get_variant(RoadMapConfigDescriptor* descriptor)
 {
-    if (found != NULL)
-    {
-        *found = false;
-    }
-
     if (descriptor->reference == NULL)
     {
         QString itemName = roadmap_config_property_name(descriptor);
@@ -69,25 +64,7 @@ static QVariant roadmap_config_get_variant(RoadMapConfigDescriptor* descriptor, 
         descriptor->reference = item;
     }
 
-    QSettings* settings = config->getSettings(descriptor->reference->file);
-    if (settings == NULL)
-    {
-        return QVariant();
-    }
-
-    settings->beginGroup(descriptor->category);
-    QVariant value = settings->value(descriptor->name);
-    settings->endGroup();
-
-    if (value.isNull())
-    {
-        value.setValue(descriptor->reference->default_value);
-    }
-    else if (found != NULL)
-    {
-        *found = true;
-    }
-    return value;
+    return config->getValue(descriptor);
 }
 
 void roadmap_config_declare
@@ -283,7 +260,7 @@ int   roadmap_config_get_type (RoadMapConfigDescriptor *descriptor)
 
 const char *roadmap_config_get (RoadMapConfigDescriptor *descriptor)
 {
-    QVariant value = roadmap_config_get_variant(descriptor, (bool*) NULL);
+    QVariant value = roadmap_config_get_variant(descriptor);
     descriptor->reference->strValue = value.toString();
     return descriptor->reference->strValue.getStr();
 }
@@ -302,16 +279,9 @@ void roadmap_config_set
         }
     }
 
-    QSettings* settings = config->getSettings(descriptor->reference->file);
     QString qValue = QString::fromLocal8Bit(value);
     descriptor->reference->strValue = qValue;
-    settings->beginGroup(descriptor->category);
-    settings->setValue(descriptor->name, QVariant(qValue));
-    settings->endGroup();
-    if (descriptor->reference->callback != NULL)
-    {
-        descriptor->reference->callback();
-    }
+    config->setValue(descriptor, qValue);
 }
 
 int roadmap_config_get_list (RoadMapConfigDescriptor *descriptor, const char* delimiters, const char* list_out[], int list_size )
@@ -335,7 +305,7 @@ int roadmap_config_get_list (RoadMapConfigDescriptor *descriptor, const char* de
 
 int   roadmap_config_get_integer (RoadMapConfigDescriptor *descriptor)
 {
-    QVariant value = roadmap_config_get_variant(descriptor, (bool*) NULL);
+    QVariant value = roadmap_config_get_variant(descriptor);
     bool isOk;
 
     int intValue = value.toInt(&isOk);
@@ -361,29 +331,15 @@ void  roadmap_config_set_integer (RoadMapConfigDescriptor *descriptor, int x)
         }
     }
 
-    QSettings* settings = config->getSettings(descriptor->reference->file);
     QVariant qValue = QVariant(x);
-    settings->beginGroup(descriptor->category);
-    settings->setValue(descriptor->name, qValue);
-    settings->endGroup();
     descriptor->reference->strValue = qValue.toString();
-    if (descriptor->reference->callback != NULL)
-    {
-        descriptor->reference->callback();
-    }
+    config->setValue(descriptor, qValue);
 }
 
 int   roadmap_config_match
         (RoadMapConfigDescriptor *descriptor, const char *text)
 {
-    bool isFound;
-    QVariant value = roadmap_config_get_variant(descriptor, &isFound);
-
-    if (!isFound)
-    {
-        return 0;
-    }
-
+    QVariant value = roadmap_config_get_variant(descriptor);
     return value.toString().compare(QString::fromLocal8Bit(text), Qt::CaseInsensitive) == 0;
 }
 
@@ -397,10 +353,7 @@ BOOL  roadmap_config_get_position
         roadmap_config_declare("session", descriptor, "", NULL);
     }
 
-    QSettings* settings = config->getSettings(descriptor->reference->file);
-    settings->beginGroup(descriptor->category);
-    QString strPosition = settings->value(descriptor->name).toString();
-    settings->endGroup();
+    QString strPosition = config->getValue(descriptor).toString();
 
     if (strPosition.isEmpty() && !descriptor->reference->default_value.toString().isEmpty())
     {

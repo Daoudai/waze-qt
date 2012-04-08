@@ -10,12 +10,22 @@ extern "C" {
 RMapConfig::RMapConfig(QObject *parent) :
     QObject(parent)
 {
-    QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, QApplication::applicationDirPath()+ QString("/.."));
-    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, roadmap_path_user());
+    QString appData = QApplication::applicationDirPath()+ QString("/../data/");
+    QString userData = QString::fromLocal8Bit(roadmap_path_user()) + "/";
 
-    _settings["user"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "data", "user");
-    _settings["preferences"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "data", "preferences");
-    _settings["session"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "data", "session");
+    SettingsList* userList = new SettingsList();
+    userList->append(new QSettings(userData + "user.ini", QSettings::IniFormat));
+    _settings["user"] = userList;
+
+    SettingsList* preferencesList = new SettingsList();
+    preferencesList->append(new QSettings(userData + "preferences.ini", QSettings::IniFormat));
+    preferencesList->append(new QSettings(appData + "preferences.ini", QSettings::IniFormat));
+    _settings["preferences"] = preferencesList;
+
+    SettingsList* sessionList = new SettingsList();
+    sessionList->append(new QSettings(userData + "session.ini", QSettings::IniFormat));
+    _settings["session"] = sessionList;
+
     reloadConfig("schema");
 }
 
@@ -24,7 +34,14 @@ RMapConfig::~RMapConfig()
     QStringList::iterator fileIt = _settings.keys().begin();
     for (; fileIt != _settings.keys().end(); fileIt++)
     {
-        delete _settings.value(*fileIt);
+        SettingsList* settingsList = _settings.value(*fileIt);
+        SettingsList::iterator settingsIt = settingsList->begin();
+        for (; settingsIt != settingsList->end(); settingsIt++)
+        {
+            delete *settingsIt;
+        }
+        settingsList->clear();
+        delete settingsList;
 
         ItemsHash* configItems = _configItems.value(*fileIt);
         ItemsHash::iterator itemsIt = configItems->begin();
@@ -41,25 +58,70 @@ RMapConfig::~RMapConfig()
 
 void RMapConfig::saveAllSettings()
 {
-    QHash<QString, QSettings*>::iterator it = _settings.begin();
+    QHash<QString, SettingsList*>::iterator it = _settings.begin();
     for (; it != _settings.end(); it++)
     {
-        QSettings* settings = it.value();
-        settings->sync();
+        SettingsList::iterator settingsIt = it.value()->begin();
+        for (; settingsIt != it.value()->end(); settingsIt++)
+        {
+            QSettings* settings = *settingsIt;
+            settings->sync();
+        }
     }
 }
 
-QSettings* RMapConfig::getSettings(const QString file)
+QVariant RMapConfig::getValue(RoadMapConfigDescriptor *descriptor)
 {
-
-    QSettings* settings = _settings.value(file, NULL);
-
-    if (settings == NULL)
+    SettingsList* settingsList = _settings.value(descriptor->reference->file, NULL);
+    if (settingsList == NULL)
     {
-        roadmap_log(ROADMAP_ERROR, "Unsupported settings file <%s>", file.toAscii().data());
+        return QVariant();
     }
 
-    return settings;
+    QVariant value;
+    SettingsList::iterator settingsIt = settingsList->begin();
+    for (; settingsIt != settingsList->end() && value.isNull(); settingsIt++)
+    {
+        QSettings* settings = *settingsIt;
+        settings->beginGroup(descriptor->category);
+        if (settings->contains(descriptor->name))
+        {
+            value = settings->value(descriptor->name);
+        }
+        else
+        {
+            qDebug("not found %s: %s/%s", settings->fileName().toLocal8Bit().data(), descriptor->category, descriptor->name);
+        }
+        settings->endGroup();
+    }
+
+    if (value.isNull())
+    {
+        return descriptor->reference->default_value;
+    }
+
+    return value;
+}
+
+void RMapConfig::setValue(RoadMapConfigDescriptor *descriptor, QVariant value)
+{
+    SettingsList* settingsList = _settings.value(descriptor->reference->file, NULL);
+    if (settingsList == NULL)
+    {
+        roadmap_log(ROADMAP_ERROR, "No settings file was found for %s", descriptor->reference->file.toLocal8Bit().data());
+        return;
+    }
+
+    QSettings* settings = settingsList->first();
+    settings->beginGroup(descriptor->category);
+    settings->setValue(descriptor->name, value);
+    settings->endGroup();
+
+    if (descriptor->reference->callback != NULL)
+    {
+        descriptor->reference->callback();
+    }
+    return;
 }
 
 void RMapConfig::addConfigItem(QString file, QString name, RoadMapConfigItem* item)
@@ -130,17 +192,28 @@ void RMapConfig::reloadConfig(QString file)
     // schema is a special case as it is composed with more than user & system scopes (themes)
     if (file != QString("schema"))
     {
-        _settings.value(file)->sync();
+        _settings.value(file)->first()->sync();
         return;
     }
 
     // schema
-    QSettings* settings = _settings.value(QString(file), NULL);
-    if (settings != NULL)
+    SettingsList* settingsList = _settings.value(file, NULL);
+    if (settingsList != NULL)
     {
-        // save and release current settings
-        settings->sync();
-        delete settings;
+        SettingsList::iterator settingsIt = settingsList->begin();
+        for (; settingsIt != settingsList->end(); settingsIt++)
+        {
+            // save and release current settings
+            QSettings* settings = *settingsIt;
+            settings->sync();
+            delete settings;
+        }
+        settingsList->clear();
+    }
+    else
+    {
+        settingsList = new SettingsList();
+        _settings[file] = settingsList;
     }
 
     // serach for the proper schema file in the skin dirs
@@ -163,5 +236,5 @@ void RMapConfig::reloadConfig(QString file)
         path = QString::fromLocal8Bit(roadmap_path_config()).append("/").append(file);
     }
 
-    _settings[file] = new QSettings(path, QSettings::IniFormat);
+    settingsList->append(new QSettings(path, QSettings::IniFormat));
 }
