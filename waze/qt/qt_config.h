@@ -33,14 +33,12 @@ class RMapConfig : public QObject
     Q_OBJECT
 public:
     typedef QHash<QString, RoadMapConfigItem* > ItemsHash;
-    typedef QList<QSettings*> SettingsList;
 
     explicit RMapConfig(QObject *parent);
     virtual ~RMapConfig();
 
     void saveAllSettings();
-    QVariant getValue(RoadMapConfigDescriptor *descriptor);
-    void setValue(RoadMapConfigDescriptor *descriptor, QVariant value);
+    QSettings* getSettings(QString file);
 
     void reloadConfig(QString file);
 
@@ -53,7 +51,7 @@ public:
 
 private:
 
-    QHash<QString, SettingsList* > _settings;
+    QHash<QString, QSettings*> _settings;
     QHash<QString, ItemsHash*> _configItems;
 };
 
