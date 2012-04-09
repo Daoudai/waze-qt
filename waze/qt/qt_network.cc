@@ -12,15 +12,15 @@ extern "C" {
 }
 
 RNetworkSocket::RNetworkSocket(QObject *parent, QNetworkReply* reply) :
-    QObject(parent), _reply(reply)
+    QObject(parent), _reply(reply), _pendingFinish(1)
 
 {
     _io.subsystem = ROADMAP_IO_NET;
     _io.os.socket = this;
     _timerId = startTimer(5000);
-    _pendingFinish.acquire();
     connect(this, SIGNAL(callbackChanged()), this, SLOT(onCallbackChanged()));
     connect(_reply, SIGNAL(finished()), this, SLOT(finished()));
+    _pendingFinish.acquire();
 }
 
 void RNetworkSocket::waitUntilFinished()
