@@ -11,6 +11,8 @@ extern "C" {
 #include "roadmap_config.h"
 }
 
+#define INIT_MARKER_VALUE 10001
+
 struct RoadMapConfigItemRecord {
     QString file;
     QVariant default_value;
@@ -26,6 +28,8 @@ struct RoadMapConfigItemRecord {
     QList<WazeString>::const_iterator enum_iter;
 
     QHash<QString, RoadMapConfigItem* >::const_iterator items_iter;
+
+    int initializedMarker;
 };
 
 class RMapConfig : public QObject
@@ -38,18 +42,24 @@ public:
     virtual ~RMapConfig();
 
     void saveAllSettings();
-    QSettings* getSettings(QString file);
+    QSettings* getSettings(QString& file);
 
-    void reloadConfig(QString file);
+    void reloadConfig(QString& file);
 
-    void addConfigItem(QString file, QString name, RoadMapConfigItem* item);
-    RoadMapConfigItem* getConfigItem(QString file, QString name);
-    RoadMapConfigItem* getConfigItem(QString name);
+    void addConfigItem(QString& file, QString& name, RoadMapConfigItem* item);
+    RoadMapConfigItem* getConfigItem(QString& file, QString& name);
+    RoadMapConfigItem* getConfigItem(QString& name);
 
-    ItemsHash::const_iterator getItemsConstBegin(QString file);
-    ItemsHash::const_iterator getItemsConstEnd(QString file);
+    ItemsHash::const_iterator getItemsConstBegin(QString& file);
+    ItemsHash::const_iterator getItemsConstEnd(QString& file);
 
 private:
+
+    QString DataStr;
+    QString UserStr;
+    QString PreferencesStr;
+    QString SessionStr;
+    QString SchemaStr;
 
     QHash<QString, QSettings*> _settings;
     QHash<QString, ItemsHash*> _configItems;

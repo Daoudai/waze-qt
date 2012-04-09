@@ -13,10 +13,16 @@ RMapConfig::RMapConfig(QObject *parent) :
     QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, QApplication::applicationDirPath()+ QString("/.."));
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, roadmap_path_user());
 
-    _settings["user"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "data", "user");
-    _settings["preferences"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "data", "preferences");
-    _settings["session"] = new QSettings(QSettings::IniFormat, QSettings::UserScope, "data", "session");
-    reloadConfig("schema");
+    DataStr = QString::fromLocal8Bit("data");
+    UserStr = QString::fromLocal8Bit("user");
+    PreferencesStr = QString::fromLocal8Bit("preferences");
+    SessionStr = QString::fromLocal8Bit("session");
+    SchemaStr = QString::fromLocal8Bit("schema");
+
+    _settings[UserStr] = new QSettings(QSettings::IniFormat, QSettings::UserScope, DataStr, UserStr);
+    _settings[PreferencesStr] = new QSettings(QSettings::IniFormat, QSettings::UserScope, DataStr, PreferencesStr);
+    _settings[SessionStr] = new QSettings(QSettings::IniFormat, QSettings::UserScope, DataStr, SessionStr);
+    reloadConfig(SchemaStr);
 }
 
 RMapConfig::~RMapConfig()
@@ -49,7 +55,7 @@ void RMapConfig::saveAllSettings()
     }
 }
 
-QSettings* RMapConfig::getSettings(const QString file)
+QSettings* RMapConfig::getSettings(QString& file)
 {
 
     QSettings* settings = _settings.value(file, NULL);
@@ -62,7 +68,7 @@ QSettings* RMapConfig::getSettings(const QString file)
     return settings;
 }
 
-void RMapConfig::addConfigItem(QString file, QString name, RoadMapConfigItem* item)
+void RMapConfig::addConfigItem(QString& file, QString& name, RoadMapConfigItem* item)
 {
     ItemsHash* items = _configItems.value(file, NULL);
 
@@ -72,20 +78,24 @@ void RMapConfig::addConfigItem(QString file, QString name, RoadMapConfigItem* it
         _configItems.insert(file, items);
     }
 
+    if (items->contains(name))
+    {
+        delete items->value(name);
+    }
     items->insert(name, item);
 }
 
-RoadMapConfigItem* RMapConfig::getConfigItem(QString file, QString name)
+RoadMapConfigItem* RMapConfig::getConfigItem(QString& file, QString& name)
 {
     ItemsHash* items = _configItems.value(file, NULL);
-    if (items == NULL)
+    if (items == NULL || items->contains(name))
     {
         return NULL;
     }
     return items->value(name, NULL);
 }
 
-RoadMapConfigItem* RMapConfig::getConfigItem(QString name)
+RoadMapConfigItem* RMapConfig::getConfigItem(QString& name)
 {
     QHash<QString, ItemsHash*>::iterator itemsIt = _configItems.begin();
     for (; itemsIt != _configItems.end(); itemsIt++)
@@ -99,7 +109,7 @@ RoadMapConfigItem* RMapConfig::getConfigItem(QString name)
     return NULL;
 }
 
-RMapConfig::ItemsHash::const_iterator RMapConfig::getItemsConstBegin(QString file)
+RMapConfig::ItemsHash::const_iterator RMapConfig::getItemsConstBegin(QString& file)
 {
     ItemsHash* items = _configItems.value(file, NULL);
 
@@ -112,7 +122,7 @@ RMapConfig::ItemsHash::const_iterator RMapConfig::getItemsConstBegin(QString fil
     return items->constBegin();
 }
 
-RMapConfig::ItemsHash::const_iterator RMapConfig::getItemsConstEnd(QString file)
+RMapConfig::ItemsHash::const_iterator RMapConfig::getItemsConstEnd(QString& file)
 {
     ItemsHash* items = _configItems.value(file, NULL);
 
@@ -125,17 +135,17 @@ RMapConfig::ItemsHash::const_iterator RMapConfig::getItemsConstEnd(QString file)
     return items->constEnd();
 }
 
-void RMapConfig::reloadConfig(QString file)
+void RMapConfig::reloadConfig(QString& file)
 {
     // schema is a special case as it is composed with more than user & system scopes (themes)
-    if (file != QString("schema"))
+    if (file != SchemaStr)
     {
         _settings.value(file)->sync();
         return;
     }
 
     // schema
-    QSettings* settings = _settings.value(QString(file), NULL);
+    QSettings* settings = _settings.value(file, NULL);
     if (settings != NULL)
     {
         // save and release current settings
