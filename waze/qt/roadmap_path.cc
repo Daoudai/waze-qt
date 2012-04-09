@@ -319,11 +319,6 @@ static char *roadmap_path_expand (const char *item, size_t length) {
 
 void roadmap_path_set (const char *name, const char *path) {
 
-   int i;
-   size_t count;
-   const char *item;
-   const char *next_item;
-
    RoadMapPathRecord path_list = roadmap_path_find (name);
 
    if (path_list.preferred.length() == 0) {
