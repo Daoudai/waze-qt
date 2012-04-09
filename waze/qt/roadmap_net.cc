@@ -130,8 +130,15 @@ void *roadmap_net_connect_async (const char *protocol, const char *name, const c
     }
 
     QUrl url;
-    url.setHost(name);
-    url.setPort(default_port);
+    url.setUrl(QString::fromAscii(resolved_name));
+
+    if (!url.isValid())
+    {
+        url.clear();
+        url.setHost(resolved_name);
+        url.setPort(default_port);
+    }
+
     return networkManager->requestAsync(action, url, QDateTime::fromTime_t(update_time), flags, callback, context);
 }
 
