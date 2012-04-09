@@ -51,6 +51,7 @@ public:
 
     inline void setCallback(RoadMapInput callback)
     {
+        qDebug("Settings network request callback");
         _callback = callback;
 
         emit callbackChanged();
@@ -60,6 +61,7 @@ public:
 
 public slots:
     inline void invokeCallback() {
+        qDebug("Invoking network request callback");
         if (_callback != NULL)
         {
             _callback(&_io);
@@ -70,6 +72,7 @@ public slots:
 private slots:
     inline void finished()
     {
+        qDebug("Network request finished");
         killTimer(_timerId);
         _pendingFinish.release();
         emit finished(this);
@@ -77,6 +80,7 @@ private slots:
 
     inline void onCallbackChanged()
     {
+        qDebug("Network request callback changed");
         if (_reply->isFinished())
         {
             invokeCallback();
@@ -86,6 +90,7 @@ private slots:
     void timerEvent(QTimerEvent *te)
     {
         killTimer(_timerId);
+        qDebug("Network request operation timed out");
         _reply->abort();
         emit timedout();
     }
