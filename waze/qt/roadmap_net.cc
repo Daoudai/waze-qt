@@ -80,28 +80,29 @@ RoadMapSocket roadmap_net_connect (const char *protocol, const char *name,
                                    int flags,
                                    roadmap_result* err) {
 
-   RNetworkManager::RequestType action;
+   RequestType action;
 
    if (err != NULL)
    (*err) = succeeded;
 
    if (!strcmp(protocol, "http_get"))
    {
-        action = RNetworkManager::Get;
+        action = Get;
    }
    else if (!strcmp(protocol, "http_post"))
    {
-       action = RNetworkManager::Post;
+       action = Post;
    }
    else
    {
        roadmap_log(ROADMAP_ERROR, "Unsupported action type: %s", protocol);
-       action = RNetworkManager::Unknown;
+       action = Unknown;
    }
 
    QUrl url;
    url.setHost(name);
    url.setPort(default_port);
+   roadmap_net_mon_connect ();
    return networkManager->requestSync(action, url, QDateTime::fromTime_t(update_time), flags, err);
 }
 
@@ -113,20 +114,20 @@ void *roadmap_net_connect_async (const char *protocol, const char *name, const c
                                RoadMapNetConnectCallback callback,
                                void *context) {
 
-    RNetworkManager::RequestType action;
+    RequestType action;
 
     if (!strcmp(protocol, "http_get"))
     {
-         action = RNetworkManager::Get;
+         action = Get;
     }
     else if (!strcmp(protocol, "http_post"))
     {
-        action = RNetworkManager::Post;
+        action = Post;
     }
     else
     {
         roadmap_log(ROADMAP_ERROR, "Unsupported action type: %s", protocol);
-        action = RNetworkManager::Unknown;
+        action = Unknown;
     }
 
     QUrl url;
@@ -139,6 +140,7 @@ void *roadmap_net_connect_async (const char *protocol, const char *name, const c
         url.setPort(default_port);
     }
 
+    roadmap_net_mon_connect ();
     return networkManager->requestAsync(action, url, QDateTime::fromTime_t(update_time), flags, callback, context);
 }
 
@@ -146,7 +148,7 @@ void roadmap_net_cancel_connect (void *context) {
     RoadMapIO* io = (RoadMapIO *) context;
     RoadMapSocket s = io->os.socket;
 
-    ((RNetworkSocket*) s)->reply()->abort();
+    ((RNetworkSocket*) s)->abort();
 }
 
 int roadmap_net_send_async( RoadMapSocket s, const void *data, int length )
@@ -157,113 +159,27 @@ int roadmap_net_send_async( RoadMapSocket s, const void *data, int length )
 
 
 int roadmap_net_send (RoadMapSocket s, const void *data, int length, int wait) {
-
-   int total = length;
-//   fd_set fds;
-//   struct timeval recv_timeout = {0, 0};
-
-//   if (s->is_secured) {
-//      return roadmap_net_send_ssl( s, data, length, wait);
-//   }
-
-//   FD_ZERO(&fds);
-//   FD_SET(s->s, &fds);
-
-//   if (wait) {
-//      recv_timeout.tv_sec = 60;
-//   }
-
-//   while (length > 0) {
-//      int res;
-
-//      res = select(s->s + 1, NULL, &fds, NULL, &recv_timeout);
-
-//      if(!res) {
-//         roadmap_log (ROADMAP_ERROR,
-//               "Timeout waiting for select in roadmap_net_send");
-
-//         roadmap_net_mon_error("Error in send - timeout.");
-
-//         if (!wait) return 0;
-//         else return -1;
-//      }
-
-//      if(res < 0) {
-//         roadmap_log (ROADMAP_ERROR,
-//               "Error waiting on select in roadmap_net_send");
-
-//         roadmap_net_mon_error("Error in send - select.");
-//         return -1;
-//      }
-
-//      res = send(s->s, data, length, 0);
-
-//      if (res < 0) {
-//         roadmap_log (ROADMAP_ERROR, "Error sending data: (%d) %s", errno, strerror(errno));
-
-//         roadmap_net_mon_error("Error in send - data.");
-//         return -1;
-//      }
-
-//      length -= res;
-//      data = (char *)data + res;
-
-//      roadmap_net_mon_send(res);
-//   }
-
-   return total;
+    RNetworkSocket* socket = (RNetworkSocket*) s;
+    int sent = socket->write((char*)data, length);
+    roadmap_net_mon_send(sent);
+    return sent;
 }
 
 
 int roadmap_net_receive (RoadMapSocket s, void *data, int size) {
 
-   int total_received = 0, received;
-   void *ctx_buffer;
-   int ctx_buffer_size;
-   RNetworkSocket* socket = (RNetworkSocket*) s;
+    RNetworkSocket* socket = (RNetworkSocket*) s;
+    int total_received = socket->read((char*)data, size);
 
-   if (socket->isCompressed()) {
+    if (total_received < 0) {
+        roadmap_net_mon_error("Error in recv.");
+        roadmap_log (ROADMAP_DEBUG, "Error in recv., errno = %d", errno);
+        return -1; /* On UNIX, this is sign of an error. */
+    }
 
-      if (!socket->compressContext()) {
-         socket->setCompressContext(roadmap_http_comp_init());
-         if (socket->compressContext() == NULL) return -1;
-      }
+    roadmap_net_mon_recv(total_received);
 
-      roadmap_http_comp_get_buffer(socket->compressContext(), &ctx_buffer, &ctx_buffer_size);
-
-//      if (!s->is_secured)
-//         received = read(s->s, ctx_buffer, ctx_buffer_size);
-//      else
-//         received = roadmap_ssl_read(s->ssl_ctx, ctx_buffer, ctx_buffer_size);
-
-      roadmap_http_comp_add_data(socket->compressContext(), received);
-
-      while ((received = roadmap_http_comp_read(socket->compressContext(), data + total_received, size - total_received))
-             != 0) {
-         if (received < 0) {
-            roadmap_net_mon_error("Error in recv.");
-            roadmap_log (ROADMAP_DEBUG, "Error in recv. - comp returned %d", received);
-            return -1;
-         }
-
-         total_received += received;
-      }
-   } else {
-//      if (!s->is_secured)
-         total_received = socket->reply()->read((char*)data, size);
-//      else
-//         total_received = roadmap_ssl_read (s->ssl_ctx, data, size);
-   }
-
-   if (total_received < 0) {
-      roadmap_net_mon_error("Error in recv.");
-      roadmap_log (ROADMAP_DEBUG, "Error in recv., errno = %d", errno);
-      return -1; /* On UNIX, this is sign of an error. */
-   }
-
-   roadmap_net_mon_recv(total_received);
-
-   return total_received;
+    return total_received;
 }
 
 
@@ -281,13 +197,7 @@ RoadMapSocket roadmap_net_accept(RoadMapSocket server_socket) {
 
 void roadmap_net_close (RoadMapSocket s) {
    roadmap_net_mon_disconnect();
-   RNetworkSocket* socket = (RNetworkSocket*) s;
-   socket->reply()->close();
-   if (socket->compressContext()) {
-       roadmap_http_comp_close(socket->compressContext());
-       socket->setCompressContext(NULL);
-   }
-   delete socket;
+   delete s;
 }
 
 
