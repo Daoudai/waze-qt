@@ -59,10 +59,6 @@ int USING_PHONE_KEYPAD = 0;
 
 unsigned char APP_SHUTDOWN_FLAG = 0;	// The indicator if the application is in the exiting process
 
-time_t timegm(struct tm *tm) { return 0; }
-
-static BOOL sgFirstRun = FALSE;	// The indicator if current application run is after the upgrade (first execution)
-
 #define CRASH_DUMP_ADDR_NUM		200		/* The number of addresses to dump when crash is occured */
 #define CRASH_DUMP_ADDR_NUM_ON_SHUTDOWN      20      /* The number of addresses to dump when crash is occured on shutdown
                                                       * to not blow up the log on each exit
@@ -131,13 +127,10 @@ void roadmap_main_remove_input (RoadMapIO *io)
 RoadMapIO *roadmap_main_output_timedout(time_t timeout)
 {
     /* never called */
+    return NULL;
 }
 
 void roadmap_main_new(const char* title, int width, int height) {
-
-    mainWindow = new RMapMainWindow(0,0);
-
-    mainWindow->showFullScreen();
 
     editor_main_set(1);
 }
@@ -253,33 +246,6 @@ void roadmap_main_show(void) {
    }
 }
 
-
-/*************************************************************************************************
- * roadmap_main_timeout()
- * Called upon timeout expiration - calls the timer callback matching the received id
- */
-static int roadmap_main_timeout ( int aTimerId )
-{
-        roadmap_main_timer lTimer;
-
-        if( aTimerId < 0 || aTimerId > ROADMAP_MAX_TIMER )
-                return FALSE;
-
-        // Getting the appropriate timer
-        lTimer = RoadMapMainPeriodicTimer[aTimerId];
-
-        RoadMapCallback callback = ( RoadMapCallback ) ( lTimer.callback );
-
-        // roadmap_log( ROADMAP_DEBUG, "Timer expired for timer : %d. Callback : %x\n", aTimerId, callback );
-
-        if (callback != NULL)
-        {
-           // Apply the callback
-          (*callback) ();
-        }
-
-        return TRUE;
-}
 
 void roadmap_main_set_periodic (int interval, RoadMapCallback callback) {
 
@@ -494,6 +460,9 @@ int main(int argc, char* argv[]) {
 
    QCoreApplication::setOrganizationName("Waze");
    QCoreApplication::setApplicationName("Waze");
+
+   mainWindow = new RMapMainWindow(0,0);
+   mainWindow->showFullScreen();
 
    roadmap_option (argc, argv, NULL);
 
