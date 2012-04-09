@@ -10,6 +10,7 @@
 #include <QAbstractSocket>
 #include <QSemaphore>
 #include <QTimerEvent>
+#include "qt_global.h"
 
 extern "C" {
 #include "roadmap_main.h"
@@ -17,98 +18,58 @@ extern "C" {
 #include "roadmap_http_comp.h"
 }
 
+enum RequestType { Get, Post, Unknown };
+
+class RNetworkManager;
+
 class RNetworkSocket : public QObject {
     Q_OBJECT
 
 public:
-    RNetworkSocket(QObject* parent, QNetworkReply* reply);
+    RNetworkSocket(RNetworkManager* parent, QNetworkRequest* request, RequestType type, void *context);
 
-    virtual ~RNetworkSocket()
-    {
-        _reply->close();
-        delete _reply;
-    }
+    virtual ~RNetworkSocket();
 
-    inline QNetworkReply* reply()
-    {
-        return _reply;
-    }
+    void setCallback(RoadMapInput callback);
 
-    inline bool isCompressed()
-    {
-        return _isCompressed;
-    }
-
-    inline RoadMapHttpCompCtx compressContext()
-    {
-        return _compressContext;
-    }
-
-    inline void setCompressContext(RoadMapHttpCompCtx context)
-    {
-        _compressContext = context;
-    }
-
-    inline void setCallback(RoadMapInput callback)
-    {
-        qDebug("Settings network request callback");
-        _callback = callback;
-
-        emit callbackChanged();
-    }
+    void commitRequest(QByteArray data = QByteArray());
 
     void waitUntilFinished();
 
+    int read(char* data, int size);
+
+    int write(char* data, int size);
+
+    void abort();
+
 public slots:
-    inline void invokeCallback() {
-        qDebug("Invoking network request callback");
-        if (_callback != NULL)
-        {
-            _callback(&_io);
-            finished();
-        }
-    }
+    void invokeCallback();
 
 private slots:
-    inline void finished()
-    {
-        qDebug("Network request finished");
-        killTimer(_timerId);
-        _pendingFinish.release();
-        emit finished(this);
-    }
+    void finished();
 
-    inline void onCallbackChanged()
-    {
-        qDebug("Network request callback changed");
-        if (_reply->isFinished())
-        {
-            invokeCallback();
-        }
-    }
+    void onCallbackChanged();
 
-    void timerEvent(QTimerEvent *te)
-    {
-        killTimer(_timerId);
-        qDebug("Network request operation timed out");
-        _reply->abort();
-        emit timedout();
-    }
+    void timerEvent(QTimerEvent *te);
 
 signals:
     void timedout();
     void finished(RNetworkSocket* socket);
     void callbackChanged();
+    void callbackExecuted();
 
 private:
     RoadMapInput _callback;
 
     RoadMapHttpCompCtx _compressContext;
     bool _isCompressed;
+    QNetworkRequest* _request;
     QNetworkReply* _reply;
     RoadMapIO _io;
     int _timerId;
     QSemaphore _pendingFinish;
+    RNetworkManager* _networkManager;
+    RequestType _type;
 };
 
 class RNetworkManager : public QNetworkAccessManager
@@ -118,8 +79,6 @@ public:
     explicit RNetworkManager(QObject *parent = 0);
 
     virtual ~RNetworkManager();
-
-    enum RequestType { Get, Post, Unknown };
 
     RNetworkSocket* requestSync(RequestType protocol, QUrl url,
                      QDateTime update_time,
