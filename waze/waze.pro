@@ -250,6 +250,7 @@ SOURCES += \
     address_search/address_search_dlg.c \
     address_search/address_search.c \
     websvc_trans/websvc_trans_queue.c \
+    websvc_trans/websvc_trans.c \
     websvc_trans/websvc_address.c \
     websvc_trans/web_date_format.c \
     websvc_trans/string_parser.c \

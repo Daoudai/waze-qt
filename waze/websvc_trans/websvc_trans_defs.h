@@ -86,8 +86,8 @@ typedef struct tag_http_response_status
 
 }  http_response_status;
 
-void                 http_response_status_init( http_response_status*   me);
-transaction_result   http_response_status_load( http_response_status*   me,
+void                 http_response_status_init( http_response_status*   this);
+transaction_result   http_response_status_load( http_response_status*   this,
                                                 const char*             szResponse,
                                                 BOOL                    verify_tag,
                                                 int*                    pBytesRead);
@@ -174,8 +174,8 @@ typedef struct tag_wst_context
          void                 *connect_context;
 
 }     wst_context, *wst_context_ptr;
-void  wst_context_init  (  wst_context_ptr      me);
-void  wst_context_free  (  wst_context_ptr      me);
+void  wst_context_init  (  wst_context_ptr      this);
+void  wst_context_free  (  wst_context_ptr      this);
 
 // Same function, but buffer is ready formatted:
 BOOL RTNet_HttpAsyncTransaction_FormattedBuffer(
