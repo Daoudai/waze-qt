@@ -82,10 +82,10 @@ static QVariant roadmap_config_get_variant(RoadMapConfigDescriptor* descriptor, 
 
     if (value.isNull())
     {
-        qDebug("Config not found, will use default: %s, %s/%s",
-               descriptor->reference->file.toLocal8Bit().data(),
-               descriptor->category,
-               descriptor->name);
+//        qDebug("Config not found, will use default: %s, %s/%s",
+//               descriptor->reference->file.toLocal8Bit().data(),
+//               descriptor->category,
+//               descriptor->name);
         value.setValue(descriptor->reference->default_value);
     }
     else if (found != NULL)

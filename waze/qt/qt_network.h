@@ -10,6 +10,7 @@
 #include <QAbstractSocket>
 #include <QSemaphore>
 #include <QTimerEvent>
+#include "qt_global.h"
 
 extern "C" {
 #include "roadmap_main.h"
@@ -17,75 +18,46 @@ extern "C" {
 #include "roadmap_http_comp.h"
 }
 
+enum RequestType { Get, Post, Unknown };
+
+class RNetworkManager;
+
 class RNetworkSocket : public QObject {
     Q_OBJECT
 
 public:
-    RNetworkSocket(QObject* parent, QNetworkReply* reply, bool isCompressed, void *context);
+    RNetworkSocket(QAbstractSocket* socket, bool isCompressed);
 
     virtual ~RNetworkSocket();
 
-    void setCallback(RoadMapInput callback);
+    void setCallback(RoadMapInput callback, RoadMapIO* io);
+
+    void commitRequest(QByteArray data = QByteArray());
 
     void waitUntilFinished();
 
+    bool connectSocket(QUrl& url);
+
+    int socketDescriptor();
+
     int read(char* data, int size);
+
+    int write(char* data, int size, bool immediate = true);
 
     void abort();
 
-public slots:
-    void invokeCallback();
-
 private slots:
-    void finished();
+    void executeCallback();
 
-    void onCallbackChanged();
-
-    void timerEvent(QTimerEvent *te);
 signals:
-    void timedout();
-    void finished(RNetworkSocket* socket);
     void callbackChanged();
-    void callbackExecuted();
 
 private:
     RoadMapInput _callback;
-
-    RoadMapHttpCompCtx _compressContext;
     bool _isCompressed;
-    QNetworkReply* _reply;
+    QAbstractSocket* _socket;
+    roadmap_http_comp_t* _compressContext;
     RoadMapIO _io;
-    int _timerId;
-    QSemaphore _pendingFinish;
-};
-
-class RNetworkManager : public QNetworkAccessManager
-{
-    Q_OBJECT
-public:
-    explicit RNetworkManager(QObject *parent = 0);
-
-    virtual ~RNetworkManager();
-
-    enum RequestType { Get, Post, Unknown };
-
-    RNetworkSocket* requestSync(RequestType protocol, QUrl url,
-                     QDateTime update_time,
-                     int flags,
-                     roadmap_result* err);
-
-    RNetworkSocket* requestAsync(RequestType protocol, QUrl url,
-                      QDateTime update_time,
-                      int flags,
-                      RoadMapNetConnectCallback callback,
-                      void *context,
-                      const QByteArray& data);
-
-private:
-    void prepareNetworkRequest(QNetworkRequest& req,
-                               QUrl url,
-                               QDateTime update_time,
-                               int flags);
 };
 
 #endif // QT_NETWORK_H
