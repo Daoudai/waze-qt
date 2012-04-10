@@ -333,6 +333,36 @@ void* roadmap_net_connect_async (const char *protocol, const char *name,
    else return s;
 }
 
+void roadmap_net_cancel_connect (void* context) {
+   RoadMapIO *io = (RoadMapIO*) context;
+   RoadMapNetData *data = (RoadMapNetData*) io->context;
+   RoadMapSocket s = io->os.socket;
+
+   if ( io == NULL || io->subsystem == ROADMAP_IO_INVALID )
+      return;
+
+   if (io->retry_params.protocol && io->retry_params.protocol[0]) {
+      free(io->retry_params.protocol);
+   }
+   if (io->retry_params.name && io->retry_params.name[0]) {
+      free(io->retry_params.name);
+   }
+   if (io->retry_params.resolved_name && io->retry_params.resolved_name[0]) {
+      free(io->retry_params.resolved_name);
+   }
+
+   roadmap_log(ROADMAP_DEBUG, "Cancelling async connect request (%d)", ((RNetworkSocket*)s)->socketDescriptor());
+   roadmap_main_remove_input(io);
+   roadmap_net_close(s);
+   free(data);
+
+   RoadMapNetNumConnects--;
+
+   if (RoadMapNetNumConnects == 0) {
+      roadmap_main_remove_periodic(check_connect_timeout);
+   }
+}
+
 
 int roadmap_net_send (RoadMapSocket s, const void *data, int length, int wait) {
 
