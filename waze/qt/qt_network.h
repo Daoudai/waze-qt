@@ -10,7 +10,6 @@
 #include <QAbstractSocket>
 #include <QSemaphore>
 #include <QTimerEvent>
-#include "qt_global.h"
 
 extern "C" {
 #include "roadmap_main.h"
@@ -18,27 +17,19 @@ extern "C" {
 #include "roadmap_http_comp.h"
 }
 
-enum RequestType { Get, Post, Unknown };
-
-class RNetworkManager;
-
 class RNetworkSocket : public QObject {
     Q_OBJECT
 
 public:
-    RNetworkSocket(RNetworkManager* parent, QNetworkRequest* request, RequestType type, void *context);
+    RNetworkSocket(QObject* parent, QNetworkReply* reply, bool isCompressed, void *context);
 
     virtual ~RNetworkSocket();
 
     void setCallback(RoadMapInput callback);
 
-    void commitRequest(QByteArray data = QByteArray());
-
     void waitUntilFinished();
 
     int read(char* data, int size);
-
-    int write(char* data, int size);
 
     void abort();
 
@@ -51,7 +42,6 @@ private slots:
     void onCallbackChanged();
 
     void timerEvent(QTimerEvent *te);
-
 signals:
     void timedout();
     void finished(RNetworkSocket* socket);
@@ -63,13 +53,10 @@ private:
 
     RoadMapHttpCompCtx _compressContext;
     bool _isCompressed;
-    QNetworkRequest* _request;
     QNetworkReply* _reply;
     RoadMapIO _io;
     int _timerId;
     QSemaphore _pendingFinish;
-    RNetworkManager* _networkManager;
-    RequestType _type;
 };
 
 class RNetworkManager : public QNetworkAccessManager
@@ -80,6 +67,8 @@ public:
 
     virtual ~RNetworkManager();
 
+    enum RequestType { Get, Post, Unknown };
+
     RNetworkSocket* requestSync(RequestType protocol, QUrl url,
                      QDateTime update_time,
                      int flags,
@@ -89,7 +78,8 @@ public:
                       QDateTime update_time,
                       int flags,
                       RoadMapNetConnectCallback callback,
-                      void *context);
+                      void *context,
+                      const QByteArray& data);
 
 private:
     void prepareNetworkRequest(QNetworkRequest& req,

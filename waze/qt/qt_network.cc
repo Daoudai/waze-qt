@@ -11,27 +11,27 @@ extern "C" {
 #include "roadmap_net.h"
 }
 
-RNetworkSocket::RNetworkSocket(RNetworkManager *parent,
-                               QNetworkRequest* request,
-                               RequestType type,
+RNetworkSocket::RNetworkSocket(QObject *parent,
+                               QNetworkReply* reply,
+                               bool isCompressed,
                                void *context) :
     QObject(parent),
-    _networkManager(parent),
+    _reply(reply),
     _pendingFinish(1),
-    _request(request),
-    _type(type),
-    _timerId(0)
+    _isCompressed(isCompressed)
 {
-    qDebug("timer id: %d", _timerId);
     _io.subsystem = ROADMAP_IO_NET;
     _io.os.socket = this;
     _io.context = context;
+    _timerId = startTimer(5000);
+    connect(this, SIGNAL(callbackChanged()), this, SLOT(onCallbackChanged()));
+    connect(_reply, SIGNAL(finished()), this, SLOT(finished()));
+    connect(this, SIGNAL(callbackExectued()), this, SLOT(finished()));
+    _pendingFinish.acquire();
 }
 
 RNetworkSocket::~RNetworkSocket()
 {
-    delete _request;
-
     if (_compressContext != NULL)
     {
         roadmap_http_comp_close(_compressContext);
@@ -42,6 +42,13 @@ RNetworkSocket::~RNetworkSocket()
         _reply->close();
         delete _reply;
     }
+}
+
+void RNetworkSocket::waitUntilFinished()
+{
+    _pendingFinish.acquire();
+    // wait until finished
+    _pendingFinish.release();
 }
 
 void RNetworkSocket::setCallback(RoadMapInput callback)
@@ -64,12 +71,7 @@ void RNetworkSocket::invokeCallback() {
 void RNetworkSocket::finished()
 {
     qDebug("Network request finished");
-    if (_timerId != 0)
-    {
-        qDebug("releasing timer id: %d", _timerId);
-        killTimer(_timerId);
-        _timerId = 0;
-    }
+    killTimer(_timerId);
     _pendingFinish.release();
     emit finished(this);
 }
@@ -77,7 +79,7 @@ void RNetworkSocket::finished()
 void RNetworkSocket::onCallbackChanged()
 {
     qDebug("Network request callback changed");
-    if (_reply != NULL && _reply->isFinished())
+    if (_reply->isFinished())
     {
         invokeCallback();
     }
@@ -85,66 +87,16 @@ void RNetworkSocket::onCallbackChanged()
 
 void RNetworkSocket::timerEvent(QTimerEvent *te)
 {
-    if (_timerId != 0)
-    {
-        qDebug("releasing timer id: %d", _timerId);
-        killTimer(_timerId);
-        _timerId = 0;
-    }
+    killTimer(_timerId);
     qDebug("Network request operation timed out");
-    if (_reply != NULL)
-    {
-        _reply->abort();
-    }
+    _reply->abort();
     _pendingFinish.release();
     emit timedout();
-}
-
-void RNetworkSocket::commitRequest(QByteArray data) {
-    switch (_type)
-    {
-    case Post:
-        _reply = _networkManager->post(*_request, data);
-        break;
-    case Get:
-        _reply = _networkManager->get(*_request);
-        break;
-    }
-
-    _timerId = startTimer(5000);
-    qDebug("allocated timer id: %d", _timerId);
-    connect(this, SIGNAL(callbackChanged()), this, SLOT(onCallbackChanged()));
-    connect(_reply, SIGNAL(finished()), this, SLOT(invokeCallback()));
-    connect(this, SIGNAL(callbackExectued()), this, SLOT(finished()));
-    _pendingFinish.acquire();
-
-    if (data.isNull())
-    {
-        waitUntilFinished();
-    }
-}
-
-void RNetworkSocket::waitUntilFinished()
-{
-    _pendingFinish.acquire();
-    // wait until finished
-    _pendingFinish.release();
 }
 
 int RNetworkSocket::read(char* data, int size)
 {
     int received;
-
-    if (_reply == NULL)
-    {
-        commitRequest();
-    }
-
-    if (_reply == NULL)
-    {
-        data[0] = 0;
-        return -1;
-    }
 
     if (_isCompressed)
     {
@@ -171,31 +123,11 @@ int RNetworkSocket::read(char* data, int size)
     return received;
 }
 
-int RNetworkSocket::write(char* data, int size)
-{
-    if (_reply == NULL)
-    {
-        data[0] = 0;
-        return -1;
-    }
-
-    commitRequest(QByteArray(data, size));
-    return size;
-}
-
 void RNetworkSocket::abort()
 {
-    if (_timerId != 0)
-    {
-        qDebug("releasing timer id: %d", _timerId);
-        killTimer(_timerId);
-        _timerId = 0;
-    }
+    killTimer(_timerId);
 
-    if (_reply != NULL)
-    {
-        _reply->abort();
-    }
+    _reply->abort();
 }
 
 RNetworkManager::RNetworkManager(QObject *parent) :
@@ -234,11 +166,34 @@ RNetworkSocket* RNetworkManager::requestSync(RequestType protocol, QUrl url,
                  int flags,
                  roadmap_result* err)
 {
-    QNetworkRequest* request = new QNetworkRequest();
-    prepareNetworkRequest(*request, url, update_time, flags);
+    QNetworkRequest request;
+    prepareNetworkRequest(request, url, update_time, flags);
 
-    RNetworkSocket* socket = new RNetworkSocket(this, request, protocol, NULL);
-    socket->commitRequest();
+    QNetworkReply *reply = NULL;
+
+    switch (protocol) {
+    case Get:
+        reply = get(request);
+        break;
+    case Post:
+        reply = post(request, QByteArray());
+        break;
+    default:
+        (*err) = err_net_failed;
+        return NULL;
+    }
+
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        roadmap_log(ROADMAP_ERROR, "Connection error occured: %s", reply->errorString().toLocal8Bit().data());
+        (*err) = err_net_failed;
+        reply->close();
+        delete reply;
+        return NULL;
+    }
+
+    RNetworkSocket* socket = new RNetworkSocket(this, reply, TEST_NET_COMPRESS(flags), NULL);
+    socket->waitUntilFinished();
     return socket;
 }
 
@@ -246,14 +201,46 @@ RNetworkSocket* RNetworkManager::requestAsync(RequestType protocol, QUrl url,
                   QDateTime update_time,
                   int flags,
                   RoadMapNetConnectCallback callback,
-                  void *context)
+                  void *context,
+                  const QByteArray& data)
 {
-    QNetworkRequest* request = new QNetworkRequest();
-    prepareNetworkRequest(*request, url, update_time, flags);
+    QNetworkRequest request;
+    prepareNetworkRequest(request, url, update_time, flags);
 
-    RNetworkSocket* socket = new RNetworkSocket(this, request, protocol, context);
+    QNetworkReply *reply = NULL;
 
-    callback(socket, context, succeeded);
+    switch (protocol) {
+    case Get:
+        reply = get(request);
+        break;
+    case Post:
+        reply = post(request, data);
+        break;
+    default:
+        reply = NULL;
+    }
+
+    roadmap_result result = err_net_failed;
+    RNetworkSocket* socket = NULL;
+    if (reply != NULL && reply->error() != QNetworkReply::NoError)
+    {
+        roadmap_log(ROADMAP_ERROR, "Connection error occured: %s", reply->errorString().toLocal8Bit().data());
+    }
+    else if (reply != NULL)
+    {
+        socket = new RNetworkSocket(this, reply, TEST_NET_COMPRESS(flags), NULL);
+        result = succeeded;
+    }
+    if (callback != NULL)
+    {
+        callback(socket, context, result);
+    }
+
+    if (socket == NULL && reply != NULL)
+    {
+        reply->close();
+        delete reply;
+    }
 
     return socket;
 }

@@ -38,21 +38,24 @@
 #define  EBUFFER_STATIC_SIZE                    \
                ((int)((double)EBUFFER_BIG_SIZE/EBUFFER_ECONOMIC_BUFFER_FACTOR))
 
+// EBUFFER_STATIC_SIZE + 1
+#define EBUFFER_ACTUAL_STATIC_SIZE 2235
+
 typedef struct tagebuffer
 {
-   char  static_buffer[EBUFFER_STATIC_SIZE+1];
+   char  static_buffer[2235];
    char* dynamic_buffer;
    int   size;
 
 }  ebuffer, *ebuffer_ptr;
 
-void  ebuffer_init            ( ebuffer_ptr   this);
-char* ebuffer_alloc           ( ebuffer_ptr   this, int size);
-void  ebuffer_free            ( ebuffer_ptr   this);
+void  ebuffer_init            ( ebuffer_ptr   me);
+char* ebuffer_alloc           ( ebuffer_ptr   me, int size);
+void  ebuffer_free            ( ebuffer_ptr   me);
 
-char* ebuffer_get_buffer      ( ebuffer_ptr   this);
-int   ebuffer_get_buffer_size ( ebuffer_ptr   this);
-int   ebuffer_get_string_size ( ebuffer_ptr   this);
+char* ebuffer_get_buffer      ( ebuffer_ptr   me);
+int   ebuffer_get_buffer_size ( ebuffer_ptr   me);
+int   ebuffer_get_string_size ( ebuffer_ptr   me);
 
 void  ebuffer_getStatistics(  int*  StaticAllocationsCount,
                               int*  DynamicAllocationsCount);

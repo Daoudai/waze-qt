@@ -57,12 +57,12 @@ typedef struct tag_cyclic_buffer
 //
 // When (data_processed == data_size) transaction completed
 
-void  cyclic_buffer_init   (  cyclic_buffer_ptr this);
-void  cyclic_buffer_recycle(  cyclic_buffer_ptr this);
+void  cyclic_buffer_init   (  cyclic_buffer_ptr me);
+void  cyclic_buffer_recycle(  cyclic_buffer_ptr me);
 void  cyclic_buffer_update_processed_data(
-                              cyclic_buffer_ptr this,
+                              cyclic_buffer_ptr me,
                               const char*       data,
                               const char*       data_to_skip);
 const char* cyclic_buffer_get_unprocessed_data(
-                              cyclic_buffer_ptr this);
+                              cyclic_buffer_ptr me);
 #endif   //   __CYCLIC_BUFFER_H__

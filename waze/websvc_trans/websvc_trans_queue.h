@@ -36,8 +36,8 @@ typedef struct tag_wstq_item
 
 }  wstq_item, *wstq_item_ptr;
 
-void wstq_item_init   ( wstq_item_ptr this);
-void wstq_item_release( wstq_item_ptr this);
+void wstq_item_init   ( wstq_item_ptr me);
+void wstq_item_release( wstq_item_ptr me);
 
 typedef struct tag_wst_queue
 {
@@ -47,15 +47,15 @@ typedef struct tag_wst_queue
 
 }  wst_queue, *wst_queue_ptr;
 
-void  wstq_init      ( wst_queue_ptr this);
-void  wstq_clear     ( wst_queue_ptr this);  // Loose all items
+void  wstq_init      ( wst_queue_ptr me);
+void  wstq_clear     ( wst_queue_ptr me);  // Loose all items
 
-int   wstq_size      ( wst_queue_ptr this);
-BOOL  wstq_is_empty  ( wst_queue_ptr this);
+int   wstq_size      ( wst_queue_ptr me);
+BOOL  wstq_is_empty  ( wst_queue_ptr me);
 
 // Shallow copy: Caller has to alloc/free packet buffer
-BOOL  wstq_enqueue   ( wst_queue_ptr this, wstq_item_ptr item);
-BOOL  wstq_dequeue   ( wst_queue_ptr this, wstq_item_ptr item);
-void wstq_remove_type( wst_queue_ptr this, int type);
+BOOL  wstq_enqueue   ( wst_queue_ptr me, wstq_item_ptr item);
+BOOL  wstq_dequeue   ( wst_queue_ptr me, wstq_item_ptr item);
+void wstq_remove_type( wst_queue_ptr me, int type);
 
 #endif	//	__HTTPTRANSQUEUE_H__

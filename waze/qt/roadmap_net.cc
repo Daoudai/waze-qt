@@ -80,29 +80,31 @@ RoadMapSocket roadmap_net_connect (const char *protocol, const char *name,
                                    int flags,
                                    roadmap_result* err) {
 
-   RequestType action;
+   RNetworkManager::RequestType action;
 
    if (err != NULL)
    (*err) = succeeded;
 
    if (!strcmp(protocol, "http_get"))
    {
-        action = Get;
+        action = RNetworkManager::Get;
    }
    else if (!strcmp(protocol, "http_post"))
    {
-       action = Post;
+       action = RNetworkManager::Post;
    }
    else
    {
        roadmap_log(ROADMAP_ERROR, "Unsupported action type: %s", protocol);
-       action = Unknown;
+       action = RNetworkManager::Unknown;
    }
 
    QUrl url;
    url.setHost(name);
    url.setPort(default_port);
+
    roadmap_net_mon_connect ();
+
    return networkManager->requestSync(action, url, QDateTime::fromTime_t(update_time), flags, err);
 }
 
@@ -114,20 +116,20 @@ void *roadmap_net_connect_async (const char *protocol, const char *name, const c
                                RoadMapNetConnectCallback callback,
                                void *context) {
 
-    RequestType action;
+    RNetworkManager::RequestType action;
 
     if (!strcmp(protocol, "http_get"))
     {
-         action = Get;
+         action = RNetworkManager::Get;
     }
     else if (!strcmp(protocol, "http_post"))
     {
-        action = Post;
+        action = RNetworkManager::Post;
     }
     else
     {
         roadmap_log(ROADMAP_ERROR, "Unsupported action type: %s", protocol);
-        action = Unknown;
+        action = RNetworkManager::Unknown;
     }
 
     QUrl url;
@@ -141,7 +143,8 @@ void *roadmap_net_connect_async (const char *protocol, const char *name, const c
     }
 
     roadmap_net_mon_connect ();
-    return networkManager->requestAsync(action, url, QDateTime::fromTime_t(update_time), flags, callback, context);
+
+    return networkManager->requestAsync(action, url, QDateTime::fromTime_t(update_time), flags, callback, context, QByteArray());
 }
 
 void roadmap_net_cancel_connect (void *context) {
@@ -153,16 +156,15 @@ void roadmap_net_cancel_connect (void *context) {
 
 int roadmap_net_send_async( RoadMapSocket s, const void *data, int length )
 {
-   // TODO
-   return NULL;
+    // never send - not supported
+   return  -1;
 }
 
 
 int roadmap_net_send (RoadMapSocket s, const void *data, int length, int wait) {
-    RNetworkSocket* socket = (RNetworkSocket*) s;
-    int sent = socket->write((char*)data, length);
-    roadmap_net_mon_send(sent);
-    return sent;
+
+    // never send - not supported
+   return  -1;
 }
 
 
@@ -197,7 +199,9 @@ RoadMapSocket roadmap_net_accept(RoadMapSocket server_socket) {
 
 void roadmap_net_close (RoadMapSocket s) {
    roadmap_net_mon_disconnect();
-   delete s;
+
+   RNetworkSocket* socket = (RNetworkSocket*) s;
+   socket->deleteLater();
 }
 
 

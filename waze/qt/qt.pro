@@ -50,7 +50,8 @@ SOURCES += \
     qt/roadmap_path.cc \
     qt/roadmap_file.cc \
     qt/roadmap_config.cc \
-    qt/qt_config.cc
+    qt/qt_config.cc \
+    qt/websvc_trans.cc
 
 HEADERS += \
     qt_progress.h \
