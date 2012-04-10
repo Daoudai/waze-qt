@@ -82,10 +82,10 @@ static QVariant roadmap_config_get_variant(RoadMapConfigDescriptor* descriptor, 
 
     if (value.isNull())
     {
-        qDebug("Config not found, will use default: %s, %s/%s",
-               descriptor->reference->file.toLocal8Bit().data(),
-               descriptor->category,
-               descriptor->name);
+//        qDebug("Config not found, will use default: %s, %s/%s",
+//               descriptor->reference->file.toLocal8Bit().data(),
+//               descriptor->category,
+//               descriptor->name);
         value.setValue(descriptor->reference->default_value);
     }
     else if (found != NULL)
@@ -250,7 +250,7 @@ void *roadmap_config_get_enumeration (RoadMapConfigDescriptor *descriptor)
     }
 
     descriptor->reference->enum_iter = descriptor->reference->enumeration_values.constBegin();
-    return &(descriptor->reference);
+    return descriptor->reference;
 }
 
 char *roadmap_config_get_enumeration_value (void *enumeration)
