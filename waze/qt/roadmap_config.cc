@@ -250,7 +250,7 @@ void *roadmap_config_get_enumeration (RoadMapConfigDescriptor *descriptor)
     }
 
     descriptor->reference->enum_iter = descriptor->reference->enumeration_values.constBegin();
-    return &(descriptor->reference);
+    return descriptor->reference;
 }
 
 char *roadmap_config_get_enumeration_value (void *enumeration)
