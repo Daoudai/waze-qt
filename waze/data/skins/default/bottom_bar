@@ -1,0 +1,79 @@
+N me_on_map
+I me_on_map me_on_map2
+P 0 -75
+A show_me
+B -10 0 143 75
+
+N Map_text
+E Me_on_map
+P 72 -20
+L 12
+F 14
+D #ffffff
+
+N me_on_map
+I me_on_map_d me_on_map2
+P 0 -75
+A show_me
+B -10 0 143 75
+C bottom_bar 1
+
+N Map_text
+E Me_on_map
+P 72 -20
+L 12
+F 14
+D #939393
+C bottom_bar 1
+
+N search
+I Search Search2
+P 144 -75
+A search_menu
+B -10 0 110 75
+
+
+N Search_text
+E Drive_to
+P 200 -20
+L 12
+F 14
+D #ffffff
+
+N Live_event
+I Live_event Live_event2
+P 255 -75
+A real_time_alerts_list
+B -10 0 110 75
+
+N Live_event_text
+E Events
+P 310 -20
+L 12
+F 14
+D #ffffff
+
+N Report
+I Report Report2
+P 367 -75
+A alertsmenu
+B -10 0 110 75
+
+
+N Report_text
+E Report
+P 425 -20
+L 12
+F 14
+D #ffffff
+
+N num_alerts
+T num_alerts
+P 351 -61
+D #ffffff
+F 15
+S alerts_state
+C real_time_state 1
+
+
+Y 1
