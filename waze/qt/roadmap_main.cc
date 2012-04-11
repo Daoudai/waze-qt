@@ -37,8 +37,7 @@
 
 #include <sstream>
 #include <QApplication>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QList>
 #include "qt_main.h"
 #include "roadmap_qtbrowser.h"
 #include "qt_network.h"
@@ -72,6 +71,7 @@ static QApplication* app;
 
 RMapMainWindow* mainWindow;
 RMapTimers* timers;
+QList<RoadMapIO*> ioList;
 
 static int RoadMapMainStatus;
 
@@ -103,8 +103,9 @@ void roadmap_main_set_input    (RoadMapIO *io, RoadMapInput callback)
         io->subsystem == ROADMAP_IO_NET &&
         io->os.socket != NULL)
     {
+        ioList.append(io);
         RNetworkSocket* socket = (RNetworkSocket*) io->os.socket;
-        socket->setCallback(callback, io);
+        socket->setCallback(callback, ReadDirection);
     }
 }
 
@@ -114,19 +115,30 @@ void roadmap_main_set_output   (RoadMapIO *io, RoadMapInput callback, BOOL is_co
         io->subsystem == ROADMAP_IO_NET &&
         io->os.socket != NULL)
     {
+        ioList.append(io);
         RNetworkSocket* socket = (RNetworkSocket*) io->os.socket;
-        socket->setCallback(callback, io);
+        socket->setCallback(callback, WriteDirection);
     }
 }
 
 void roadmap_main_remove_input (RoadMapIO *io)
 {
-
+    ioList.removeOne(io);
 }
 
 RoadMapIO *roadmap_main_output_timedout(time_t timeout)
 {
-    /* never called */
+    QDateTime timeoutTime = QDateTime::fromTime_t(timeout);
+    QList<RoadMapIO*>::iterator it = ioList.begin();
+    for (; it != ioList.end(); it++)
+    {
+        RoadMapIO* io = *it;
+        if (((RNetworkSocket*)io->os.socket)->isTimedOut(timeoutTime))
+        {
+            return io;
+        }
+    }
+
     return NULL;
 }
 

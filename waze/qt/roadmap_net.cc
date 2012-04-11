@@ -72,10 +72,19 @@ static RoadMapConfigDescriptor RoadMapConfigNetCompressEnabled =
 static int  RoadMapNetNumConnects;
 static BOOL RoadMapNetCompressEnabled = FALSE;
 
-#define CONNECT_TIMEOUT_SEC 5
+#define CONNECT_TIMEOUT_SEC 10
 
 static void connect_callback (RoadMapSocket s, RoadMapNetData *data);
 static void io_connect_callback (RoadMapIO *io);
+static void *roadmap_net_connect_internal (const char *protocol, const char *name, const char *resolved_name,
+                                                   time_t update_time,
+                                                   int default_port,
+                                                   int async,
+                                                   int flags,
+                                                   RoadMapNetConnectCallback callback,
+                                                   void *context,
+                                                   RoadMapIO *reuse_connect_io,
+                                                   int num_retries);
 
 static void check_connect_timeout (void) {
    RoadMapIO *io;
@@ -85,16 +94,59 @@ static void check_connect_timeout (void) {
    while ((io = roadmap_main_output_timedout(timeout))) {
       RoadMapNetData *data = (RoadMapNetData *) io->context;
       RoadMapSocket s = io->os.socket;
+      RoadMapIO retry_io = *io;
+      RoadMapIO *reuse_connect_io;
+      char *protocol = strdup(retry_io.retry_params.protocol);
+      char *name = strdup(retry_io.retry_params.name);
+      char *resolved_name = strdup(retry_io.retry_params.resolved_name);
 
-      roadmap_log(ROADMAP_ERROR, "Connect time out");
+      if (retry_io.retry_params.protocol && retry_io.retry_params.protocol[0]) {
+         free(retry_io.retry_params.protocol);
+      }
+      if (retry_io.retry_params.name && retry_io.retry_params.name[0]) {
+         free(retry_io.retry_params.name);
+      }
+      if (retry_io.retry_params.resolved_name && retry_io.retry_params.resolved_name[0]) {
+         free(retry_io.retry_params.resolved_name);
+      }
+
+      roadmap_log(ROADMAP_ERROR, "Connect time out (%d)", ((RNetworkSocket*) s)->socketDescriptor());
+      reuse_connect_io = ((RNetworkSocket*) s)->io();
+      ((RNetworkSocket*) s)->set_io(NULL);
       roadmap_main_remove_input(io);
       roadmap_net_close(s);
 
+      if (retry_io.retry_params.num_retries < 2) {
+         RoadMapNetNumConnects--;
+         retry_io.retry_params.num_retries++;
+         roadmap_log(ROADMAP_ERROR, "Retrying connection (retry # %d)", retry_io.retry_params.num_retries);
+         if (ROADMAP_INVALID_SOCKET != roadmap_net_connect_internal (protocol, name, resolved_name,
+                                                                     retry_io.retry_params.update_time,
+                                                                     retry_io.retry_params.default_port,
+                                                                     TRUE,
+                                                                     retry_io.retry_params.flags,
+                                                                     retry_io.retry_params.callback,
+                                                                     retry_io.retry_params.context,
+                                                                     reuse_connect_io,
+                                                                     retry_io.retry_params.num_retries)) {
+            free(protocol);
+            free(name);
+            free(resolved_name);
+            free(data);
+            continue;
+         }
+      }
+      
+      free(protocol);
+      free(name);
+      free(resolved_name);
       connect_callback(ROADMAP_INVALID_SOCKET, data);
    }
 }
 
 static void connect_callback (RoadMapSocket s, RoadMapNetData *data) {
+   RoadMapNetConnectCallback callback = data->callback;
+   void *context = data->context;
 
    RoadMapNetNumConnects--;
 
@@ -105,17 +157,18 @@ static void connect_callback (RoadMapSocket s, RoadMapNetData *data) {
    if ((s != ROADMAP_INVALID_SOCKET) && *data->packet) {
       if( -1 == roadmap_net_send(s, data->packet,
                                     (int)strlen(data->packet), 1)) {
-         roadmap_log( ROADMAP_ERROR, "roadmap_net callback (HTTP) - Failed to send the 'POST' packet");
-         roadmap_net_close(s);
-         s = ROADMAP_INVALID_SOCKET;
+        roadmap_log( ROADMAP_ERROR, "roadmap_net callback (HTTP) - Failed to send the 'POST' packet");
+        roadmap_net_close(s);
+        s = ROADMAP_INVALID_SOCKET;
       }
    }
 
+   delete data;
+   
    if (s == ROADMAP_INVALID_SOCKET)
-       (*data->callback) (s, data->context, err_net_failed);
+       (*callback) (s, context, err_net_failed);
    else
-      (*data->callback) (s, data->context, succeeded);
-   free(data);
+      (*callback) (s, context, succeeded);   
 }
 
 static void io_connect_callback (RoadMapIO *io) {
@@ -125,36 +178,33 @@ static void io_connect_callback (RoadMapIO *io) {
 
    s = io->os.socket;
    if (s != ROADMAP_INVALID_SOCKET) {
+      if (io->retry_params.protocol && io->retry_params.protocol[0]) {
+         free(io->retry_params.protocol);
+      }
+      if (io->retry_params.name && io->retry_params.name[0]) {
+         free(io->retry_params.name);
+      }
+
+      if (io->retry_params.resolved_name && io->retry_params.resolved_name[0]) {
+         free(io->retry_params.resolved_name);
+      }
+
       roadmap_main_remove_input(io);
    }
 
-   connect_callback(s, data);
+    connect_callback(s, data);
 }
 
 static RoadMapSocket create_socket (const char *protocol, int isCompressed) {
    QAbstractSocket*   s = NULL;
 
+   roadmap_net_mon_connect ();
    if (strcmp (protocol, "udp") == 0) {
       s = new QUdpSocket();
    } else if (strcmp (protocol, "tcp") == 0) {
       s = new QTcpSocket();
    } else {
       roadmap_log (ROADMAP_ERROR, "unknown protocol %s", protocol);
-   }
-
-   if (s == NULL)
-   {
-       roadmap_net_mon_disconnect();
-       roadmap_net_mon_error("Error connecting.");
-       return ROADMAP_INVALID_SOCKET;
-   }
-
-   if (!s->isValid()) {
-      roadmap_log (ROADMAP_ERROR, "cannot create socket, error = %s", s->errorString().toAscii().data());
-      roadmap_net_mon_disconnect();
-      roadmap_net_mon_error("Error connecting.");
-      delete s;
-      return ROADMAP_INVALID_SOCKET;
    }
 
    return new RNetworkSocket(s, isCompressed != 0);
@@ -174,56 +224,54 @@ static int create_connection (RoadMapSocket s, QUrl& url) {
 
 static int create_async_connection (RoadMapIO *io, QUrl& url) {
 
-   int res;
-
    RNetworkSocket* s = (RNetworkSocket*) io->os.socket;
 
-   if ((res = s->connectSocket(url)) < 0) {
+   bool res = s->connectSocket(url);
+   if (!res) {
          return -1;
    }
 
-   roadmap_main_set_output(io, io_connect_callback, FALSE);
+   roadmap_main_set_output(io, io_connect_callback, TRUE);
    RoadMapNetNumConnects++;
 
-   if (res == 0) {
-      /* Probably not realistic */
-      io_connect_callback(io);
-      return 0;
-   }
-
    if (RoadMapNetNumConnects == 1) {
-      roadmap_main_set_periodic(CONNECT_TIMEOUT_SEC * 1000, check_connect_timeout);
+      roadmap_main_set_periodic(CONNECT_TIMEOUT_SEC * 1000 /2, check_connect_timeout);
    }
 
    return 0;
 }
 
 
-static RoadMapSocket roadmap_net_connect_internal (const char *protocol, const char *name,
+static void *roadmap_net_connect_internal (const char *protocol, const char *name, const char *resolved_name,
                                          time_t update_time,
                                          int default_port,
                                          int async,
                                          int flags,
                                          RoadMapNetConnectCallback callback,
-                                         void *context) {
+                                         void *context,
+                                         RoadMapIO *reuse_connect_io,
+                                         int          num_retries) {
 
    char            packet[512];
    char            update_since[WDF_MODIFIED_HEADER_SIZE + 1];
-   RoadMapSocket res_socket;
+   RoadMapSocket res_socket, temp_socket;
    const char *   req_type = "GET";
    RoadMapNetData *data = NULL;
+   RoadMapIO      *io;
 
    QUrl url;
-   url.setUrl(name);
+   url.setUrl(resolved_name);
    url.setPort(url.port(default_port));
 
    if( strncmp( protocol, "http", 4) != 0) {
-      res_socket = create_socket(protocol, FALSE);
+      temp_socket = create_socket(protocol, FALSE);
 
-      if(ROADMAP_INVALID_SOCKET == res_socket) return ROADMAP_INVALID_SOCKET;
+      if(ROADMAP_INVALID_SOCKET == temp_socket) return ROADMAP_INVALID_SOCKET;
+
+      res_socket = temp_socket;
 
       if (async) {
-         data = (RoadMapNetData *)malloc(sizeof(RoadMapNetData));
+         data = new RoadMapNetData();
          data->packet[0] = '\0';
       }
    } else {
@@ -232,46 +280,56 @@ static RoadMapSocket roadmap_net_connect_internal (const char *protocol, const c
       WDF_FormatHttpIfModifiedSince (update_time, update_since);
       if (!strcmp(protocol, "http_post")) req_type = "POST";
 
-     res_socket = create_socket("tcp", TEST_NET_COMPRESS( flags ));
+     temp_socket = create_socket("tcp", TEST_NET_COMPRESS( flags ));
 
-     sprintf(packet,
-             "%s %s HTTP/1.0\r\n"
-             "Host: %s\r\n"
-             "User-Agent: FreeMap/%s\r\n"
-             "%s"
-             "%s",
-             req_type, url.host().toAscii().data(), url.toString().toAscii().data(), roadmap_start_version(),
-             TEST_NET_COMPRESS( flags ) ? "Accept-Encoding: gzip, deflate\r\n" : "",
-             update_since);
+         sprintf(packet,
+                 "%s %s HTTP/1.0\r\n"
+                 "Host: %s\r\n"
+                 "User-Agent: FreeMap/%s\r\n"
+                 "%s"
+                 "%s",
+                 req_type, url.path().toAscii().data() + 1, url.host().toAscii().data(), roadmap_start_version(),
+                 TEST_NET_COMPRESS( flags ) ? "Accept-Encoding: gzip, deflate\r\n" : "",
+                 update_since);
 
-      if(ROADMAP_INVALID_SOCKET == res_socket) return ROADMAP_INVALID_SOCKET;
+      if(ROADMAP_INVALID_SOCKET == temp_socket) return ROADMAP_INVALID_SOCKET;
 
+      res_socket = temp_socket;
       if (async) {
-         data = (RoadMapNetData *)malloc(sizeof(RoadMapNetData));
+         data = new RoadMapNetData();
          strncpy_safe(data->packet, packet, sizeof(data->packet));
       }
    }
 
-   if (async) {
-      RoadMapIO io;
+   if (!reuse_connect_io)
+        io = new RoadMapIO();
+   else
+        io = reuse_connect_io;
+   
+   io->os.socket = res_socket;
+   ((RNetworkSocket*)io->os.socket)->set_io(io);
 
+   if (async) {
       data->callback = callback;
       data->context = context;
 
-      io.subsystem = ROADMAP_IO_NET;
-      io.context = data;
-      io.os.socket = res_socket;
+      io->subsystem = ROADMAP_IO_NET;
+      io->context = data;
 
-      if (create_async_connection(&io, url) == -1) {
-         free(data);
+      io->retry_params.num_retries = num_retries;
+      io->retry_params.protocol = strdup(protocol);
+      io->retry_params.name = strdup(name);
+      io->retry_params.resolved_name = strdup(resolved_name);
+      io->retry_params.update_time = update_time;
+      io->retry_params.default_port = default_port;
+      io->retry_params.flags = flags;
+      io->retry_params.callback = callback;
+      io->retry_params.context = context;
+      if (create_async_connection(io, url) == -1)
+	  {
+         delete(data);
          roadmap_net_close(res_socket);
          return ROADMAP_INVALID_SOCKET;
-      }
-
-      RoadMapNetNumConnects++;
-
-      if (RoadMapNetNumConnects == 1) {
-         roadmap_main_set_periodic(CONNECT_TIMEOUT_SEC * 1000, check_connect_timeout);
       }
 
    } else {
@@ -291,7 +349,7 @@ static RoadMapSocket roadmap_net_connect_internal (const char *protocol, const c
       }
    }
 
-   return res_socket;
+   return io;
 }
 
 
@@ -305,12 +363,19 @@ RoadMapSocket roadmap_net_connect (const char *protocol, const char *name,
                                    int flags,
                                    roadmap_result* err) {
 
+   RoadMapIO *io;
+   RoadMapSocket s;
+   
    if (err != NULL)
    (*err) = succeeded;
 
-   RoadMapSocket s = roadmap_net_connect_internal(protocol, name, update_time,
-                                                   default_port, 0, flags, NULL, NULL);
+   io = (RoadMapIO*) roadmap_net_connect_internal(protocol, name, name, update_time,
+                                                   default_port, 0, flags, NULL, NULL, NULL, 0);
 
+   if (io == NULL)
+      return NULL;
+
+   s = io->os.socket;
 
    if ((s == ROADMAP_INVALID_SOCKET) && (err != NULL))
       (*err) = err_net_failed;
@@ -318,23 +383,19 @@ RoadMapSocket roadmap_net_connect (const char *protocol, const char *name,
 }
 
 
-void* roadmap_net_connect_async (const char *protocol, const char *name,
-                               const char *resolved_name,
+void *roadmap_net_connect_async (const char *protocol, const char *name, const char *resolved_name,
                                time_t update_time,
                                int default_port,
                                int flags,
                                RoadMapNetConnectCallback callback,
                                void *context) {
 
-   RoadMapSocket s = roadmap_net_connect_internal
-                        (protocol, name, update_time, default_port, 1, flags, callback, context);
-
-   if (ROADMAP_NET_IS_VALID(s)) return NULL;
-   else return s;
+   return roadmap_net_connect_internal
+                        (protocol, name, resolved_name, update_time, default_port, 1, flags, callback, context, NULL, 0);
 }
 
 void roadmap_net_cancel_connect (void* context) {
-   RoadMapIO *io = (RoadMapIO*) context;
+    RoadMapIO *io = (RoadMapIO*) context;
    RoadMapNetData *data = (RoadMapNetData*) io->context;
    RoadMapSocket s = io->os.socket;
 
@@ -354,7 +415,7 @@ void roadmap_net_cancel_connect (void* context) {
    roadmap_log(ROADMAP_DEBUG, "Cancelling async connect request (%d)", ((RNetworkSocket*)s)->socketDescriptor());
    roadmap_main_remove_input(io);
    roadmap_net_close(s);
-   free(data);
+   delete data;
 
    RoadMapNetNumConnects--;
 
@@ -362,7 +423,6 @@ void roadmap_net_cancel_connect (void* context) {
       roadmap_main_remove_periodic(check_connect_timeout);
    }
 }
-
 
 int roadmap_net_send (RoadMapSocket s, const void *data, int length, int wait) {
 
@@ -396,7 +456,6 @@ int roadmap_net_receive (RoadMapSocket s, void *data, int size) {
 
    return received;
 }
-
 
 RoadMapSocket roadmap_net_listen(int port) {
 
@@ -460,3 +519,6 @@ void roadmap_net_initialize (void) {
    roadmap_net_mon_start ();
 }
 
+int roadmap_net_socket_secured (RoadMapSocket s) {
+   return FALSE;
+}

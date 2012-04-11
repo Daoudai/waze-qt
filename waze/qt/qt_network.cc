@@ -1,10 +1,6 @@
 #include "qt_network.h"
 
-#include <QSslConfiguration>
-#include <QNetworkRequest>
 #include <QAbstractSocket>
-#include <QHostAddress>
-#include <QTimer>
 
 extern "C" {
 #include "roadmap.h"
@@ -12,21 +8,38 @@ extern "C" {
 #include "roadmap_net.h"
 }
 
+#define CONNECTION_TIMEOUT 5000
+
 RNetworkSocket::RNetworkSocket(QAbstractSocket* socket, bool isCompressed) :
+    _callback(NULL),
     _isCompressed(isCompressed),
     _socket(socket),
-    _compressContext(NULL)
+    _compressContext(NULL),
+    _io(NULL)
 {
-    connect(this, SIGNAL(callbackChanged()), this, SLOT(executeCallback()));
-    connect(_socket, SIGNAL(readChannelFinished()), this, SLOT(executeCallback()));
+
 }
 
 RNetworkSocket::~RNetworkSocket()
 {
+    switch (_direction)
+    {
+    case ReadDirection:
+        disconnect(SIGNAL(readyRead()), this, SLOT(executeCallback()));
+        break;
+    case WriteDirection:
+        disconnect(SIGNAL(readyWrite()), this, SLOT(executeCallback()));
+        break;
+    }
+
+    if (_io != NULL)
+    {
+        delete _io;
+    }
+
     if (_compressContext != NULL)
     {
         roadmap_http_comp_close(_compressContext);
-        delete _compressContext;
     }
 
     _socket->close();
@@ -35,9 +48,8 @@ RNetworkSocket::~RNetworkSocket()
 
 bool RNetworkSocket::connectSocket(QUrl &url)
 {
-    _socket->connectToHost(QHostAddress(url.host()), url.port());
-    _socket->waitForConnected(5000);
-    return _socket->isOpen();
+    _socket->connectToHost(url.host(), url.port());
+    return _socket->waitForConnected(CONNECTION_TIMEOUT);
 }
 
 int RNetworkSocket::socketDescriptor()
@@ -45,18 +57,45 @@ int RNetworkSocket::socketDescriptor()
     return _socket->socketDescriptor();
 }
 
-void RNetworkSocket::setCallback(RoadMapInput callback, RoadMapIO* io)
+void RNetworkSocket::setCallback(RoadMapInput callback, SocketDirection direction)
 {
-    _callback = callback;
-    _io = *io;
+    if (_callback != NULL)
+    {
+        switch (_direction)
+        {
+        case ReadDirection:
+            disconnect(SIGNAL(readyRead()), this, SLOT(executeCallback()));
+            break;
+        case WriteDirection:
+            disconnect(SIGNAL(readyWrite()), this, SLOT(executeCallback()));
+            break;
+        }
+    }
 
-    emit callbackChanged();
+    _direction = direction;
+    _callback = callback;
+    _startDate = QDateTime::currentDateTime();
+
+    switch (_direction)
+    {
+    case ReadDirection:
+        connect(_socket, SIGNAL(readyRead()), this, SLOT(executeCallback()));
+        break;
+    case WriteDirection:
+        connect(_socket, SIGNAL(connected()), this, SLOT(executeCallback()));
+        connect(this, SIGNAL(readyWrite()), this, SLOT(executeCallback()));
+        if (_socket->isOpen())
+        {
+            emit readyWrite();
+        }
+        break;
+    }
 }
 
 void RNetworkSocket::executeCallback() {
-    if (_callback != NULL && _socket->bytesAvailable() > 0)
+    if (_callback != NULL)
     {
-        _callback(&_io);
+        _callback(_io);
     }
 }
 
@@ -86,11 +125,14 @@ int RNetworkSocket::read(char* data, int size)
           received = _socket->read((char*)data, size);
      }
 
+    qDebug("Read Data: *************\n%s\n***********", data);
+
     return received;
 }
 
 int RNetworkSocket::write(char* data, int size, bool immediate)
 {
+    qDebug("Write Data: *************\n%s\n***********", data);
     int written = _socket->write(data, size);
 
     if (!immediate)
@@ -99,4 +141,20 @@ int RNetworkSocket::write(char* data, int size, bool immediate)
     }
 
     return written;
+}
+
+
+bool RNetworkSocket::isTimedOut(const QDateTime &checkDate)
+{
+    return !_startDate.isNull() && _startDate < checkDate;
+}
+
+void RNetworkSocket::set_io(RoadMapIO *io)
+{
+    _io = io;
+}
+
+RoadMapIO* RNetworkSocket::io()
+{
+    return _io;
 }
