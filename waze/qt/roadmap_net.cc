@@ -259,9 +259,17 @@ static void *roadmap_net_connect_internal (const char *protocol, const char *nam
    RoadMapNetData *data = NULL;
    RoadMapIO      *io;
 
-   QUrl url;
-   url.setUrl(resolved_name);
+   QUrl url = QUrl::fromEncoded(resolved_name);
    url.setPort(url.port(default_port));
+
+   QHostInfo hi = QHostInfo::fromName(url.host());
+
+   if (!hi.addresses().isEmpty())
+   {
+        url.setHost(hi.addresses().first().toString());
+   }
+
+   QString hostPort = QString("%1:%2").arg(url.host()).arg(url.port());
 
    if( strncmp( protocol, "http", 4) != 0) {
       temp_socket = create_socket(protocol, FALSE);
@@ -288,7 +296,7 @@ static void *roadmap_net_connect_internal (const char *protocol, const char *nam
                  "User-Agent: FreeMap/%s\r\n"
                  "%s"
                  "%s",
-                 req_type, url.path().toAscii().data() + 1, url.host().toAscii().data(), roadmap_start_version(),
+                 req_type, url.toString(QUrl::RemoveScheme | QUrl::RemoveAuthority).toAscii().data(), hostPort.toAscii().data(), roadmap_start_version(),
                  TEST_NET_COMPRESS( flags ) ? "Accept-Encoding: gzip, deflate\r\n" : "",
                  update_since);
 
