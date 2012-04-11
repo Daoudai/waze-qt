@@ -2,14 +2,9 @@
 #define QT_NETWORK_H
 
 #include <QObject>
-#include <QNetworkAccessManager>
-#include <QNetworkRequest>
-#include <QNetworkReply>
 #include <QDateTime>
 #include <QUrl>
 #include <QAbstractSocket>
-#include <QSemaphore>
-#include <QTimerEvent>
 #include "qt_global.h"
 
 extern "C" {
@@ -18,9 +13,7 @@ extern "C" {
 #include "roadmap_http_comp.h"
 }
 
-enum RequestType { Get, Post, Unknown };
-
-class RNetworkManager;
+enum SocketDirection {ReadDirection, WriteDirection};
 
 class RNetworkSocket : public QObject {
     Q_OBJECT
@@ -30,11 +23,7 @@ public:
 
     virtual ~RNetworkSocket();
 
-    void setCallback(RoadMapInput callback, RoadMapIO* io);
-
-    void commitRequest(QByteArray data = QByteArray());
-
-    void waitUntilFinished();
+    void setCallback(RoadMapInput callback, SocketDirection direction);
 
     bool connectSocket(QUrl& url);
 
@@ -44,20 +33,25 @@ public:
 
     int write(char* data, int size, bool immediate = true);
 
-    void abort();
+    bool isTimedOut(const QDateTime& checkDate);
+
+    void set_io(RoadMapIO* io);
+    RoadMapIO* io();
 
 private slots:
     void executeCallback();
 
 signals:
-    void callbackChanged();
+    void readyWrite();
 
 private:
     RoadMapInput _callback;
+    SocketDirection _direction;
     bool _isCompressed;
     QAbstractSocket* _socket;
-    roadmap_http_comp_t* _compressContext;
-    RoadMapIO _io;
+    RoadMapHttpCompCtx _compressContext;
+    RoadMapIO* _io;
+    QDateTime _startDate;
 };
 
 #endif // QT_NETWORK_H
