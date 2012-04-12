@@ -105,6 +105,7 @@ void roadmap_main_set_input    (RoadMapIO *io, RoadMapInput callback)
     {
         ioList.append(io);
         RNetworkSocket* socket = (RNetworkSocket*) io->os.socket;
+        socket->set_io(io);
         socket->setCallback(callback, ReadDirection);
     }
 }
@@ -117,6 +118,7 @@ void roadmap_main_set_output   (RoadMapIO *io, RoadMapInput callback, BOOL is_co
     {
         ioList.append(io);
         RNetworkSocket* socket = (RNetworkSocket*) io->os.socket;
+        socket->set_io(io);
         socket->setCallback(callback, WriteDirection);
     }
 }
