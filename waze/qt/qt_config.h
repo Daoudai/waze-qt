@@ -28,8 +28,6 @@ struct RoadMapConfigItemRecord {
     QList<WazeString>::const_iterator enum_iter;
 
     QHash<QString, RoadMapConfigItem* >::const_iterator items_iter;
-
-    int initializedMarker;
 };
 
 class RMapConfig : public QObject

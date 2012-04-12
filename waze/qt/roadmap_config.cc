@@ -57,18 +57,14 @@ static QVariant roadmap_config_get_variant(RoadMapConfigDescriptor* descriptor, 
         *found = false;
     }
 
-    if (descriptor->reference == NULL || descriptor->reference->initializedMarker != INIT_MARKER_VALUE)
-    {
-        QString itemName = roadmap_config_property_name(descriptor);
-        RoadMapConfigItem* item = config->getConfigItem(itemName);
+    QString itemName = roadmap_config_property_name(descriptor);
+    RoadMapConfigItem* item = config->getConfigItem(itemName);
 
-        if (item == NULL)
-        {
-            return QVariant();
-        }
-        descriptor->reference = item;
-        descriptor->reference->initializedMarker = INIT_MARKER_VALUE;
+    if (item == NULL)
+    {
+        return QVariant();
     }
+    descriptor->reference = item;
 
     QSettings* settings = config->getSettings(descriptor->reference->file);
     if (settings == NULL)
@@ -101,22 +97,18 @@ void roadmap_config_declare
          int *is_new)
 {
     QString qFile = QString::fromLocal8Bit(file);
-    if (descriptor->reference == NULL || descriptor->reference->initializedMarker != INIT_MARKER_VALUE)
-    {
-        QString configName = roadmap_config_property_name(descriptor);
-        RoadMapConfigItemRecord* item = config->getConfigItem(qFile, configName);
+    QString configName = roadmap_config_property_name(descriptor);
+    RoadMapConfigItemRecord* item = config->getConfigItem(qFile, configName);
 
-        if (item == NULL)
-        {
-            item = new RoadMapConfigItemRecord;
-            item->name = descriptor->name;
-            item->category = descriptor->category;
-            item->callback = NULL;
-            config->addConfigItem(qFile, configName, item);
-        }
-        descriptor->reference = item;
-        descriptor->reference->initializedMarker = INIT_MARKER_VALUE;
+    if (item == NULL)
+    {
+        item = new RoadMapConfigItemRecord;
+        item->name = descriptor->name;
+        item->category = descriptor->category;
+        item->callback = NULL;
+        config->addConfigItem(qFile, configName, item);
     }
+    descriptor->reference = item;
 
     descriptor->reference->default_value = QVariant(QString::fromLocal8Bit(default_value));
     descriptor->reference->file = qFile;
@@ -299,16 +291,12 @@ const char *roadmap_config_get (RoadMapConfigDescriptor *descriptor)
 void roadmap_config_set
                 (RoadMapConfigDescriptor *descriptor, const char *value)
 {
-    if (descriptor->reference == NULL || descriptor->reference->initializedMarker != INIT_MARKER_VALUE)
-    {
-        QString itemName = roadmap_config_property_name(descriptor);
-        descriptor->reference = config->getConfigItem(itemName);
-        descriptor->reference->initializedMarker = INIT_MARKER_VALUE;
+    QString itemName = roadmap_config_property_name(descriptor);
+    descriptor->reference = config->getConfigItem(itemName);
 
-        if (descriptor->reference == NULL)
-        {
-            return;
-        }
+    if (descriptor->reference == NULL)
+    {
+        return;
     }
 
     QSettings* settings = config->getSettings(descriptor->reference->file);
@@ -359,16 +347,12 @@ int   roadmap_config_get_integer (RoadMapConfigDescriptor *descriptor)
 
 void  roadmap_config_set_integer (RoadMapConfigDescriptor *descriptor, int x)
 {
-    if (descriptor->reference == NULL || descriptor->reference->initializedMarker != INIT_MARKER_VALUE)
-    {
-        QString itemName = roadmap_config_property_name(descriptor);
-        descriptor->reference = config->getConfigItem(itemName);
-        descriptor->reference->initializedMarker = INIT_MARKER_VALUE;
+    QString itemName = roadmap_config_property_name(descriptor);
+    descriptor->reference = config->getConfigItem(itemName);
 
-        if (descriptor->reference == NULL)
-        {
-            return;
-        }
+    if (descriptor->reference == NULL)
+    {
+        return;
     }
 
     QSettings* settings = config->getSettings(descriptor->reference->file);
@@ -402,7 +386,7 @@ BOOL  roadmap_config_get_position
 {
     BOOL found = TRUE;
 
-    if (descriptor->reference == NULL || descriptor->reference->initializedMarker != INIT_MARKER_VALUE)
+    if (descriptor->reference == NULL)
     {
         roadmap_config_declare("session", descriptor, "", NULL);
     }
@@ -436,7 +420,7 @@ BOOL  roadmap_config_get_position
 void  roadmap_config_set_position
         (RoadMapConfigDescriptor *descriptor, const RoadMapPosition *position)
 {
-    if (descriptor->reference == NULL || descriptor->reference->initializedMarker != INIT_MARKER_VALUE)
+    if (descriptor->reference == NULL)
     {
         roadmap_config_declare("session", descriptor, "", NULL);
     }
