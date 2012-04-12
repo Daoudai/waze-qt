@@ -438,7 +438,7 @@ void roadmap_path_create ( const char *path )
     {
         QDir().mkpath(qParentPath);
 
-        if (QFile::setPermissions(qParentPath, QFile::ReadUser | QFile::WriteUser | QFile::ExeUser |
+        if (!QFile::setPermissions(qParentPath, QFile::ReadUser | QFile::WriteUser | QFile::ExeUser |
                                                QFile::ReadGroup | QFile::WriteGroup | QFile::ExeGroup))
         {
             roadmap_log( ROADMAP_ERROR, "Error creating path: %s", path);
