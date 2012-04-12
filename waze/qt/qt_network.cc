@@ -15,27 +15,19 @@ RNetworkSocket::RNetworkSocket(QAbstractSocket* socket, bool isCompressed) :
     _isCompressed(isCompressed),
     _socket(socket),
     _compressContext(NULL),
-    _io(NULL)
+    _io(NULL),
+    _isCallbackExecuting(false),
+    _callbackCheckSemaphore(1),
+    _isPendingClose(false)
 {
-
+    connect(this, SIGNAL(readyRead()), this, SLOT(executeCallback()));
 }
 
 RNetworkSocket::~RNetworkSocket()
 {
-    switch (_direction)
-    {
-    case ReadDirection:
-        disconnect(SIGNAL(readyRead()), this, SLOT(executeCallback()));
-        break;
-    case WriteDirection:
-        disconnect(SIGNAL(readyWrite()), this, SLOT(executeCallback()));
-        break;
-    }
+    roadmap_log(ROADMAP_INFO, "Delete RNetworkSocket <%d>", _socket->socketDescriptor());
 
-    if (_io != NULL)
-    {
-        delete _io;
-    }
+    disconnect(_socket, SIGNAL(readyRead()), this, SLOT(executeCallback()));
 
     if (_compressContext != NULL)
     {
@@ -49,7 +41,9 @@ RNetworkSocket::~RNetworkSocket()
 bool RNetworkSocket::connectSocket(QUrl &url)
 {
     _socket->connectToHost(url.host(), url.port());
-    return _socket->waitForConnected(CONNECTION_TIMEOUT);
+    bool rc = _socket->waitForConnected(CONNECTION_TIMEOUT);
+    roadmap_log(ROADMAP_INFO, "RNetworkSocket connected <%d>", _socket->socketDescriptor());
+    return rc;
 }
 
 int RNetworkSocket::socketDescriptor()
@@ -59,43 +53,43 @@ int RNetworkSocket::socketDescriptor()
 
 void RNetworkSocket::setCallback(RoadMapInput callback, SocketDirection direction)
 {
-    if (_callback != NULL)
-    {
-        switch (_direction)
-        {
-        case ReadDirection:
-            disconnect(SIGNAL(readyRead()), this, SLOT(executeCallback()));
-            break;
-        case WriteDirection:
-            disconnect(SIGNAL(readyWrite()), this, SLOT(executeCallback()));
-            break;
-        }
-    }
-
     _direction = direction;
     _callback = callback;
     _startDate = QDateTime::currentDateTime();
 
-    switch (_direction)
+    if (_direction == ReadDirection)
     {
-    case ReadDirection:
-        connect(_socket, SIGNAL(readyRead()), this, SLOT(executeCallback()));
-        break;
-    case WriteDirection:
-        connect(_socket, SIGNAL(connected()), this, SLOT(executeCallback()));
-        connect(this, SIGNAL(readyWrite()), this, SLOT(executeCallback()));
-        if (_socket->isOpen())
+        connect(_socket, SIGNAL(readyRead()), this, SIGNAL(readyRead()));
+        if (_socket->bytesAvailable() > 0)
         {
-            emit readyWrite();
+            emit readyRead();
         }
-        break;
+    }
+    else if(_direction == WriteDirection)
+    {
+        emit readyRead();
     }
 }
 
 void RNetworkSocket::executeCallback() {
     if (_callback != NULL)
     {
-        _callback(_io);
+        if (_direction == ReadDirection)
+        {
+            disconnect(_socket, SIGNAL(readyRead()), this, SIGNAL(readyRead()));
+        }
+
+        _callbackCheckSemaphore.acquire();
+        _isCallbackExecuting = true;
+        bool canExecute = !_isPendingClose;
+        _callbackCheckSemaphore.release();
+        if (canExecute)
+        {
+            _callback(_io);
+        }
+        _callbackCheckSemaphore.acquire();
+        _isCallbackExecuting = false;
+        _callbackCheckSemaphore.release();
     }
 }
 
@@ -125,14 +119,14 @@ int RNetworkSocket::read(char* data, int size)
           received = _socket->read((char*)data, size);
      }
 
-    qDebug("Read Data: *************\n%s\n***********", data);
+    roadmap_log(ROADMAP_INFO, "Read Data: *************\n%s\n***********", data);
 
     return received;
 }
 
 int RNetworkSocket::write(char* data, int size, bool immediate)
 {
-    qDebug("Write Data: *************\n%s\n***********", data);
+    roadmap_log(ROADMAP_INFO, "Write Data: *************\n%s\n***********", data);
     int written = _socket->write(data, size);
 
     if (!immediate)
@@ -146,7 +140,15 @@ int RNetworkSocket::write(char* data, int size, bool immediate)
 
 bool RNetworkSocket::isTimedOut(const QDateTime &checkDate)
 {
-    return !_startDate.isNull() && _startDate < checkDate;
+    _callbackCheckSemaphore.acquire();
+    bool isTimedOut = !_isCallbackExecuting && !_startDate.isNull() && _startDate < checkDate;
+    if (isTimedOut)
+    {
+        _isPendingClose = true;
+    }
+    _callbackCheckSemaphore.release();
+
+    return isTimedOut;
 }
 
 void RNetworkSocket::set_io(RoadMapIO *io)

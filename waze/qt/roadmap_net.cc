@@ -72,7 +72,7 @@ static RoadMapConfigDescriptor RoadMapConfigNetCompressEnabled =
 static int  RoadMapNetNumConnects;
 static BOOL RoadMapNetCompressEnabled = FALSE;
 
-#define CONNECT_TIMEOUT_SEC 10
+#define CONNECT_TIMEOUT_SEC 5
 
 static void connect_callback (RoadMapSocket s, RoadMapNetData *data);
 static void io_connect_callback (RoadMapIO *io);
@@ -132,7 +132,7 @@ static void check_connect_timeout (void) {
             free(protocol);
             free(name);
             free(resolved_name);
-            free(data);
+            delete data;
             continue;
          }
       }
@@ -234,6 +234,12 @@ static int create_async_connection (RoadMapIO *io, QUrl& url) {
    roadmap_main_set_output(io, io_connect_callback, TRUE);
    RoadMapNetNumConnects++;
 
+   if (res == 0) {
+      /* Probably not realistic */
+      io_connect_callback(io);
+      return 0;
+   }
+
    if (RoadMapNetNumConnects == 1) {
       roadmap_main_set_periodic(CONNECT_TIMEOUT_SEC * 1000 /2, check_connect_timeout);
    }
@@ -274,7 +280,7 @@ static void *roadmap_net_connect_internal (const char *protocol, const char *nam
    if( strncmp( protocol, "http", 4) != 0) {
       temp_socket = create_socket(protocol, FALSE);
 
-      if(ROADMAP_INVALID_SOCKET == temp_socket) return ROADMAP_INVALID_SOCKET;
+      if(ROADMAP_INVALID_SOCKET == temp_socket) return NULL;
 
       res_socket = temp_socket;
 
@@ -337,7 +343,7 @@ static void *roadmap_net_connect_internal (const char *protocol, const char *nam
 	  {
          delete(data);
          roadmap_net_close(res_socket);
-         return ROADMAP_INVALID_SOCKET;
+         return NULL;
       }
 
    } else {
@@ -345,14 +351,14 @@ static void *roadmap_net_connect_internal (const char *protocol, const char *nam
       /* Blocking connect */
       if (create_connection(res_socket, url) == -1) {
          roadmap_net_close(res_socket);
-         return ROADMAP_INVALID_SOCKET;
+         return NULL;
       }
 
       if( strncmp(protocol, "http", 4) == 0) {
          if(-1 == roadmap_net_send(res_socket, packet, (int)strlen(packet), 1)) {
             roadmap_log( ROADMAP_ERROR, "roadmap_net_connect(HTTP) - Failed to send the 'POST' packet");
             roadmap_net_close(res_socket);
-            return ROADMAP_INVALID_SOCKET;
+            return NULL;
          }
       }
    }
@@ -453,7 +459,7 @@ int roadmap_net_send (RoadMapSocket s, const void *data, int length, int wait) {
 int roadmap_net_receive (RoadMapSocket s, void *data, int size) {
 
     RNetworkSocket* socket = (RNetworkSocket*) s;
-   int received = socket->read((char*) data, size);
+    int received = socket->read((char*) data, size);
 
    if (received < 0) {
       roadmap_net_mon_error("Error in recv.");
@@ -479,7 +485,7 @@ RoadMapSocket roadmap_net_accept(RoadMapSocket server_socket) {
 
 void roadmap_net_close (RoadMapSocket s) {
    roadmap_net_mon_disconnect();
-   delete (RNetworkSocket*) s;
+   ((RNetworkSocket*) s)->deleteLater();
 }
 
 

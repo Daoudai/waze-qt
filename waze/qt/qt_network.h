@@ -5,6 +5,7 @@
 #include <QDateTime>
 #include <QUrl>
 #include <QAbstractSocket>
+#include <QSemaphore>
 #include "qt_global.h"
 
 extern "C" {
@@ -42,7 +43,7 @@ private slots:
     void executeCallback();
 
 signals:
-    void readyWrite();
+    void readyRead();
 
 private:
     RoadMapInput _callback;
@@ -52,6 +53,9 @@ private:
     RoadMapHttpCompCtx _compressContext;
     RoadMapIO* _io;
     QDateTime _startDate;
+    bool _isCallbackExecuting;
+    QSemaphore _callbackCheckSemaphore;
+    bool _isPendingClose;
 };
 
 #endif // QT_NETWORK_H
