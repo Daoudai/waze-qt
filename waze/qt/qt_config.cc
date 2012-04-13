@@ -19,20 +19,20 @@ RMapConfig::RMapConfig(QObject *parent) :
     SessionStr = QString::fromLocal8Bit("session");
     SchemaStr = QString::fromLocal8Bit("schema");
 
-    _settings[UserStr] = new QSettings(QSettings::IniFormat, QSettings::UserScope, DataStr, UserStr);
-    _settings[PreferencesStr] = new QSettings(QSettings::IniFormat, QSettings::UserScope, DataStr, PreferencesStr);
-    _settings[SessionStr] = new QSettings(QSettings::IniFormat, QSettings::UserScope, DataStr, SessionStr);
+    _settings.insert(UserStr, new QSettings(QSettings::IniFormat, QSettings::UserScope, DataStr, UserStr));
+    _settings.insert(PreferencesStr, new QSettings(QSettings::IniFormat, QSettings::UserScope, DataStr, PreferencesStr));
+    _settings.insert(SessionStr, new QSettings(QSettings::IniFormat, QSettings::UserScope, DataStr, SessionStr));
     reloadConfig(SchemaStr);
 }
 
 RMapConfig::~RMapConfig()
 {
-    QStringList::iterator fileIt = _settings.keys().begin();
-    for (; fileIt != _settings.keys().end(); fileIt++)
+    QHash<QString, QSettings*>::iterator fileIt = _settings.begin();
+    for (; fileIt != _settings.end(); fileIt++)
     {
-        delete _settings.value(*fileIt);
+        delete _settings.value(fileIt.key());
 
-        ItemsHash* configItems = _configItems.value(*fileIt);
+        ItemsHash* configItems = _configItems.value(fileIt.key());
         ItemsHash::iterator itemsIt = configItems->begin();
         for (; itemsIt != configItems->end(); itemsIt++)
         {
@@ -173,6 +173,6 @@ void RMapConfig::reloadConfig(QString& file)
         path = QString::fromLocal8Bit(roadmap_path_config()).append("/").append(file);
     }
 
-    _settings[file] = new QSettings(path, QSettings::IniFormat);
+    _settings.insert(SchemaStr, new QSettings(path, QSettings::IniFormat));
     roadmap_log(ROADMAP_INFO, "Schema is being read from %s (status %d)", _settings[file]->fileName().toLocal8Bit().data(), _settings[file]->status());
 }
