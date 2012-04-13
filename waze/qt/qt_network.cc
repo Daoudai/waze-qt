@@ -74,11 +74,6 @@ void RNetworkSocket::setCallback(RoadMapInput callback, SocketDirection directio
 void RNetworkSocket::executeCallback() {
     if (_callback != NULL)
     {
-        if (_direction == ReadDirection)
-        {
-            disconnect(_socket, SIGNAL(readyRead()), this, SIGNAL(readyRead()));
-        }
-
         _callbackCheckSemaphore.acquire();
         _isCallbackExecuting = true;
         bool canExecute = !_isPendingClose;
