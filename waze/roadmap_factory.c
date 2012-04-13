@@ -335,14 +335,19 @@ ssd_contextmenu_ptr roadmap_factory_load_menu(
                         const RoadMapAction* actions)
 {
    const char*          path = roadmap_path_first("config");
-   ssd_contextmenu_ptr  menu = roadmap_factory_load_menu_file( 
+   for ( ;
+         path != NULL;
+         path = roadmap_path_next("config", path))
+   {
+      if (roadmap_file_exists(path, filename)) {
+            break;
+      }
+   }
+
+   ssd_contextmenu_ptr  menu = roadmap_factory_load_menu_file(
                                           filename, 
-                                          actions, 
-#ifndef IPHONE
-                                          roadmap_path_user());
-#else
-                                          roadmap_path_bundle());
-#endif //IPHONE
+                                          actions,
+                                          path);
 
    if( menu)
       return menu;
