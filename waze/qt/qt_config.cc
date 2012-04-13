@@ -174,4 +174,5 @@ void RMapConfig::reloadConfig(QString& file)
     }
 
     _settings[file] = new QSettings(path, QSettings::IniFormat);
+    roadmap_log(ROADMAP_INFO, "Schema is being read from %s (status %d)", _settings[file]->fileName().toLocal8Bit().data(), _settings[file]->status());
 }

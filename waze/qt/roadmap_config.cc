@@ -284,6 +284,11 @@ int   roadmap_config_get_type (RoadMapConfigDescriptor *descriptor)
 const char *roadmap_config_get (RoadMapConfigDescriptor *descriptor)
 {
     QVariant value = roadmap_config_get_variant(descriptor, (bool*) NULL);
+    if (value.isNull())
+    {
+        return "";
+    }
+
     descriptor->reference->strValue = value.toString();
     return descriptor->reference->strValue.getStr();
 }
