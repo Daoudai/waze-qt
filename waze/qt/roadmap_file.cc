@@ -276,8 +276,13 @@ const char *roadmap_file_map (const char *set,
 
    } else {
 
-       if (sequence == NULL) {
-          sequence = roadmap_path_first(set);
+       if (sequence == NULL)
+       {
+            sequence = roadmap_path_first(set);
+       }
+       else
+       {
+            sequence = roadmap_path_next(set, sequence);
        }
 
        for (  ; sequence != NULL; sequence = roadmap_path_next(set, sequence))
@@ -295,19 +300,18 @@ const char *roadmap_file_map (const char *set,
        }
 
        qFile = new QFile(qSequence);
-       sequence = roadmap_path_next(set, sequence); // ensuring that the next in line is returned
    }
 
    qFile->setPermissions(QFile::ReadUser | QFile::WriteUser |
                          QFile::ReadGroup | QFile::WriteGroup |
                          QFile::ReadOther | QFile::WriteOther);
 
-   if (qFile->open(open_mode)) {
+   if (!qFile->open(open_mode)) {
       roadmap_log (ROADMAP_INFO, "cannot open file %s", name);
       return NULL;
    }
 
-   context = (RoadMapFileContextStructure*) malloc (sizeof(*context));
+   context = new RoadMapFileContextStructure();
    roadmap_check_allocated(context);
 
    context->file = qFile;
