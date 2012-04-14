@@ -111,7 +111,6 @@ static RoadMapPathRecord roadmap_path_find (const char *name) {
         skinPathRecord.preferred = QString(userDataPath).append("/").append(QString("skins"));
         RoadMapPaths.insert(QString("skin"), skinPathRecord);
 
-
         QList<WazeString> mapPaths;
         mapPaths.append(QString(userDataPath).append("/")
                          .append(QString("maps")));
@@ -121,6 +120,21 @@ static RoadMapPathRecord roadmap_path_find (const char *name) {
         mapsPathRecord.items = mapPaths;
         mapsPathRecord.preferred = QString(userDataPath).append("/").append(QString("maps"));
         RoadMapPaths.insert(QString("maps"), mapsPathRecord);
+
+        // create all paths directories that not exist
+        RoadMapPathList::iterator pathsIt = RoadMapPaths.begin();
+        for(; pathsIt != RoadMapPaths.end(); pathsIt++)
+        {
+            QList<WazeString>::iterator pathIt = pathsIt.value().items.begin();
+            for(; pathIt != pathsIt.value().items.end(); pathIt++)
+            {
+                QString path = (*pathIt).getQStr();
+                if (!QFile::exists(path))
+                {
+                    QDir().mkpath(path);
+                }
+            }
+        }
     }
 
     return RoadMapPaths.value(QString(name), defaultRecord);
