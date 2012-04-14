@@ -14,7 +14,7 @@ extern "C" {
 KeyboardDialog::KeyboardDialog(RMapMainWindow *parent) :
     QDeclarativeView(parent), mainWindow(parent)
 {
-    setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/qml/TextBox.qml")));
+    setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../qml/TextBox.qml")));
     setAttribute(Qt::WA_TranslucentBackground);
 
     QObject *item = dynamic_cast<QObject*>(rootObject());
