@@ -87,20 +87,16 @@ static void trans_commit( void );
  *				:
  */
 static const char * get_global_filename( int fips ) {
-
-   const char *map_path = roadmap_db_map_path ();
-   char name[30];
-   static char filename[RM_TILE_STORAGE_DB_PATH_MAXSIZE] = {0};
+   static char name[30] = {0};
 
      /* Global square id */
-   if ( !filename[0])
+   if ( !name[0])
    {
 	   const char *suffix = "index";
-	   snprintf (name, sizeof (name), "%05d_%s%s", fips, suffix,
+       snprintf (name, sizeof (name), "%05d_%s%s", fips, suffix,
             ROADMAP_DATA_TYPE );
-	   roadmap_path_format (filename, sizeof (filename), map_path, name);
    }
-   return filename;
+   return name;
 }
 
 
@@ -456,30 +452,39 @@ void roadmap_tile_remove (int fips, int tile_index)
 }
 
 
-static int roadmap_tile_file_load ( const char *full_name, void **base, size_t *size) {
+static int roadmap_tile_file_load ( const char *name, void **base, size_t *size) {
 
    RoadMapFile		file;
    int				res;
 
-   file = roadmap_file_open (full_name, "r");
+   for (const char *path = roadmap_path_first("maps");
+        path != NULL;
+        path = roadmap_path_next("maps", path))
+   {
+       if (!roadmap_file_exists(path, name))
+       {
+           continue;
+       }
 
-   if (!ROADMAP_FILE_IS_VALID(file)) {
-      return -1;
-   }
+       const char* full_name = roadmap_path_join(path, name);
+       file = roadmap_file_open (full_name, "r");
 
-#ifdef J2ME
-   *size = favail(file);
-#else
-   *size = roadmap_file_length (NULL, full_name);
-#endif
-   *base = malloc (*size);
+       if (!ROADMAP_FILE_IS_VALID(file)) {
+          delete full_name;
+          return -1;
+       }
 
-	   res = roadmap_file_read (file, *base, *size);
-	   roadmap_file_close (file);
+       *size = roadmap_file_length (NULL, full_name);
+       *base = malloc (*size);
 
-   if (res != (int)*size) {
-      free (*base);
-      return -1;
+           res = roadmap_file_read (file, *base, *size);
+           roadmap_file_close (file);
+
+       if (res != (int)*size) {
+          free (*base);
+          delete full_name;
+          return -1;
+       }
    }
 
    return 0;
@@ -502,7 +507,7 @@ int roadmap_tile_load (int fips, int tile_index, void **data, size_t *size)
 	if ( tile_index == -1 )
 	{
 		const char* file_name = get_global_filename( fips );
-                res = roadmap_tile_file_load( file_name, data, size );
+        res = roadmap_tile_file_load( file_name, data, size );
 		return res;
 	}
 
