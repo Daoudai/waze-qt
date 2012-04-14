@@ -279,14 +279,11 @@ void roadmap_lang_reload(void){
    RoadMapLangSize = 0;
    roadmap_hash_free(RoadMapLangHash);
    roadmap_lang_allocate ();
-#ifndef J2ME
-   p = roadmap_path_user ();
-#else
-   p = NULL;
-#endif
-   RoadMapLangLoaded = roadmap_lang_load (p);
-   if (!RoadMapLangLoaded){
-      p = roadmap_path_downloads();
+
+   for (p = roadmap_path_first("user");
+        p != NULL && !RoadMapLangLoaded;
+        p = roadmap_path_next("user", p))
+   {
       RoadMapLangLoaded = roadmap_lang_load (p);
    }
 
@@ -456,9 +453,10 @@ void roadmap_lang_initialize (void) {
 
    roadmap_lang_conf_load(roadmap_path_downloads());
 
-   RoadMapLangLoaded = roadmap_lang_load (p);
-   if (!RoadMapLangLoaded){
-      p = roadmap_path_downloads();
+   for (p = roadmap_path_first("user");
+        p != NULL && !RoadMapLangLoaded;
+        p = roadmap_path_next("user", p))
+   {
       RoadMapLangLoaded = roadmap_lang_load (p);
    }
    RoadMapLangRTL = (strcasecmp(roadmap_lang_get ("RTL"), "Yes") == 0);
