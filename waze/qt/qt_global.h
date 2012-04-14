@@ -9,18 +9,18 @@ public:
 
     }
 
-    WazeString(const QString str) {
+    inline WazeString(const QString str) {
         _str = str.toLocal8Bit();
     }
 
-    WazeString(const WazeString& other) {
+    inline WazeString(const WazeString& other) {
         if (&other != this)
         {
             _str = other._str;
         }
     }
 
-    WazeString &operator=(const WazeString &other)
+    inline WazeString &operator=(const WazeString &other)
     {
         if (&other != this)
         {
@@ -30,14 +30,14 @@ public:
         return *this;
     }
 
-    WazeString &operator=(const QString &str)
+    inline WazeString &operator=(const QString &str)
     {
         _str = str.toLocal8Bit().data();
 
         return *this;
     }
 
-    bool operator==(const WazeString &other) const
+    inline bool operator==(const WazeString &other) const
     {
         if (&other == this)
         {
@@ -47,17 +47,21 @@ public:
         return _str == other._str;
     }
 
-    bool operator==(const QString &str) const
+    inline bool operator==(const QString &str) const
     {
         return _str == str.toLocal8Bit();
     }
 
-    int length() const {
+    inline int length() const {
         return _str.length();
     }
 
-    const char *getStr() const {
+    inline const char *getStr() const {
         return _str.data();
+    }
+
+    inline QString getQStr() const {
+        return QString(_str);
     }
 
 private:
