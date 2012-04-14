@@ -145,6 +145,8 @@ RoadMapIO *roadmap_main_output_timedout(time_t timeout)
 }
 
 void roadmap_main_new(const char* title, int width, int height) {
+    mainWindow = new RMapMainWindow(0,0);
+    mainWindow->showFullScreen();
 
     editor_main_set(1);
 }
@@ -474,9 +476,6 @@ int main(int argc, char* argv[]) {
 
    QCoreApplication::setOrganizationName("Waze");
    QCoreApplication::setApplicationName("Waze");
-
-   mainWindow = new RMapMainWindow(0,0);
-   mainWindow->showFullScreen();
 
    roadmap_option (argc, argv, NULL);
 
