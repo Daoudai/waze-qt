@@ -140,27 +140,29 @@ static void *load_resource (unsigned int type, unsigned int flags,
       }
 
    } else {
-
-      const char *user_path = roadmap_path_user ();
-      char path[512];
-      switch (type) {
-         case RES_BITMAP:
-            *mem = 0;
-            roadmap_path_format (path, sizeof (path), user_path, "icons");
-            data = roadmap_canvas_load_image (path, name);
-            break;
-         case RES_SOUND:
-            roadmap_path_format (path, sizeof (path), roadmap_path_downloads(), "sound");
-            roadmap_path_format (path, sizeof (path), path, roadmap_prompts_get_name());
-            data = roadmap_sound_load (path, name, mem);
-            break;
-#ifdef IPHONE_NATIVE
-         case RES_NATIVE_IMAGE:
-            *mem = 0;
-            roadmap_path_format (path, sizeof (path), user_path, "icons");
-            data = roadmap_main_load_image (path, name);
-            break;
-#endif
+       for (cursor = roadmap_path_first ("user");
+             cursor != NULL;
+             cursor = roadmap_path_next ("user", cursor)) {
+          char path[1024];
+          switch (type) {
+             case RES_BITMAP:
+                *mem = 0;
+                roadmap_path_format (path, sizeof (path), cursor, "icons");
+                data = roadmap_canvas_load_image (path, name);
+                break;
+             case RES_SOUND:
+                roadmap_path_format (path, sizeof (path), cursor, "sound");
+                roadmap_path_format (path, sizeof (path), path, roadmap_prompts_get_name());
+                data = roadmap_sound_load (path, name, mem);
+                break;
+    #ifdef IPHONE_NATIVE
+             case RES_NATIVE_IMAGE:
+                *mem = 0;
+                roadmap_path_format (path, sizeof (path), cursor, "icons");
+                data = roadmap_main_load_image (path, name);
+                break;
+    #endif
+          }
       }
    }
 
