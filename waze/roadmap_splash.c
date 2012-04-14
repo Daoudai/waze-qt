@@ -215,7 +215,7 @@ static void on_splash_downloaded (const char* res_name, int success, void *conte
    if (success){
        if (last_modified && *last_modified)
           roadmap_splash_set_update_time(last_modified);
-#if ( !defined(IPHONE) && !defined(ANDROID) )
+#if ( !defined(IPHONE) && !defined(ANDROID) && !defined(QTMOBILITY))
        download_wide_splash();
 #endif
        roadmap_splash_set_check_time();
@@ -300,7 +300,7 @@ void roadmap_splash_download_init(void){
 
 //////////////////////////////////////////////////////////////////
 void roadmap_splash_display (void) {
-#if !defined(ANDROID) && !defined(IPHONE) && !defined(GTK2_OGL)
+#if !defined(ANDROID) && !defined(IPHONE) && !defined(GTK2_OGL) && !defined(QTMOBILITY)
    int height, width;
    RoadMapImage image;
    RoadMapGuiPoint pos;
