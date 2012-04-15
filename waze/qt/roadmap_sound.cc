@@ -34,6 +34,7 @@
 #include <QMediaResource>
 #include <QFile>
 #include <QUrl>
+#include <QFileInfo>
 #include "qt_sound.h"
 #include "qt_main.h"
 
@@ -197,26 +198,20 @@ RoadMapSound roadmap_sound_load (const char *path, const char *file, int *mem)
 {
 
    char *full_name = roadmap_path_join (path, file);
-   const char *seq;
-   RoadMapFileContext sound;
-   char sound_filename[MAX_SOUND_NAME];
+   roadmap_sound_st* sound;
+   QString soundFileName = QString("%1.mp3").arg(QString::fromLocal8Bit(full_name));
 
-   return NULL;
-
-   snprintf( sound_filename, sizeof(sound_filename), "%s.mp3", full_name);
-
-   seq = roadmap_file_map (NULL, sound_filename, NULL, "r", &sound);
-
-   roadmap_path_free (full_name);
-
-   if (seq == NULL) {
+   if (!QFile::exists(soundFileName)) {
       *mem = 0;
       return NULL;
    }
 
-   *mem = roadmap_file_size (sound);
+   sound = new roadmap_sound_st();
 
-   return (RoadMapSound) sound;
+   sound->media = new QMediaResource(QUrl::fromLocalFile(soundFileName));
+
+   *mem = QFileInfo(soundFileName).size();
+   return sound;
 }
 
 int roadmap_sound_free (RoadMapSound sound)
