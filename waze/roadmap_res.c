@@ -109,7 +109,7 @@ static void *load_resource (unsigned int type, unsigned int flags,
 
    if (flags & RES_SKIN) {
       for (cursor = roadmap_path_first ("skin");
-            cursor != NULL;
+            cursor != NULL && data == NULL;
             cursor = roadmap_path_next ("skin", cursor)) {
          switch (type) {
             case RES_BITMAP:
@@ -136,12 +136,11 @@ static void *load_resource (unsigned int type, unsigned int flags,
                break;
 #endif
          }
-         if (data) break;
       }
 
    } else {
        for (cursor = roadmap_path_first ("user");
-             cursor != NULL;
+             cursor != NULL && data == NULL;
              cursor = roadmap_path_next ("user", cursor)) {
           char path[1024];
           switch (type) {
