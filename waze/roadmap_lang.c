@@ -442,12 +442,6 @@ void roadmap_lang_initialize (void) {
    lang_labels[0] = "English";
    lang_values[0] = "eng";
 
-#ifndef J2ME
-		p = roadmap_path_user ();
-#else
-   p = NULL;
-#endif
-
    LangNextLoginCb = Realtime_NotifyOnLogin (roadmap_lang_login_cb);
 
 

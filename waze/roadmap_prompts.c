@@ -216,19 +216,24 @@ static int load_prompt_list (void) {
    char *name;
    char *value;
    const char *path;
-#ifdef IPHONE
-   path = roadmap_path_bundle();
-#elif (!defined(J2ME))
-   path = roadmap_path_user ();
-#else
-   path = NULL;
-#endif
-
 
    if (num_prompts != 0)
       return 1;
 
    sprintf (file_name, "prompt_list.txt");
+
+   for (path = roadmap_path_first("user");
+        path != NULL;
+        path = roadmap_path_next("user", path))
+   {
+       if (roadmap_file_exists(path, file_name))
+       {
+           break;
+       }
+   }
+
+   assert(path);
+
    file = roadmap_file_fopen (path, file_name, "sr");
    if (file == NULL) {
       roadmap_log (ROADMAP_ERROR,"prompt_list.txt not found." );
