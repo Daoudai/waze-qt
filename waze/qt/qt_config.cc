@@ -88,7 +88,7 @@ void RMapConfig::addConfigItem(QString& file, QString& name, RoadMapConfigItem* 
 RoadMapConfigItem* RMapConfig::getConfigItem(QString& file, QString& name)
 {
     ItemsHash* items = _configItems.value(file, NULL);
-    if (items == NULL || items->contains(name))
+    if (items == NULL || !items->contains(name))
     {
         return NULL;
     }
