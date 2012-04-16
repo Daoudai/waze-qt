@@ -110,7 +110,10 @@ void roadmap_config_declare
     }
     descriptor->reference = item;
 
-    descriptor->reference->default_value = QVariant(QString::fromLocal8Bit(default_value));
+    if (descriptor->reference->default_value.isNull())
+    {
+        descriptor->reference->default_value = QVariant(QString::fromLocal8Bit(default_value));
+    }
     descriptor->reference->file = qFile;
 }
 
