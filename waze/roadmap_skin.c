@@ -101,44 +101,39 @@ void roadmap_skin_register (RoadMapCallback listener) {
 
 
 static void roadmap_skin_set_subskin_int (const char *sub_skin, BOOL save) {
-   const char *base_path = roadmap_path_preferred ("skin");
-   char path[1024];
-   char *skin_path = NULL;
+   char path[1024] = {0};
    char *subskin_path;
    const char *cursor;
    char *subskin_path2 = NULL;
    CurrentSubSkin = sub_skin;
 
-   skin_path = roadmap_path_join (base_path, CurrentSkin);
-   subskin_path = roadmap_path_join (skin_path, CurrentSubSkin);
-//   offset = strlen(path);
-
-   if (!strcmp(CurrentSubSkin,"day")){
-      subskin_path2 = roadmap_path_join (subskin_path, get_map_schema());
-
-      snprintf (path, sizeof(path), "%s", subskin_path2);
-      roadmap_path_free (subskin_path2);
-   }
-   else{
-      snprintf (path, sizeof(path), "%s", subskin_path);
-   }
-
-
    for ( cursor = roadmap_path_first ("skin");
-                  cursor != NULL;
-			  cursor = roadmap_path_next ("skin", cursor))
+         cursor != NULL;
+         cursor = roadmap_path_next ("skin", cursor))
    {
-	 if ( !((strstr(cursor,"day") || strstr(cursor,"night")))){
-	   strcat(path, ",");
-		strcat(path, cursor);
+        if (!(strstr(cursor,"day") || strstr(cursor,"night"))){
+             subskin_path = roadmap_path_join (cursor, CurrentSubSkin);
 
-	 }
+             if (!strcmp(CurrentSubSkin,"day")){
+                subskin_path2 = roadmap_path_join (subskin_path, get_map_schema());
+
+                strcat(path, ",");
+                strcat(path, subskin_path2);
+                roadmap_path_free (subskin_path2);
+             }
+             else{
+                strcat(path, ",");
+                strcat(path, subskin_path);
+             }
+
+             strcat(path, ",");
+             strcat(path, cursor);
+
+             roadmap_path_free (subskin_path);
+         }
    }
 
    roadmap_path_set ("skin", path);
-
-   roadmap_path_free (subskin_path);
-   roadmap_path_free (skin_path);
    
    if (save && !auto_night_mode_cfg_on()) {
       roadmap_config_set(&RoadMapConfigMapSubSkin,sub_skin );
