@@ -351,6 +351,8 @@ void roadmap_path_set (const char *name, const char *path) {
        newPathList.append(WazeString(*constIterator));
    }
    path_list.items = newPathList;
+
+   RoadMapPaths.insert(name, path_list);
 }
 
 
