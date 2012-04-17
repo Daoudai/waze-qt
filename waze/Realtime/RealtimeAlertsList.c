@@ -738,7 +738,7 @@ static SsdWidget create_list(int tab_id){
 #endif
    sprintf(tab_name, "list %d", tab_id);
    list = ssd_list_new (tab_name, SSD_MIN_SIZE, SSD_MIN_SIZE, inputtype_none,flags, NULL);
-   ssd_widget_set_color(list, "#ffffff", "#000000");
+   ssd_widget_set_color(list, "#000000", "#ffffff");
    ssd_list_resize (list, SSD_MIN_SIZE);
 
    return list;
