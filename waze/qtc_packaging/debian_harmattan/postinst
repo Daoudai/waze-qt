@@ -1,8 +1,8 @@
 #!/bin/sh
 
-SOURCE_DIR=/opt/waze/data
 WAZE_TARGET_DIR=/home/user/MyDocs/.waze
 
-echo Deploying Waze data to ${WAZE_TARGET_DIR}
-mkdir -p ${WAZE_TARGET_DIR}
-cp -r ${SOURCE_DIR}/* ${WAZE_TARGET_DIR} 2> /dev/null
+if [ -e "${WAZE_TARGET_DIR}" -a -e "${WAZE_TARGET_DIR}/user"]; then
+    echo Removing previous Waze data from ${WAZE_TARGET_DIR}
+    rm -Rf ${WAZE_TARGET_DIR}
+fi
