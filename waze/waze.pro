@@ -44,10 +44,8 @@ LIBS += -ldl -lrt
     QMAKE_CFLAGS += -Wno-unused-result -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable
 }
 
-maemo5 {
-    DEFINES += HOME_PREFIX=\"MyDocs/.waze\"
-} else:!isEmpty(MEEGO_VERSION_MAJOR) {
-    DEFINES += HOME_PREFIX=\"MyDocs/.waze\"
+maemo5 | !isEmpty(MEEGO_VERSION_MAJOR) {
+    DEFINES += HOME_PREFIX=\\\"MyDocs/.waze\\\"
 }
 
 SOURCES += \

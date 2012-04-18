@@ -183,6 +183,8 @@ static inline void do_assert(char *text) {
 typedef void (*roadmap_log_msgbox_handler) (const char *title, const char *msg);
 
 #ifdef QTMOBILITY
+#include <time.h>
+
 typedef struct {
     int year, month, day, hour, min, sec, msec;
 } time_s;
