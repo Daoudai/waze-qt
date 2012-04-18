@@ -1,3 +1,13 @@
+waze (0.0.7) unstable; urgency=low
+  * Rewrite the network layer to be based on Qt instead of kernel sockets
+  * Rewrite the config layer to use QSettings
+  * Rewrite the path+file layer to use QFile & QDir
+  * Fix current traffic reports list dialog - reports not visible
+  * Support multiuser environments (such as Linux and Windows)
+  * Fix low battery warning still showing when charging
+
+ -- Assaf Paz <damagedspline@gmail.com>  Wed, 18 Apr 2012 09:31:20 +0300
+
 waze (0.0.6) unstable; urgency=low
   * Fix mislocation issue
   * Fix multitouch zoom on N9
