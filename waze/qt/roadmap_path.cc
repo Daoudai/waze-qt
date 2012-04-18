@@ -211,11 +211,11 @@ void roadmap_path_format (char *buffer, int buffer_size, const char *path, const
 
 char *roadmap_path_skip_directories (const char *name) {
 
-   char *result = strrchr (name, path_separator);
+   const char *result = strrchr (name, path_separator);
 
    if (result == NULL) return (char *)name;
 
-   return result + 1;
+   return (char *) result + 1;
 }
 
 
