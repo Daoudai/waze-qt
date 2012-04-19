@@ -75,10 +75,6 @@ QList<RoadMapIO*> ioList;
 
 static int RoadMapMainStatus;
 
-
-//////// Timers section ////////////////
-#define ROADMAP_MAX_TIMER 32
-
 typedef struct roadmap_main_timer {
    int id;
    RoadMapCallback callback;
