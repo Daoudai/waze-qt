@@ -138,7 +138,9 @@ int roadmap_sound_list_add_buf (RoadMapSoundList list, void* buf, size_t size )
     sprintf( path, "%s/tmp/%d", roadmap_path_tts(), file_num );
     if ( file_num == 0 )
     {
-       roadmap_path_create( roadmap_path_parent( path, NULL ) );
+        char *parent_path = roadmap_path_parent( path, NULL );
+       roadmap_path_create( parent_path );
+       roadmap_path_free(parent_path);
     }
 
     file = roadmap_file_open( path, "w" );
@@ -299,8 +301,25 @@ static const char* get_full_name( const char* name )
    }
    else
    {
-      snprintf( full_name, sizeof( full_name ), "%s//%s//%s//%s%s",
-            roadmap_path_downloads(), "sound", roadmap_prompts_get_name(), name, suffix );
+       const char* cursor = NULL;
+       for ( cursor = roadmap_path_first ("user");
+             cursor != NULL;
+             cursor = roadmap_path_next ("user", cursor))
+       {
+           snprintf( full_name, sizeof( full_name ), "%s/%s/%s/%s%s",
+                 cursor, "sound", roadmap_prompts_get_name(), name, suffix );
+           if (QFile::exists(QString::fromLocal8Bit(full_name)))
+           {
+               break;
+           }
+       }
+
+       if (cursor == NULL)
+       {
+           snprintf( full_name, sizeof( full_name ), "%s/%s/%s/%s%s",
+                 roadmap_path_downloads(), "sound", roadmap_prompts_get_name(), name, suffix );
+       }
    }
+
    return full_name;
 }

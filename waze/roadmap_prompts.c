@@ -554,37 +554,56 @@ void roadmap_prompts_init (void) {
    if (prompt[0] == 0) {
       roadmap_prompts_set_name (roadmap_lang_get_system_lang ());
    }
-   roadmap_prompts_conf_load (roadmap_path_downloads ());
+
+   const char* cursor = NULL;
+   int success = 0;
+   for ( cursor = roadmap_path_first ("user");
+         cursor != NULL && success == 0;
+         cursor = roadmap_path_next ("user", cursor))
+   {
+        success = roadmap_prompts_conf_load (cursor);
+   }
+
+   if (cursor == NULL)
+   {
+       roadmap_prompts_conf_load (roadmap_path_downloads ());
+   }
 
    PromptsNextLoginCb = Realtime_NotifyOnLogin (roadmap_prompts_login_cb);
 }
 
 //////////////////////////////////////////////////////////////////
-BOOL roadmap_prompts_exist (const char *name) {
-   BOOL exist;
+
+static BOOL roadmap_prompts_lang_file_exist(const char *lang, const char *prompt_name){
    char path[256];
-   roadmap_path_format (path, sizeof (path), roadmap_path_downloads (), "sound");
-   roadmap_path_format (path, sizeof (path), path, name);
+   char file_name[256];
+
+   const char* cursor = NULL;
+   int exists = FALSE;
+   for ( cursor = roadmap_path_first ("user");
+         cursor != NULL && !exists;
+         cursor = roadmap_path_next ("user", cursor))
+   {
+       roadmap_path_format (path, sizeof (path), cursor, "sound");
+       roadmap_path_format (path, sizeof (path), path, lang);
 #ifdef ANDROID
-   exist = roadmap_file_exists (path, "click.bin");
+       snprintf( file_name, sizeof(file_name), "%s.bin", prompt_name);
 #else
-   exist = roadmap_file_exists (path, "click.mp3");
+       snprintf( file_name, sizeof(file_name), "%s.mp3", prompt_name);
+       exists = roadmap_file_exists (path, file_name);
 #endif
-   return exist;
+   }
+
+   return exists;
+
+}
+
+BOOL roadmap_prompts_exist (const char *name) {
+    return roadmap_prompts_lang_file_exist(name, "click");
 }
 
 BOOL roadmap_prompts_file_exist(const char *prompt_name){
-   char path[256];
-   char file_name[256];
-   roadmap_path_format (path, sizeof (path), roadmap_path_downloads (), "sound");
-   roadmap_path_format (path, sizeof (path), path, roadmap_prompts_get_name());
-
-#ifdef ANDROID
-   snprintf( file_name, sizeof(file_name), "%s.bin", prompt_name);
-#else
-   snprintf( file_name, sizeof(file_name), "%s.mp3", prompt_name);
-#endif
-   return roadmap_file_exists (path, file_name);
+   return roadmap_prompts_lang_file_exist(roadmap_prompts_get_name(), prompt_name);
 
 }
 
@@ -592,17 +611,21 @@ BOOL roadmap_prompts_file_exist_and_not_empty(const char *prompt_name){
    char path[256];
    char file_name[256];
 
-   if (!roadmap_prompts_file_exist (prompt_name))
-      return FALSE;
-
-   roadmap_path_format (path, sizeof (path), roadmap_path_downloads (), "sound");
-   roadmap_path_format (path, sizeof (path), path, roadmap_prompts_get_name());
-
+   const char* cursor = NULL;
+   int exists = FALSE;
+   for ( cursor = roadmap_path_first ("user");
+         cursor != NULL && !exists;
+         cursor = roadmap_path_next ("user", cursor))
+   {
+       roadmap_path_format (path, sizeof (path), cursor, "sound");
+       roadmap_path_format (path, sizeof (path), path, roadmap_prompts_get_name());
 #ifdef ANDROID
-   snprintf( file_name, sizeof(file_name), "%s.bin", prompt_name);
+       snprintf( file_name, sizeof(file_name), "%s.bin", prompt_name);
 #else
-   snprintf( file_name, sizeof(file_name), "%s.mp3", prompt_name);
+       snprintf( file_name, sizeof(file_name), "%s.mp3", prompt_name);
+       exists = roadmap_file_exists (path, file_name);
 #endif
+   }
 
-   return (roadmap_file_length(path,file_name) != 0);
+   return exists && (roadmap_file_length(path,file_name) != 0);
 }
