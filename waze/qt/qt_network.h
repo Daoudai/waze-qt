@@ -5,7 +5,7 @@
 #include <QDateTime>
 #include <QUrl>
 #include <QAbstractSocket>
-#include <QSemaphore>
+#include <QMutex>
 #include "qt_global.h"
 
 extern "C" {
@@ -54,7 +54,7 @@ private:
     RoadMapIO* _io;
     QDateTime _startDate;
     bool _isCallbackExecuting;
-    QSemaphore _callbackCheckSemaphore;
+    QMutex _callbackCheckSemaphore;
     bool _isPendingClose;
 };
 

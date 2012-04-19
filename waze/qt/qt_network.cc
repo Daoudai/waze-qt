@@ -17,7 +17,6 @@ RNetworkSocket::RNetworkSocket(QAbstractSocket* socket, bool isCompressed) :
     _compressContext(NULL),
     _io(NULL),
     _isCallbackExecuting(false),
-    _callbackCheckSemaphore(1),
     _isPendingClose(false)
 {
     connect(this, SIGNAL(readyRead()), this, SLOT(executeCallback()));
@@ -74,17 +73,17 @@ void RNetworkSocket::setCallback(RoadMapInput callback, SocketDirection directio
 void RNetworkSocket::executeCallback() {
     if (_callback != NULL)
     {
-        _callbackCheckSemaphore.acquire();
+        _callbackCheckSemaphore.lock();
         _isCallbackExecuting = true;
         bool canExecute = !_isPendingClose;
-        _callbackCheckSemaphore.release();
+        _callbackCheckSemaphore.unlock();
         if (canExecute)
         {
             _callback(_io);
         }
-        _callbackCheckSemaphore.acquire();
+        _callbackCheckSemaphore.lock();
         _isCallbackExecuting = false;
-        _callbackCheckSemaphore.release();
+        _callbackCheckSemaphore.unlock();
     }
 }
 
@@ -114,14 +113,11 @@ int RNetworkSocket::read(char* data, int size)
           received = _socket->read((char*)data, size);
      }
 
-    roadmap_log(ROADMAP_INFO, "Read Data: *************\n%s\n***********", data);
-
     return received;
 }
 
 int RNetworkSocket::write(char* data, int size, bool immediate)
 {
-    roadmap_log(ROADMAP_INFO, "Write Data: *************\n%s\n***********", data);
     int written = _socket->write(data, size);
 
     if (!immediate)
@@ -135,13 +131,13 @@ int RNetworkSocket::write(char* data, int size, bool immediate)
 
 bool RNetworkSocket::isTimedOut(const QDateTime &checkDate)
 {
-    _callbackCheckSemaphore.acquire();
+    _callbackCheckSemaphore.lock();
     bool isTimedOut = !_isCallbackExecuting && !_startDate.isNull() && _startDate < checkDate;
     if (isTimedOut)
     {
         _isPendingClose = true;
     }
-    _callbackCheckSemaphore.release();
+    _callbackCheckSemaphore.unlock();
 
     return isTimedOut;
 }
