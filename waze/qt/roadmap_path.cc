@@ -472,7 +472,7 @@ char **roadmap_path_list (const char *path, const char *extension) {
 
     QDir dir(path);
     QStringList filter;
-    filter << extension;
+    filter << QString("*%1").arg(extension);
 
     QStringList files = dir.entryList(filter);
     result = (char**) calloc (files.count() + 1, sizeof(char *));
