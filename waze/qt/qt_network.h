@@ -12,6 +12,7 @@ extern "C" {
 #include "roadmap_main.h"
 #include "roadmap_net.h"
 #include "roadmap_http_comp.h"
+#include "roadmap_ssl.h"
 }
 
 enum SocketDirection {ReadDirection, WriteDirection};
@@ -20,7 +21,7 @@ class RNetworkSocket : public QObject {
     Q_OBJECT
 
 public:
-    RNetworkSocket(QAbstractSocket* socket, bool isCompressed);
+    RNetworkSocket(QAbstractSocket* socket, bool isCompressed, bool isSecured);
 
     virtual ~RNetworkSocket();
 
@@ -39,6 +40,9 @@ public:
     void set_io(RoadMapIO* io);
     RoadMapIO* io();
 
+    void setSecuredContext(RoadMapSslIO context);
+    bool isSecured();
+
 private slots:
     void executeCallback();
 
@@ -49,8 +53,10 @@ private:
     RoadMapInput _callback;
     SocketDirection _direction;
     bool _isCompressed;
+    bool _isSecured;
     QAbstractSocket* _socket;
     RoadMapHttpCompCtx _compressContext;
+    RoadMapSslIO _securedContext;
     RoadMapIO* _io;
     QDateTime _startDate;
     bool _isCallbackExecuting;

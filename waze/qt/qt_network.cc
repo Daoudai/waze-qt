@@ -6,15 +6,18 @@ extern "C" {
 #include "roadmap.h"
 #include "roadmap_start.h"
 #include "roadmap_net.h"
+#include "roadmap_ssl.h"
 }
 
 #define CONNECTION_TIMEOUT 5000
 
-RNetworkSocket::RNetworkSocket(QAbstractSocket* socket, bool isCompressed) :
+RNetworkSocket::RNetworkSocket(QAbstractSocket* socket, bool isCompressed, bool isSecured) :
     _callback(NULL),
     _isCompressed(isCompressed),
+    _isSecured(isSecured),
     _socket(socket),
     _compressContext(NULL),
+    _securedContext(NULL),
     _io(NULL),
     _isCallbackExecuting(false),
     _isPendingClose(false)
@@ -31,6 +34,11 @@ RNetworkSocket::~RNetworkSocket()
     if (_compressContext != NULL)
     {
         roadmap_http_comp_close(_compressContext);
+    }
+
+    if (_securedContext != NULL)
+    {
+        roadmap_ssl_close(_securedContext);
     }
 
     _socket->close();
@@ -102,15 +110,29 @@ int RNetworkSocket::read(char* data, int size)
            int ctx_buffer_size;
 
            roadmap_http_comp_get_buffer(_compressContext, &ctx_buffer, &ctx_buffer_size);
-
-           received = _socket->read((char*)ctx_buffer, ctx_buffer_size);
+\
+           if (_isSecured)
+           {
+               received = roadmap_ssl_read ((char*)ctx_buffer, data, size);
+           }
+           else
+           {
+               received = _socket->read((char*)ctx_buffer, ctx_buffer_size);
+           }
 
            roadmap_http_comp_add_data(_compressContext, received);
 
            received = roadmap_http_comp_read(_compressContext, data, size);
         }
      } else {
-          received = _socket->read((char*)data, size);
+        if (_isSecured)
+        {
+            received = roadmap_ssl_read (_securedContext, data, size);
+        }
+        else
+        {
+            received = _socket->read((char*)data, size);
+        }
      }
 
     return received;
@@ -118,7 +140,16 @@ int RNetworkSocket::read(char* data, int size)
 
 int RNetworkSocket::write(char* data, int size, bool immediate)
 {
-    int written = _socket->write(data, size);
+    int written = -1;
+
+    if (_isSecured)
+    {
+        roadmap_ssl_send(_securedContext, data, size);
+    }
+    else
+    {
+        _socket->write(data, size);
+    }
 
     if (!immediate)
     {
@@ -150,4 +181,14 @@ void RNetworkSocket::set_io(RoadMapIO *io)
 RoadMapIO* RNetworkSocket::io()
 {
     return _io;
+}
+
+void RNetworkSocket::setSecuredContext(RoadMapSslIO context)
+{
+    _securedContext = context;
+}
+
+bool RNetworkSocket::isSecured()
+{
+    return _isSecured;
 }

@@ -171,6 +171,15 @@ static void connect_callback (RoadMapSocket s, RoadMapNetData *data) {
       (*callback) (s, context, succeeded);   
 }
 
+static void on_ssl_open_callback (RoadMapSocket s, void *data, void *context, roadmap_result res) {
+    ((RNetworkSocket*)s)->setSecuredContext((RoadMapSslIO)context);
+    if (res == succeeded) {
+       connect_callback(s, (RoadMapNetData *) data);
+    } else {
+       connect_callback(ROADMAP_INVALID_SOCKET, (RoadMapNetData *) data);
+    }
+}
+
 static void io_connect_callback (RoadMapIO *io) {
 
    RoadMapNetData *data = (RoadMapNetData *) io->context;
@@ -192,10 +201,15 @@ static void io_connect_callback (RoadMapIO *io) {
       roadmap_main_remove_input(io);
    }
 
-    connect_callback(s, data);
+   if (!((RNetworkSocket*) s)->isSecured()) {
+      connect_callback(s, data);
+   }
+   else {
+      roadmap_ssl_open(s, data, on_ssl_open_callback);
+   }
 }
 
-static RoadMapSocket create_socket (const char *protocol, int isCompressed) {
+static RoadMapSocket create_socket (const char *protocol, int isCompressed, bool isSecured) {
    QAbstractSocket*   s = NULL;
 
    roadmap_net_mon_connect ();
@@ -207,7 +221,7 @@ static RoadMapSocket create_socket (const char *protocol, int isCompressed) {
       roadmap_log (ROADMAP_ERROR, "unknown protocol %s", protocol);
    }
 
-   return new RNetworkSocket(s, isCompressed != 0);
+   return new RNetworkSocket(s, isCompressed != 0, isSecured);
 }
 
 
@@ -278,23 +292,23 @@ static void *roadmap_net_connect_internal (const char *protocol, const char *nam
    QString hostPort = QString("%1:%2").arg(url.host()).arg(url.port());
 
    if( strncmp( protocol, "http", 4) != 0) {
-      temp_socket = create_socket(protocol, FALSE);
+       temp_socket = create_socket(protocol, FALSE, url.port() == 443);
 
-      if(ROADMAP_INVALID_SOCKET == temp_socket) return NULL;
+       if(ROADMAP_INVALID_SOCKET == temp_socket) return NULL;
 
-      res_socket = temp_socket;
+       res_socket = temp_socket;
 
-      if (async) {
-         data = new RoadMapNetData();
-         data->packet[0] = '\0';
-      }
+       if (async) {
+          data = new RoadMapNetData();
+          data->packet[0] = '\0';
+       }
    } else {
       // HTTP Connection, using system configuration for Proxy
 
       WDF_FormatHttpIfModifiedSince (update_time, update_since);
       if (!strcmp(protocol, "http_post")) req_type = "POST";
 
-     temp_socket = create_socket("tcp", TEST_NET_COMPRESS( flags ));
+     temp_socket = create_socket("tcp", TEST_NET_COMPRESS( flags ), url.port() == 443);
 
          sprintf(packet,
                  "%s %s HTTP/1.0\r\n"
@@ -309,6 +323,7 @@ static void *roadmap_net_connect_internal (const char *protocol, const char *nam
       if(ROADMAP_INVALID_SOCKET == temp_socket) return ROADMAP_INVALID_SOCKET;
 
       res_socket = temp_socket;
+
       if (async) {
          data = new RoadMapNetData();
          strncpy_safe(data->packet, packet, sizeof(data->packet));
@@ -531,8 +546,4 @@ void roadmap_net_initialize (void) {
    RoadMapNetCompressEnabled = roadmap_config_match( &RoadMapConfigNetCompressEnabled, "yes" );
 
    roadmap_net_mon_start ();
-}
-
-int roadmap_net_socket_secured (RoadMapSocket s) {
-   return FALSE;
 }
