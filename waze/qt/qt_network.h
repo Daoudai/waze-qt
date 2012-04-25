@@ -5,6 +5,7 @@
 #include <QDateTime>
 #include <QUrl>
 #include <QAbstractSocket>
+#include <QSslError>
 #include <QMutex>
 #include "qt_global.h"
 
@@ -40,6 +41,7 @@ public:
     RoadMapIO* io();
 
 private slots:
+    void sslErrors(const QList<QSslError> &errors);
     void executeCallback();
 
 signals:

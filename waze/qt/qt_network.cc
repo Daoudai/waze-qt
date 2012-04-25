@@ -1,6 +1,8 @@
 #include "qt_network.h"
 
 #include <QAbstractSocket>
+#include <QSslSocket>
+#include <QSslError>
 
 extern "C" {
 #include "roadmap.h"
@@ -39,10 +41,30 @@ RNetworkSocket::~RNetworkSocket()
 
 bool RNetworkSocket::connectSocket(QUrl &url)
 {
-    _socket->connectToHost(url.host(), url.port());
-    bool rc = _socket->waitForConnected(CONNECTION_TIMEOUT);
+    bool rc = false;
+    if (url.port() == 443)
+    {
+        QSslSocket* secSok = (QSslSocket*) _socket;
+        secSok->setPeerVerifyMode(QSslSocket::VerifyNone);
+        connect(secSok, SIGNAL(sslErrors(QList<QSslError>)),
+                    this, SLOT(sslErrors(QList<QSslError>)));
+        secSok->connectToHostEncrypted(url.host(), url.port());
+        rc = secSok->waitForEncrypted(CONNECTION_TIMEOUT);
+    }
+    else
+    {
+        _socket->connectToHost(url.host(), url.port());
+        rc = _socket->waitForConnected(CONNECTION_TIMEOUT);
+    }
+
     roadmap_log(ROADMAP_INFO, "RNetworkSocket connected <%d>", _socket->socketDescriptor());
     return rc;
+}
+
+void RNetworkSocket::sslErrors(const QList<QSslError> &errors)
+{
+    foreach (const QSslError &error, errors)
+        roadmap_log(ROADMAP_ERROR,"SSL Error: %s", error.errorString().toLocal8Bit().data());
 }
 
 int RNetworkSocket::socketDescriptor()

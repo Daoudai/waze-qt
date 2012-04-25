@@ -31,22 +31,13 @@ symbian:TARGET.CAPABILITY += NetworkServices ReadUserData LocalServices NetworkS
 # CONFIG += mobility
 # MOBILITY +=
 
-QT       += core gui sql
+QT       += core gui sql network
 TEMPLATE = app
 TARGET = waze
 CONFIG -= staticlib
 
-win32 {
-    OPENSSL_PATH = $$(OPENSSL_CONF)
-    OPENSSL_PATH ~= s/openssl.cfg/..
-    isEmpty(OPENSSL_PATH) | !exists($$OPENSSL_PATH):error("OpenSSL for Windows is not installed")
-
-    INCLUDEPATH += $$OPENSSL_PATH/include
-    LIBS += $$OPENSSL_PATH\lib\libeay32.lib $$OPENSSL_PATH\lib\ssleay32.lib
-}
-
 linux {
-    LIBS += -ldl -lrt -lssl -lcrypto
+    LIBS += -ldl -lrt
 }
 
 !maemo5 {
@@ -322,8 +313,7 @@ SOURCES += \
     zlib/deflate.c \
     zlib/crc32.c \
     zlib/compress.c \
-    zlib/adler32.c \
-    unix/roadmap_ssl.c
+    zlib/adler32.c
 
 HEADERS += \
     roadmap_types.h \
@@ -650,8 +640,7 @@ HEADERS += \
     zlib/inffixed.h \
     zlib/inffast.h \
     zlib/deflate.h \
-    zlib/crc32.h \
-    roadmap_ssl.h
+    zlib/crc32.h
 
 OTHER_FILES += \
     qtc_packaging/debian_fremantle/README \
