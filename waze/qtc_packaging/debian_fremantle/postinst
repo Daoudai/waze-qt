@@ -1,0 +1,9 @@
+#!/bin/sh
+
+WAZE_TARGET_DIR=/home/user/MyDocs/.waze
+
+if [ -e "${WAZE_TARGET_DIR}" -a -e "${WAZE_TARGET_DIR}/user" ]; then
+    echo Removing previous Waze data from ${WAZE_TARGET_DIR}
+    rm -Rf ${WAZE_TARGET_DIR}
+fi
+
