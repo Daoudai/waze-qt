@@ -204,7 +204,7 @@ static const char* last_err_string( void )
 static void log_ssl( void )
 {
   char buf[256];
-  u_long err;
+  unsigned err;
   while ( (err = ERR_get_error()) != 0 )
   {
      ERR_error_string_n(err, buf, sizeof(buf));

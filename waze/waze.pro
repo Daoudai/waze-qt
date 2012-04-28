@@ -31,13 +31,13 @@ symbian:TARGET.CAPABILITY += NetworkServices ReadUserData LocalServices NetworkS
 # CONFIG += mobility
 # MOBILITY +=
 
-QT       += core gui sql
+QT       += core gui sql network
 TEMPLATE = app
 TARGET = waze
 CONFIG -= staticlib
 
 linux {
-LIBS += -ldl -lrt
+    LIBS += -ldl -lrt
 }
 
 !maemo5 {
