@@ -3,7 +3,7 @@ waze (0.0.8) unstable; urgency=low
   * Fixed empty mood list
   * Fixed empty car list
 
- -- Assaf Paz <damagedspline@gmail.com>  Sat, 28 Apr 2012 09:26:44 +0300
+ -- Assaf Paz (damagedspline) <damagedspline@gmail.com>  Sat, 28 Apr 2012 19:26:44 +0300
 
 waze (0.0.7) unstable; urgency=low
   * Rewrite the network layer to be based on Qt instead of kernel sockets

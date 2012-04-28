@@ -1,8 +1,8 @@
 Source: waze
 Section: user/navigation
 Priority: optional
-Maintainer: Assaf Paz <damagedspline@gmail.com>
-Build-Depends: debhelper (>= 5), libqt4-dev, libqtm-dev, libqtm-dev, zlib1g-dev, libssl-dev
+Maintainer: Assaf Paz (damagedspline) <damagedspline@gmail.com>
+Build-Depends: debhelper (>= 5), libqt4-dev, libqtm-dev, libqtm-dev
 Standards-Version: 3.7.3
 Homepage: http://code.google.com/p/waze-qt
 

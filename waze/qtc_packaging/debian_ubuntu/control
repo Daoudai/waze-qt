@@ -1,8 +1,8 @@
 Source: waze
-Section: user/location
-Priority: optional
-Maintainer: Assaf Paz <damagedspline@gmail.com>
-Build-Depends: debhelper (>= 5), libqt4-dev, qtmobility-dev, libqtwebkit-dev
+Section: misc
+Priority: extra
+Maintainer: Assaf Paz (damagedspline) <damagedspline@gmail.com>
+Build-Depends: debhelper (>= 5), libqt4-dev, qtmobility-dev, libqtwebkit-dev, libqt4-opengl-dev
 Standards-Version: 3.7.3
 Homepage: http://code.google.com/p/waze-qt
 
