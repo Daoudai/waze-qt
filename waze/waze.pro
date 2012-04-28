@@ -1,7 +1,7 @@
 
 include(qt/qt.pro)
 
-VERSION = 0.0.6
+VERSION = 0.0.8
 
 # Add files and directories to ship with the application 
 # by adapting the examples below.
@@ -666,7 +666,13 @@ OTHER_FILES += \
     zlib/FAQ \
     zlib/configure \
     zlib/ChangeLog \
-    zlib/algorithm.txt
+    zlib/algorithm.txt \
+    qtc_packaging/debian_ubuntu/rules \
+    qtc_packaging/debian_ubuntu/README \
+    qtc_packaging/debian_ubuntu/copyright \
+    qtc_packaging/debian_ubuntu/control \
+    qtc_packaging/debian_ubuntu/compat \
+    qtc_packaging/debian_ubuntu/changelog
 
 
 # Please do not modify the following two lines. Required for deployment.
