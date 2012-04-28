@@ -202,7 +202,7 @@ static RoadMapSocket create_socket (const char *protocol, int isCompressed) {
    if (strcmp (protocol, "udp") == 0) {
       s = new QUdpSocket();
    } else if (strcmp (protocol, "tcp") == 0) {
-      s = new QTcpSocket();
+      s = new QSslSocket();
    } else {
       roadmap_log (ROADMAP_ERROR, "unknown protocol %s", protocol);
    }
