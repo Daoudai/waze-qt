@@ -1,7 +1,7 @@
 
 include(qt/qt.pro)
 
-VERSION = 0.0.8
+VERSION = 0.0.8-1
 
 # Add files and directories to ship with the application 
 # by adapting the examples below.
