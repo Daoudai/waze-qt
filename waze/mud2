@@ -55,7 +55,7 @@ my $pkgMeeGo           = 0;
 
 # -- Build packages...
 #
-&createDebian('fremantle', '1.0', sub {
+&createDebian('fremantle', '1.0', 1, sub {
   &write('5', "$dir/fremantle/debian/compat");
   system("tar", "cvzf", "$dir/fremantle/${package}_${version}.orig.tar.gz",
                       "--exclude-vcs",
@@ -66,7 +66,7 @@ my $pkgMeeGo           = 0;
   # TODO Create as a patch
 }, 'unstable', "${package}_${version}.changes") if $pkgDebianFremantle;
 
-&createDebian('harmattan', '3.0 (quilt)', sub {
+&createDebian('harmattan', '3.0 (quilt)', 1, sub {
   system("tar", "cvzf", "$dir/harmattan/${package}_${version}.debian.tar.gz",
                         "-C", "$dir/harmattan",
                         "--exclude-vcs",
@@ -78,7 +78,7 @@ my $pkgMeeGo           = 0;
                       ".");
 }) if $pkgDebianHarmattan;
 
-&createDebian('ubuntu', '1.0', sub {
+&createDebian('ubuntu', '1.0', 0, sub {
   &write('5', "$dir/ubuntu/debian/compat");
   system("tar", "cvzf", "$dir/ubuntu/${package}_${version}.tar.gz",
                       "--exclude-vcs",
@@ -110,7 +110,7 @@ sub createSpec {
 # createDebian - Clone the debian directory and resolve it ready for updates
 # ---------------------------------------------------------------------------
 sub createDebian {
-  my ($dist, $format, $content, $distribution, $create_changes) = @_;
+  my ($dist, $format, $fix_rules, $content, $distribution, $create_changes) = @_;
 
   # -- Copy the source and rationalise the debian folder...
   #
@@ -119,39 +119,41 @@ sub createDebian {
   mkdir "$dir/$dist/debian/source";
   &write($format, "$dir/$dist/debian/source/format");
 
-  # -- Fix debian/rules...
-  #
-  my $rules = &read("$dir/$dist/debian/rules");
-  my $configureStamp = &readMakefile($rules, 'configure-stamp');
-  my $buildStamp = &readMakefile($rules, 'build-stamp');
-  my $clean = &readMakefile($rules, 'clean');
+  if ($fix_rules)
+  {
+	# -- Fix debian/rules...
+	#
+	my $rules = &read("$dir/$dist/debian/rules");
+	my $configureStamp = &readMakefile($rules, 'configure-stamp');
+	my $buildStamp = &readMakefile($rules, 'build-stamp');
+	my $clean = &readMakefile($rules, 'clean');
 
-  # Add qmake
-  unless ($rules =~ m!^\tqmake PREFIX=/usr$!m) {
-    $rules =~ s!^(configure-stamp:.*[\r\n]*\tdh_testdir\s*$)
-               !$1\n\tqmake PREFIX=/usr\n!xm;
-    print "+++ Adding qmake\n";
+	# Add qmake
+	unless ($rules =~ m!^\tqmake PREFIX=/usr$!m) {
+		$rules =~ s!^(configure-stamp:.*[\r\n]*\tdh_testdir\s*$)
+	       	!$1\n\tqmake PREFIX=/usr\n!xm;
+		print "+++ Adding qmake\n";
+	}
+
+	# Add $(MAKE)
+	unless ($buildStamp =~ /^\t\$\(MAKE\)\s*$/m) {
+		$rules =~ s!^(build-stamp:.*[\r\n]*\tdh_testdir\s*$)
+	       	!$1\n\t\$(MAKE)\n!xm;
+		print "+++ Adding make\n";
+	}
+
+	# Make it "-$(MAKE) clean" as the makefile won't exist at first
+	$rules =~ s/^\t(\$\(MAKE\)\s+clean\s*)$/\t-$1/mg and
+	print "+++ Fixing clean\n";
+
+	# Enable dh_shlibdeps
+	unless ($rules =~ /^\tdh_shlibdeps\s*$/m) {
+		$rules =~ s!^(\tdh_installdeb\s*$)
+	       	!$1\n\tdh_shlibdeps\n!xm;
+		print "+++ Adding dh_shlibdeps\n";
+	}
+ 	&write($rules, "$dir/$dist/debian/rules");
   }
-
-  # Add $(MAKE)
-  unless ($buildStamp =~ /^\t\$\(MAKE\)\s*$/m) {
-    $rules =~ s!^(build-stamp:.*[\r\n]*\tdh_testdir\s*$)
-               !$1\n\t\$(MAKE)\n!xm;
-    print "+++ Adding make\n";
-  }
-
-  # Make it "-$(MAKE) clean" as the makefile won't exist at first
-  $rules =~ s/^\t(\$\(MAKE\)\s+clean\s*)$/\t-$1/mg and
-    print "+++ Fixing clean\n";
-
-  # Enable dh_shlibdeps
-  unless ($rules =~ /^\tdh_shlibdeps\s*$/m) {
-    $rules =~ s!^(\tdh_installdeb\s*$)
-               !$1\n\tdh_shlibdeps\n!xm;
-    print "+++ Adding dh_shlibdeps\n";
-  }
-
-  &write($rules, "$dir/$dist/debian/rules");
 
   # -- Execute custom content modifications...
   #
