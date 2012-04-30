@@ -19,6 +19,11 @@ for(deploymentfolder, DEPLOYMENTFOLDERS) {
 
 MAINPROFILEPWD = $$PWD
 
+#!symbian {
+#        svgicon.files = $${TARGET}.svg
+#        svgicon.path = /usr/share/icons/hicolor/scalable/apps/
+#}
+
 symbian {
     isEmpty(ICON):exists($${TARGET}.svg):ICON = $${TARGET}.svg
     isEmpty(TARGET.EPOCHEAPSIZE):TARGET.EPOCHEAPSIZE = 0x20000 0x2000000
@@ -62,6 +67,13 @@ symbian {
         icon.files = $${TARGET}80.png
         icon.path = /usr/share/icons/hicolor/80x80/apps
     } else { # Assumed to be a Desktop Unix
+
+        # Desktop file & icon for Linux (assuming Linux)
+        desktopfile.files = $${TARGET}.desktop
+        desktopfile.path = /usr/share/applications
+        icon.files = $${TARGET}.svg
+        icon.path = /usr/share/icons/hicolor/scalable/apps
+
         copyCommand =
         for(deploymentfolder, DEPLOYMENTFOLDERS) {
             source = $$MAINPROFILEPWD/$$eval($${deploymentfolder}.source)
@@ -104,9 +116,12 @@ symbian {
     !isEmpty(desktopfile.path) {
         export(icon.files)
         export(icon.path)
+ #       export(svgicon.files)
+ #       export(svgicon.path)
         export(desktopfile.files)
         export(desktopfile.path)
         INSTALLS += icon desktopfile
+ #      INSTALLS += svgicon
     }
 
     target.path = $${installPrefix}/bin
