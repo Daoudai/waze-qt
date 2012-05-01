@@ -44,6 +44,7 @@
 #include "roadmap_recorder.h"
 #include "roadmap_object.h"
 #include "roadmap_math.h"
+#include "roadmap_path.h"
 
 #include "ssd/ssd_dialog.h"
 #include "ssd/ssd_container.h"

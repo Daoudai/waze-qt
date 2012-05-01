@@ -36,6 +36,7 @@
 #include "roadmap_keyboard.h"
 #include "roadmap_factory.h"
 #include "roadmap_bar.h"
+#include "ssd_bitmap.h"
 #include "ssd_dialog.h"
 #include "ssd_container.h"
 #include "ssd_button.h"

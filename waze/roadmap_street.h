@@ -184,6 +184,12 @@ int roadmap_street_extend_line_ends
 			 int flags, RoadMapStreetIterCB cb, void *context);
 int roadmap_street_line_has_predecessor (PluginLine *line);
 
+const char *roadmap_street_get_street_shield_text (
+                const RoadMapStreetProperties *properties);
+
+const char *roadmap_street_get_street_shield_type (
+                const RoadMapStreetProperties *properties);
+
 extern roadmap_db_handler RoadMapStreetHandler;
 extern roadmap_db_handler RoadMapZipHandler;
 extern roadmap_db_handler RoadMapRangeHandler;
