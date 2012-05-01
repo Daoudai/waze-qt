@@ -16,9 +16,7 @@
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
-
-	# force shadow build (in a temporary directory to avoid copy failure in package generation)
-	$(shell [ -d shadow_build ] || mkdir shadow_build;cd shadow_build;qmake PREFIX=/usr ../waze.pro)
+	# qmake PREFIX=/usr# Uncomment this line for use without Qt Creator
 
 	touch configure-stamp
 
@@ -29,21 +27,18 @@ build-stamp: configure-stamp
 	dh_testdir
 
 	# Add here commands to compile the package.
-	$(MAKE) -C shadow_build
-	
+	# $(MAKE) # Uncomment this line for use without Qt Creator
 	#docbook-to-man debian/waze.sgml > waze.1
 
 	touch $@
 
-clean:
+clean: 
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
 
 	# Add here commands to clean up after the build process.
-	$(shell [ -d shadow_build ] && $(MAKE) -C shadow_build clean)
-
-	rm -f shadow_build
+	$(MAKE) clean
 
 	dh_clean 
 
@@ -54,7 +49,7 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/waze.
-	$(MAKE) -C shadow_build INSTALL_ROOT="$(CURDIR)"/debian/waze install
+	$(MAKE) INSTALL_ROOT="$(CURDIR)"/debian/waze install
 
 
 # Build architecture-independent files here.
@@ -87,7 +82,7 @@ binary-arch: build install
 #	dh_perl
 #	dh_makeshlibs
 	dh_installdeb
-	dh_shlibdeps
+	# dh_shlibdeps # Uncomment this line for use without Qt Creator
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
