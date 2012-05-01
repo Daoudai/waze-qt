@@ -103,6 +103,7 @@
 #include "navigate_tts.h"
 #include "navigate_res_dlg.h"
 #include "tts/tts.h"
+#include "tts_apptext.h"
 
 #ifdef IPHONE
 #include "roadmap_main.h"
