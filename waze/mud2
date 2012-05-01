@@ -11,6 +11,8 @@
 #
 # Copyright (c) Andrew Flegg 2011. Released under the Artistic License.
 #               mailto:andrew@bleb.org
+# Copyright (c) Assaf Paz 2012. Released under the Artistic License.
+#               mailto:damagedspline@gmail.com
 
 use strict;
 use warnings;
@@ -55,7 +57,7 @@ my $pkgMeeGo           = 0;
 
 # -- Build packages...
 #
-&createDebian('fremantle', '1.0', 1, sub {
+&createDebian('fremantle', '1.0', 0, sub {
   &write('5', "$dir/fremantle/debian/compat");
   system("tar", "cvzf", "$dir/fremantle/${package}_${version}.orig.tar.gz",
                       "--exclude-vcs",
@@ -66,7 +68,7 @@ my $pkgMeeGo           = 0;
   # TODO Create as a patch
 }, 'unstable', "${package}_${version}.changes") if $pkgDebianFremantle;
 
-&createDebian('harmattan', '3.0 (quilt)', 1, sub {
+&createDebian('harmattan', '3.0 (quilt)', 0, sub {
   system("tar", "cvzf", "$dir/harmattan/${package}_${version}.debian.tar.gz",
                         "-C", "$dir/harmattan",
                         "--exclude-vcs",
@@ -78,7 +80,7 @@ my $pkgMeeGo           = 0;
                       ".");
 }) if $pkgDebianHarmattan;
 
-&createDebian('ubuntu', '1.0', 0, sub {
+&createDebian('ubuntu', '1.0', 1, sub {
   &write('5', "$dir/ubuntu/debian/compat");
   system("tar", "cvzf", "$dir/ubuntu/${package}_${version}.tar.gz",
                       "--exclude-vcs",
@@ -110,7 +112,7 @@ sub createSpec {
 # createDebian - Clone the debian directory and resolve it ready for updates
 # ---------------------------------------------------------------------------
 sub createDebian {
-  my ($dist, $format, $fix_rules, $content, $distribution, $create_changes) = @_;
+  my ($dist, $format, $is_signed, $content, $distribution, $create_changes) = @_;
 
   # -- Copy the source and rationalise the debian folder...
   #
@@ -119,41 +121,39 @@ sub createDebian {
   mkdir "$dir/$dist/debian/source";
   &write($format, "$dir/$dist/debian/source/format");
 
-  if ($fix_rules)
-  {
-	# -- Fix debian/rules...
-	#
-	my $rules = &read("$dir/$dist/debian/rules");
-	my $configureStamp = &readMakefile($rules, 'configure-stamp');
-	my $buildStamp = &readMakefile($rules, 'build-stamp');
-	my $clean = &readMakefile($rules, 'clean');
+  # -- Fix debian/rules...
+  #
+  my $rules = &read("$dir/$dist/debian/rules");
+  my $configureStamp = &readMakefile($rules, 'configure-stamp');
+  my $buildStamp = &readMakefile($rules, 'build-stamp');
+  my $clean = &readMakefile($rules, 'clean');
 
-	# Add qmake
-	unless ($rules =~ m!^\tqmake PREFIX=/usr$!m) {
-		$rules =~ s!^(configure-stamp:.*[\r\n]*\tdh_testdir\s*$)
-	       	!$1\n\tqmake PREFIX=/usr\n!xm;
-		print "+++ Adding qmake\n";
-	}
-
-	# Add $(MAKE)
-	unless ($buildStamp =~ /^\t\$\(MAKE\)\s*$/m) {
-		$rules =~ s!^(build-stamp:.*[\r\n]*\tdh_testdir\s*$)
-	       	!$1\n\t\$(MAKE)\n!xm;
-		print "+++ Adding make\n";
-	}
-
-	# Make it "-$(MAKE) clean" as the makefile won't exist at first
-	$rules =~ s/^\t(\$\(MAKE\)\s+clean\s*)$/\t-$1/mg and
-	print "+++ Fixing clean\n";
-
-	# Enable dh_shlibdeps
-	unless ($rules =~ /^\tdh_shlibdeps\s*$/m) {
-		$rules =~ s!^(\tdh_installdeb\s*$)
-	       	!$1\n\tdh_shlibdeps\n!xm;
-		print "+++ Adding dh_shlibdeps\n";
-	}
- 	&write($rules, "$dir/$dist/debian/rules");
+  # Add qmake
+  unless ($rules =~ m!^\tqmake PREFIX=/usr$!m) {
+    $rules =~ s!^(configure-stamp:.*[\r\n]*\tdh_testdir\s*$)
+               !$1\n\tqmake PREFIX=/usr\n!xm;
+    print "+++ Adding qmake\n";
   }
+
+  # Add $(MAKE)
+  unless ($buildStamp =~ /^\t\$\(MAKE\)\s*$/m) {
+    $rules =~ s!^(build-stamp:.*[\r\n]*\tdh_testdir\s*$)
+               !$1\n\t\$(MAKE)\n!xm;
+    print "+++ Adding make\n";
+  }
+
+  # Make it "-$(MAKE) clean" as the makefile won't exist at first
+  $rules =~ s/^\t(\$\(MAKE\)\s+clean\s*)$/\t-$1/mg and
+    print "+++ Fixing clean\n";
+
+  # Enable dh_shlibdeps
+  unless ($rules =~ /^\tdh_shlibdeps\s*$/m) {
+    $rules =~ s!^(\tdh_installdeb\s*$)
+               !$1\n\tdh_shlibdeps\n!xm;
+    print "+++ Adding dh_shlibdeps\n";
+  }
+
+  &write($rules, "$dir/$dist/debian/rules");
 
   # -- Execute custom content modifications...
   #
@@ -199,11 +199,11 @@ sub createDebian {
 
   # -- Create the DSC file...
   #
-  &mkDsc("$dir/$dist", $format, "${package}_${version}.dsc", $maintainer, $build_depends, $homepage);
+  &mkDsc("$dir/$dist", $format, "${package}_${version}.dsc", $maintainer, $build_depends, $homepage, $is_signed);
 
   # -- Create the .changes file...
   #
-  $create_changes && &mkChanges("$dir/$dist", "$create_changes", $maintainer, $description, $date, $changelog, $distribution, $section, $priority);
+  $create_changes && &mkChanges("$dir/$dist", "$create_changes", $maintainer, $description, $date, $changelog, $distribution, $section, $priority, $is_signed);
 }
 
 
@@ -222,7 +222,7 @@ sub createDist {
 # mkDsc - Create a Debian DSC file
 # ---------------------------------------------------------------------------
 sub mkDsc {
-  my ($dir, $format, $dsc, $maintainer, $build_depends, $homepage) = @_;
+  my ($dir, $format, $dsc, $maintainer, $build_depends, $homepage, $is_signed) = @_;
 
   open(DSC, ">$dir/$dsc.unsigned") or die "Unable to write $dir/$dsc: $!\n";
   print DSC <<EOH;
@@ -257,15 +257,23 @@ EOH
   print DSC $checksums256;
   print DSC $files."\n";
   close(DSC) or die "Unable to close $dir/$dsc: $!\n";
-  `gpg --output $dir/$dsc --clearsign $dir/$dsc.unsigned`;
-  unlink "$dir/$dsc.unsigned";
+
+  if ($is_signed)
+  {
+    `gpg --output $dir/$dsc --clearsign $dir/$dsc.unsigned`;
+    unlink "$dir/$dsc.unsigned";
+  }
+  else
+  {
+    rename "$dir/$dsc.unsigned", "$dir/$dsc"
+  }
 }
 
 # ===========================================================================
 # mkChanges - Create a Debian .changes file
 # ---------------------------------------------------------------------------
 sub mkChanges {
-  my ($dir, $changes, $maintainer, $description, $date, $changelog, $distribution, $section, $priority) = @_;
+  my ($dir, $changes, $maintainer, $description, $date, $changelog, $distribution, $section, $priority, $is_signed) = @_;
 
   open(CHANGES, ">$dir/$changes.unsigned") or die "Unable to write $dir/$changes: $!\n";
   print CHANGES <<EOH;
@@ -307,8 +315,15 @@ EOH
   print CHANGES $checksums256;
   print CHANGES $files."\n";
   close(CHANGES) or die "Unable to close $dir/$changes: $!\n";
-  `gpg --output $dir/$changes --clearsign $dir/$changes.unsigned`;
-  unlink "$dir/$changes.unsigned";
+  if ($is_signed)
+  {
+    `gpg --output $dir/$changes --clearsign $dir/$changes.unsigned`;
+    unlink "$dir/$changes.unsigned";
+  }
+  else
+  {
+    rename "$dir/$changes.unsigned", "$dir/$changes"
+  }
 }
 
 
