@@ -89,7 +89,7 @@ my $pkgMeeGo           = 0;
                       "-C", "$dir/ubuntu",
                       "debian");
   # TODO Create as a patch
-}, 'oneiric', "${package}_${version}_i386.changes") if $pkgDebianUbuntu;
+}, 'oneiric', "${package}_${version}_any.changes") if $pkgDebianUbuntu;
 
 &createSpec('meego', sub {
   # TODO Unsupported

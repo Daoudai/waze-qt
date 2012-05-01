@@ -7,7 +7,7 @@ Standards-Version: 3.7.3
 Homepage: http://code.google.com/p/waze-qt
 
 Package: waze
-Architecture: source
+Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libqt4-dbus, libqt4-declarative, libqt4-network, libqt4-script, libqt4-sql, libqt4-xml, libqt4-xmlpatterns, libqtcontacts1, libqtcore4, libqtgui4, libqtlocation1, libqtmultimediakit1, libqtsysteminfo1
 Description: Waze is a free, community-based traffic & navigation app
  When you download Waze, you not only get free navigation, but also become part of the local driving community in your area, joining forces with other drivers nearby to outsmart traffic, save time and improve everyone's daily commute. All you have to do is drive, so get involved today!
