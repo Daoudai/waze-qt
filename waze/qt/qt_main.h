@@ -172,8 +172,6 @@ public:
 
    void toggleFullScreen();
 
-   void showContactList();
-
    static void signalHandler(int sig);
 
    void setFocusToCanvas();
@@ -187,10 +185,6 @@ public slots:
    void handleSignal(int sig);
    void mouseAreaPressed();
 
-private slots:
-   void contactsDialogOkPressed(QString address);
-   void contactsDialogCancelPressed();
-
 private:
    QObservableInt signalFd;
 
@@ -198,8 +192,6 @@ protected:
    RoadMapKeyInput keyCallback;
    QToolBar* toolBar;
    RMapCanvas* canvas;
-   ContactsList *contactListModel;
-   QDeclarativeView *contactsDialog;
 
    bool spacePressed;
 

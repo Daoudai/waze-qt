@@ -1,13 +1,13 @@
 
 include(qt/qt.pro)
 
-VERSION = 0.0.8-1
+VERSION = 0.0.8
 
 # Add files and directories to ship with the application 
 # by adapting the examples below.
 # file1.source = myfile
 
-datadir.source = data
+datadir.source = assets/data
 
 qmldir.source = qt/qml
 

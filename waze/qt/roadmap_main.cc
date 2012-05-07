@@ -41,6 +41,7 @@
 #include "qt_main.h"
 #include "roadmap_qtbrowser.h"
 #include "qt_network.h"
+#include "qt_contacts.h"
 
 extern "C" {
 #include "roadmap.h"
@@ -70,6 +71,7 @@ static void roadmap_start_event (int event);
 static QApplication* app;
 
 RMapMainWindow* mainWindow;
+RContactsView* contactsView;
 RMapTimers* timers;
 QList<RoadMapIO*> ioList;
 
@@ -350,6 +352,7 @@ void roadmap_main_exit(void) {
    roadmap_start_exit();
 
    delete timers;
+   delete contactsView;
    delete mainWindow;
 
    app->quit();
@@ -463,7 +466,15 @@ time_t roadmap_time_translate(const char *hhmmss, const char *ddmmyy) {
 }
 
 void roadmap_main_show_contacts() {
-    mainWindow->showContactList();
+    if (contactsView == NULL)
+    {
+        contactsView = new RContactsView(mainWindow);
+        contactsView->setGeometry(0, 0, mainWindow->width(), mainWindow->height());
+        contactsView->initialize();
+    }
+
+    contactsView->show();
+    mainWindow->mouseAreaPressed();
 }
 
 int main(int argc, char* argv[]) {
@@ -472,6 +483,8 @@ int main(int argc, char* argv[]) {
 
    QCoreApplication::setOrganizationName("Waze");
    QCoreApplication::setApplicationName("Waze");
+
+   contactsView = NULL;
 
    roadmap_option (argc, argv, NULL);
 

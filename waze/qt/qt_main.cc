@@ -36,19 +36,11 @@
 #include <QSocketNotifier>
 #include <QTcpSocket>
 #include <errno.h>
-#include <QDeclarativeView>
-#include <QDeclarativeEngine>
-#include <QDeclarativeContext>
-#include <QDeclarativeProperty>
-#include <QObject>
-#include <QGraphicsObject>
 #include <QApplication>
 #include "qt_main.h"
 #include "qt_contactslistmodel.h"
 
 extern "C" {
-#include "roadmap_lang.h"
-#include "roadmap_skin.h"
 #ifdef PLAY_CLICK
 #include "roadmap_sound.h"
 #endif
@@ -58,7 +50,6 @@ extern "C" {
 #endif
 }
 
-extern "C" BOOL single_search_auto_search( const char* address);
 
 QObservableInt::QObservableInt() {
 
@@ -98,8 +89,7 @@ int  RMapTimerCallback::same(RoadMapCallback cb) {
 
 // Implementation of RMapMainWindow class
 RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) :
-    QMainWindow(parent, f),
-    contactsDialog(NULL)
+    QMainWindow(parent, f)
 {
    spacePressed = false;
    canvas = new RMapCanvas(this);
@@ -109,16 +99,10 @@ RMapMainWindow::RMapMainWindow( QWidget *parent, Qt::WFlags f) :
 
    connect(&signalFd, SIGNAL(valueChanged(int)), this, SLOT(handleSignal(int)));
 
-   QContactManager contactManager;
-   contactListModel = new ContactsList(contactManager, this);
-
    roadmap_log(ROADMAP_INFO, "main thread id: %d ", this->thread()->currentThreadId());
 }
 
 RMapMainWindow::~RMapMainWindow() {
-    delete contactsDialog;
-    delete contactListModel;
-
     QList<void*>::iterator it = leakingItems.begin();
     for (; it != leakingItems.end(); it++)
     {
@@ -251,43 +235,6 @@ void RMapMainWindow::addCanvas(void) {
    adjustSize();
 }
 
-void RMapMainWindow::showContactList() {
-    QObject *item;
-    if (contactsDialog == NULL) {
-        contactsDialog = new QDeclarativeView(this);
-        contactsDialog->setGeometry(0, 0, canvas->width(), canvas->height());
-        contactsDialog->engine()->rootContext()->setContextProperty("contactModel", contactListModel);
-        contactsDialog->setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../qml/Contacts.qml")));
-        contactsDialog->setAttribute(Qt::WA_TranslucentBackground);
-        item = dynamic_cast<QObject*>(contactsDialog->rootObject());
-
-        QObject::connect(item, SIGNAL(okPressed(QString)),
-                         this, SLOT(contactsDialogOkPressed(QString)));
-        QObject::connect(item, SIGNAL(cancelPressed()),
-                         this, SLOT(contactsDialogCancelPressed()));
-        QObject::connect(item, SIGNAL(mouseAreaPressed()),
-                         this, SLOT(mouseAreaPressed()));
-    }
-    else
-    {
-        item = dynamic_cast<QObject*>(contactsDialog->rootObject());
-    }
-
-    item->setProperty("width", canvas->width());
-    item->setProperty("height", canvas->height());
-    item->setProperty("color", roadmap_skin_state()? "#74859b" : "#70bfea"); // ssd_container::draw_bg()
-    if (roadmap_lang_rtl())
-    {
-        item->setProperty("isRtl", QVariant(true));
-    }
-    item->setProperty("okButtonText", QString::fromLocal8Bit(roadmap_lang_get("Ok")));
-    item->setProperty("cancelButtonText", QString::fromLocal8Bit(roadmap_lang_get("Back_key")));
-    item->setProperty("title", QString::fromLocal8Bit(roadmap_lang_get("Contacts")));
-
-    mouseAreaPressed();
-    contactsDialog->show();
-}
-
 void RMapMainWindow::mouseAreaPressed() {
 #ifdef PLAY_CLICK
     static RoadMapSoundList list;
@@ -299,16 +246,6 @@ void RMapMainWindow::mouseAreaPressed() {
 
     roadmap_sound_play_list (list);
 #endif
-}
-
-void RMapMainWindow::contactsDialogCancelPressed() {
-    contactsDialog->hide();
-}
-
-void RMapMainWindow::contactsDialogOkPressed(QString address) {
-    contactsDialog->hide();
-
-    single_search_auto_search(address.toLocal8Bit().data());
 }
 
 void RMapMainWindow::setFocusToCanvas() {
