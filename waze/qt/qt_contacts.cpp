@@ -7,6 +7,7 @@
 #include <QDeclarativeProperty>
 #include <QObject>
 #include <QGraphicsObject>
+#include "qt_contactslistmodel.h"
 
 extern "C" {
 #include "roadmap_lang.h"
@@ -16,18 +17,10 @@ extern "C" {
 extern "C" BOOL single_search_auto_search( const char* address);
 
 RContactsView::RContactsView(RMapMainWindow *parent) :
-    QDeclarativeView(parent)
+    QDeclarativeView(parent),
+    _contactListModel(NULL)
 {
-    setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../qml/Contacts.qml")));
     setAttribute(Qt::WA_TranslucentBackground);
-
-    QObject *item = dynamic_cast<QObject*>(rootObject());
-    QObject::connect(item, SIGNAL(okPressed(QString)),
-                     this, SLOT(okPressed(QString)));
-    QObject::connect(item, SIGNAL(cancelPressed()),
-                     this, SLOT(cancelPressed()));
-    QObject::connect(item, SIGNAL(mouseAreaPressed()),
-                     parent, SLOT(mouseAreaPressed()));
 }
 
 RContactsView::~RContactsView()
@@ -40,6 +33,15 @@ void RContactsView::initialize()
     QContactManager contactManager;
     _contactListModel = new ContactsList(contactManager, this);
     engine()->rootContext()->setContextProperty("contactModel", _contactListModel);
+    setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../qml/Contacts.qml")));
+
+    QObject *item = dynamic_cast<QObject*>(rootObject());
+    QObject::connect(item, SIGNAL(okPressed(QString)),
+                     this, SLOT(okPressed(QString)));
+    QObject::connect(item, SIGNAL(cancelPressed()),
+                     this, SLOT(cancelPressed()));
+    QObject::connect(item, SIGNAL(mouseAreaPressed()),
+                     parent(), SLOT(mouseAreaPressed()));
 }
 
 void RContactsView::show() {
