@@ -1,8 +1,6 @@
 
 include(qt/qt.pro)
 
-VERSION = 0.0.8
-
 # Add files and directories to ship with the application 
 # by adapting the examples below.
 # file1.source = myfile
@@ -37,7 +35,7 @@ TARGET = waze
 CONFIG -= staticlib
 
 linux {
-    LIBS += -ldl -lrt
+    LIBS += -ldl -lrt -lssl -lcrypto
 }
 
 !maemo5 {
