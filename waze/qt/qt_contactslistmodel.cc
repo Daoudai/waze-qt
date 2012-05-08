@@ -7,6 +7,11 @@
 #include <QContactAddress>
 #include <QContactAvatar>
 #include <QContactGeoLocation>
+#include <QUrl>
+
+extern "C" {
+#include "roadmap.h"
+}
 
 QTM_USE_NAMESPACE
 
@@ -18,51 +23,56 @@ const int ContactsList::LocationRole = Qt::UserRole + 4;
 ContactsList::ContactsList(const QContactManager &contacts, QObject *parent)
     : QAbstractListModel(parent)
 {
-    QList<QContact> contactsFromManager = contacts.contacts();
-
-    QListIterator<QContact> iter( contactsFromManager );
-    while( iter.hasNext() )
+    if (contacts.error() == QContactManager::NoError)
     {
-        QContact item = iter.next();
-        QString name = item.detail<QContactDisplayLabel>().label();
-        QContactAddress addressDetails = item.detail<QContactAddress>();
-        QString address;
-        if (addressDetails.street().length() > 0)
-        {
-            address = addressDetails.street();
+        QList<QContact> contactsFromManager = contacts.contacts();
 
-            if (addressDetails.locality().length() > 0)
+        foreach(QContact item, contactsFromManager)
+        {
+            QString name = item.detail<QContactDisplayLabel>().label();
+            QContactAddress addressDetails = item.detail<QContactAddress>();
+            QString address;
+            if (addressDetails.street().length() > 0)
             {
-                address.append(" ").append(addressDetails.locality());
-            }
-        }
-        else
-        {
-            address = addressDetails.locality();
-        }
+                address = addressDetails.street();
 
-        QUrl avatarSource = item.detail<QContactAvatar>().imageUrl();
-
-        QContactGeoLocation locationDetails = item.detail<QContactGeoLocation>();
-        QString location;
-        QDateTime timestamp = locationDetails.timestamp();
-
-        if (!timestamp.isNull() && timestamp.isValid() && timestamp.secsTo(QDateTime::currentDateTime()) <= 3600 /* one hour */ )
-        {
-            if (locationDetails.label().length() > 0)
-            {
-                location = locationDetails.label();
+                if (addressDetails.locality().length() > 0)
+                {
+                    address.append(" ").append(addressDetails.locality());
+                }
             }
             else
             {
-                location = QString().setNum(locationDetails.longitude()).append(",").append(QString().setNum(locationDetails.latitude()));
+                address = addressDetails.locality();
+            }
+
+            QUrl avatarSource = item.detail<QContactAvatar>().imageUrl();
+
+            QContactGeoLocation locationDetails = item.detail<QContactGeoLocation>();
+            QString location;
+            QDateTime timestamp = locationDetails.timestamp();
+
+            if (!timestamp.isNull() && timestamp.isValid() && timestamp.secsTo(QDateTime::currentDateTime()) <= 3600 /* one hour */ )
+            {
+                if (locationDetails.label().length() > 0)
+                {
+                    location = locationDetails.label();
+                }
+                else
+                {
+                    location = QString().setNum(locationDetails.longitude()).append(",").append(QString().setNum(locationDetails.latitude()));
+                }
+            }
+
+            if (address.length() > 0 || location.length() > 0)
+            {
+                contactList.append(Contact(name, address, avatarSource, location));
             }
         }
-
-        if (address.length() > 0 || location.length() > 0)
-        {
-            contactList.append(Contact(name, address, avatarSource, location));
-        }
+    }
+    else
+    {
+        roadmap_log(ROADMAP_ERROR, "Failed to initilize QContactManager instance with <%d> error", contacts.error());
     }
 
     QHash<int, QByteArray> roles = roleNames();
