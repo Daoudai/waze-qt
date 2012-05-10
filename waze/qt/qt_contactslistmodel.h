@@ -14,7 +14,7 @@ class Contact
 {
 public:
     Contact(QString name, QString address, QUrl avatarSource, QString location) :
-        _name(name), _address(address), _avatarSource(avatarSource), _location(location)
+        _name(name), _address(address), _location(location), _avatarSource(avatarSource)
     {}
 
     QString name() { return _name; }
