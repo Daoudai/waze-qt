@@ -1,4 +1,4 @@
-waze (0.0.8) unstable; urgency=low
+waze (0.0.8) oneiric precise; urgency=low
   * Implement secured connections
   * Fixed empty mood list
   * Fixed empty car list
