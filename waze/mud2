@@ -56,40 +56,41 @@ my $pkgMeeGo           = 0;
 # -- Build packages...
 #
 &createDebian('fremantle', '1.0', 0, sub {
-  my ($version) = @_;
-  &write('5', "$dir/fremantle/debian/compat");
-  system("tar", "cvzf", "$dir/fremantle/${package}_${version}.orig.tar.gz",
+  my ($version, $dir) = @_;
+  &write('5', "$dir/debian/compat");
+  system("tar", "cvzf", "$dir/${package}_${version}.orig.tar.gz",
                       "--exclude-vcs",
                       "--exclude=qtc_packaging",
                       ".",
-                      "-C", "$dir/fremantle",
+                      "-C", "$dir",
                       "debian");
   # TODO Create as a patch
 }, 1) if $pkgDebianFremantle;
 
 &createDebian('harmattan', '3.0 (quilt)', 0, sub {
-  my ($version) = @_;
-  system("tar", "cvzf", "$dir/harmattan/${package}_${version}.debian.tar.gz",
-                        "-C", "$dir/harmattan",
+  my ($version, $dir) = @_;
+  system("tar", "cvzf", "$dir/${package}_${version}.debian.tar.gz",
+                        "-C", "$dir",
                         "--exclude-vcs",
                         "debian");
-  system("tar", "cvzf", "$dir/harmattan/${package}_${version}.orig.tar.gz",
+  system("tar", "cvzf", "$dir/${package}_${version}.orig.tar.gz",
                       "--exclude-vcs",
                       "--exclude=debian",
                       "--exclude=qtc_packaging",
                       ".");
 }) if $pkgDebianHarmattan;
 
-&createDebian('ubuntu', '1.0', 1, sub {
-  my ($version) = @_;
-  &write('5', "$dir/ubuntu/debian/compat");
-  system("tar", "cvzf", "$dir/ubuntu/${package}_${version}.tar.gz",
+&createDebian('ubuntu', '3.0 (quilt)', 1, sub {
+  my ($version, $dir) = @_;
+  system("tar", "cvzf", "$dir/${package}_${version}.debian.tar.gz",
+                        "-C", "$dir",
+                        "--exclude-vcs",
+                        "debian");
+  system("tar", "cvzf", "$dir/${package}_${version}.orig.tar.gz",
                       "--exclude-vcs",
+                      "--exclude=debian",
                       "--exclude=qtc_packaging",
-                      ".",
-                      "-C", "$dir/ubuntu",
-                      "debian");
-  # TODO Create as a patch
+                      ".");
 }, 1) if $pkgDebianUbuntu;
 
 &createSpec('meego', sub {
@@ -115,16 +116,9 @@ sub createSpec {
 sub createDebian {
   my ($dist, $format, $is_signed, $content, $create_changes) = @_;
 
-  # -- Copy the source and rationalise the debian folder...
-  #
-  &createDist($dist);
-  system("cp", "-Lr", "qtc_packaging/debian_$dist", "$dir/$dist/debian");
-  mkdir "$dir/$dist/debian/source";
-  &write($format, "$dir/$dist/debian/source/format");
-
   # -- Fix debian/rules...
   #
-  my $rules = &read("$dir/$dist/debian/rules");
+  my $rules = &read("qtc_packaging/debian_$dist/rules");
   my $configureStamp = &readMakefile($rules, 'configure-stamp');
   my $buildStamp = &readMakefile($rules, 'build-stamp');
   my $clean = &readMakefile($rules, 'clean');
@@ -153,8 +147,6 @@ sub createDebian {
                !$1\n\tdh_shlibdeps\n!xm;
     print "+++ Adding dh_shlibdeps\n";
   }
-
-  &write($rules, "$dir/$dist/debian/rules");
 
   # -- Read control file
   #
@@ -188,7 +180,7 @@ sub createDebian {
   while (<CHANGELOG_FILE>) {
     chomp;
 
-    if ($version == "" and /^[^(]+\(([^)]+)\)\s+([^;]+);/)
+    if ($version eq "" and /^[^(]+\(([^)]+)\)\s+([^;]+);/)
     {
        $version = $1;
        $distribution = $2;
@@ -204,17 +196,52 @@ sub createDebian {
   }
   close(CHANGELOG_FILE);
 
-  # -- Execute custom content modifications...
-  #
-  &$content($version);
+  # make a dir per supported OS version
+  my @distributions = split(/[ ]+/, $distribution);
+  my $dist_count = @distributions;
+  foreach (@distributions) {
+    my $dist_version = $_;
+    my $compiled_version = $version;
+    my $compiled_dir = "$dir/${dist}";
 
-  # -- Create the DSC file...
-  #
-  &mkDsc("$dir/$dist", $format, $version, $maintainer, $build_depends, $homepage, $is_signed);
+    if ($dist_count > 1)
+    {
+        # if the is more than one OS version, creae a directory and version per each
+        $compiled_version = "$version~${dist_version}1";
+        $compiled_dir = "$dir/${dist}_$dist_version";
+    }
 
-  # -- Create the .changes file...
-  #
-  $create_changes && &mkChanges("$dir/$dist", "${package}_${version}_any.changes", $version, $maintainer, $description, $date, $changelog, $distribution, $section, $priority, $is_signed);
+    # -- Copy the source and rationalise the debian folder...
+    #
+    &createDist($compiled_dir);
+    system("cp", "-Lr", "qtc_packaging/debian_$dist", "$compiled_dir/debian");
+    mkdir "$compiled_dir/debian/source";
+    &write($format, "$compiled_dir/debian/source/format");
+
+    # -- Write rules file
+    &write($rules, "$compiled_dir/debian/rules");
+
+    # -- Update version in changelog
+    my $compiled_changelog = &read("qtc_packaging/debian_$dist/changelog");
+    if ($dist_count > 1)
+    {
+        # change the version in the changelog to <version>~<OSVer> only if there is more than one OSVer
+        $compiled_changelog =~ s!^([^(]+)\(([^)]+)\)([^;]+);!$1($2$dist_version) $dist_version;!xm;
+    }
+    &write($compiled_changelog, "$compiled_dir/debian/changelog");
+
+    # -- Execute custom content modifications...
+    #
+    &$content($compiled_version, $compiled_dir);
+
+    # -- Create the DSC file...
+    #
+    &mkDsc($compiled_dir, $format, $compiled_version, $maintainer, $build_depends, $homepage, $is_signed);
+
+    # -- Create the .changes file...
+    #
+    $create_changes && &mkChanges($compiled_dir, "${package}_${compiled_version}_source.changes", $compiled_version, $maintainer, $description, $date, $changelog, $dist_version, $section, $priority, $is_signed);
+  }
 }
 
 
@@ -224,8 +251,8 @@ sub createDebian {
 sub createDist {
   my ($dist) = @_;
 
-  system("rm", "-rf", "$dir/$dist");
-  mkdir "$dir/$dist";
+  system("rm", "-rf", $dist);
+  mkdir "$dist";
 }
 
 
@@ -241,7 +268,7 @@ sub mkDsc {
 Format: $format
 Source: $debianPackage
 Binary: $debianPackage
-Architecture: any
+Architecture: any all
 Version: $version
 Maintainer: $maintainer
 Homepage: $homepage
