@@ -30,7 +30,13 @@ RContactsView::~RContactsView()
 
 void RContactsView::initialize()
 {
+#if defined Q_WS_MAEMO_5
+    QContactManager contactManager("maemo5");
+#elif defined Q_OS_SYMBIAN
+    QContactManager contactManager("symbian");
+#else
     QContactManager contactManager;
+#endif
     _contactListModel = new ContactsList(contactManager, this);
     engine()->rootContext()->setContextProperty("contactModel", _contactListModel);
     setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../qml/Contacts.qml")));
