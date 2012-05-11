@@ -111,31 +111,39 @@ void RNetworkSocket::executeCallback() {
 
 int RNetworkSocket::read(char* data, int size)
 {
-    int received;
+    int total_received = 0;
 
     if (_isCompressed)
     {
-        _compressContext = roadmap_http_comp_init();
+        int received;
+        void *ctx_buffer = NULL;
+        int ctx_buffer_size = 0;
 
-        if ((received = roadmap_http_comp_read(_compressContext, data, size))
-              == 0) {
+        if (_compressContext == NULL) {
+           _compressContext = roadmap_http_comp_init();
+           if (_compressContext == NULL) return -1;
+        }
 
-           void *ctx_buffer;
-           int ctx_buffer_size;
+        roadmap_http_comp_get_buffer(_compressContext, &ctx_buffer, &ctx_buffer_size);
 
-           roadmap_http_comp_get_buffer(_compressContext, &ctx_buffer, &ctx_buffer_size);
+        received = _socket->read((char*)ctx_buffer, ctx_buffer_size);
 
-           received = _socket->read((char*)ctx_buffer, ctx_buffer_size);
+        roadmap_http_comp_add_data(_compressContext, received);
 
-           roadmap_http_comp_add_data(_compressContext, received);
+        while ((received = roadmap_http_comp_read(_compressContext, data + total_received, size - total_received))
+               != 0) {
+           if (received < 0) {
+              roadmap_log (ROADMAP_DEBUG, "Error in recv. - comp returned %d", received);
+              return -1;
+           }
 
-           received = roadmap_http_comp_read(_compressContext, data, size);
+           total_received += received;
         }
      } else {
-          received = _socket->read((char*)data, size);
+          total_received = _socket->read((char*)data, size);
      }
 
-    return received;
+    return total_received;
 }
 
 int RNetworkSocket::write(char* data, int size, bool immediate)
