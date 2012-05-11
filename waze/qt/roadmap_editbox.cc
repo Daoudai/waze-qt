@@ -75,19 +75,22 @@ void ShowEditbox(const char* titleUtf8, const char* textUtf8, SsdKeyboardCallbac
 
    int action = boxType & EDITBOX_ACTION_MASK;
 
-   if (!action)
+   if (!action && context != NULL)
    {
        SsdEntryContext* ctx;
        /* Get the entry widget */
 
        ctx = ( SsdEntryContext* ) ((SsdWidget)context)->context;
-       if (ctx->kb_flags & SSD_KB_DLG_SHOW_NEXT_BTN)
+       if (ctx != NULL)
        {
-           boxType = (TEditBoxType) ( boxType | EEditBoxActionNext);
-       }
-       if (ctx->kb_flags & SSD_KB_DLG_INPUT_ENGLISH)
-       {
-           boxType = (TEditBoxType) ( boxType | EEditBoxAlphaNumeric);
+           if (ctx->kb_flags & SSD_KB_DLG_SHOW_NEXT_BTN)
+           {
+               boxType = (TEditBoxType) ( boxType | EEditBoxActionNext);
+           }
+           if (ctx->kb_flags & SSD_KB_DLG_INPUT_ENGLISH)
+           {
+               boxType = (TEditBoxType) ( boxType | EEditBoxAlphaNumeric);
+           }
        }
    }
 
