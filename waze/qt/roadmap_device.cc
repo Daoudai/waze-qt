@@ -34,6 +34,8 @@ extern "C" {
 #include <QSystemScreenSaver>
 #include <QSystemDeviceInfo>
 #include "qt_main.h"
+#include "qt_device.h"
+
 QTM_USE_NAMESPACE
 
 const int BACKLIGHT_LIT_OPTIONS_COUNT = 3;
@@ -46,7 +48,7 @@ RoadMapConfigDescriptor RoadMapConfigBackLight =
 
 extern RMapMainWindow* mainWindow;
 
-static QSystemScreenSaver *screenSaver = NULL;
+static RPowerInfo* devInfo = NULL;
 
 int roadmap_device_initialize( void ) {
     // Initialize the labels for GUI
@@ -56,6 +58,8 @@ int roadmap_device_initialize( void ) {
 
     // Load the configuration
     roadmap_config_declare("user", &RoadMapConfigBackLight, DEFAULT_BACKLIGHT_LIT_OPTION, NULL);
+
+    devInfo = new RPowerInfo(mainWindow);
 
     const char* backlightValue = roadmap_config_get( &RoadMapConfigBackLight );
 
@@ -69,19 +73,7 @@ int roadmap_device_initialize( void ) {
 
 void roadmap_device_set_backlight( const char* alwaysOnStr ) {
 
-    if (!strcasecmp(alwaysOnStr, BACKLIGHT_LIT_OPTIONS[0])) {
-        if (screenSaver == NULL) {
-            screenSaver = new QSystemScreenSaver(mainWindow);
-            bool result = screenSaver->setScreenSaverInhibit();
-            roadmap_log(ROADMAP_INFO, "disabling the screensaver: %s", (result?"ok":"failed"));
-        }
-    } else if (!strcasecmp(alwaysOnStr, BACKLIGHT_LIT_OPTIONS[2])){
-        if (screenSaver) {
-            delete screenSaver;
-            screenSaver = NULL;
-            roadmap_log(ROADMAP_INFO, "screensaver enabled");
-        }
-    }
+    devInfo->setBackLightValue(alwaysOnStr);
 
     // Update the configuration
     roadmap_config_set( &RoadMapConfigBackLight, alwaysOnStr );
@@ -91,11 +83,10 @@ void roadmap_device_set_backlight( const char* alwaysOnStr ) {
 }
 
 int roadmap_device_get_battery_level( void ) {
-    QSystemDeviceInfo devInfo;
-    QSystemDeviceInfo::PowerState currentPowerState = devInfo.currentPowerState();
+    QSystemDeviceInfo::PowerState currentPowerState = devInfo->currentPowerState();
     return (currentPowerState == QSystemDeviceInfo::WallPower ||
             currentPowerState == QSystemDeviceInfo::WallPowerChargingBattery)?
-                100 : devInfo.batteryLevel();
+                100 : devInfo->batteryLevel();
 }
 
 void roadmap_device_call_start_callback( void ) {

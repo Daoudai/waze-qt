@@ -51,7 +51,8 @@ SOURCES += \
     qt/roadmap_file.cc \
     qt/roadmap_config.cc \
     qt/qt_config.cc \
-    qt/qt_contacts.cpp
+    qt/qt_contacts.cpp \
+    qt/qt_device.cpp
 
 HEADERS += \
     qt_progress.h \
@@ -69,7 +70,8 @@ HEADERS += \
     qt/qt_network.h \
     qt/qt_global.h \
     qt/qt_config.h \
-    qt/qt_contacts.h
+    qt/qt_contacts.h \
+    qt/qt_device.h
 
 
 
