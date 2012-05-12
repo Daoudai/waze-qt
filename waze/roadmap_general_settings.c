@@ -125,7 +125,7 @@ static int on_ok( SsdWidget this, const char *new_value) {
 #endif
 
 #if (defined(__SYMBIAN32__) || defined(ANDROID)) || defined(QTMOBILITY)
-   roadmap_device_set_backlight( !( strcasecmp( ( const char* ) ssd_dialog_get_data("BackLight"), yesno[0] ) ) );
+   roadmap_device_set_backlight( ( const char* ) ssd_dialog_get_data("Back Light On") );
 
    roadmap_sound_set_volume( ( int ) ssd_dialog_get_data( "Volume Control" ) );
 #endif // Symbian or android
@@ -598,11 +598,26 @@ void roadmap_general_settings_show(void) {
 
       ////////////  Backlight control  /////////////
       // TODO :: Move to another settings directory
-      box = ssd_checkbox_row_new ("BackLight", roadmap_lang_get ("Back Light On"),
-                                  TRUE, NULL, NULL, NULL, CHECKBOX_STYLE_ON_OFF);
 
+      box = ssd_container_new ("BackLight", NULL, SSD_MAX_SIZE, height,
+                               SSD_WIDGET_SPACE|SSD_END_ROW|tab_flag);
+
+      ssd_widget_set_color (box, "#000000", NULL);
+      ssd_widget_set_color (box, "#000000", "#ffffff");
+
+      ssd_widget_add (box,
+                      ssd_text_new ( "BackLightLabel",
+                                    roadmap_lang_get ("Back Light On"),
+                                    SSD_MAIN_TEXT_SIZE, SSD_TEXT_NORMAL_FONT|SSD_TEXT_LABEL|SSD_ALIGN_VCENTER|SSD_WIDGET_SPACE ) );
+
+      ssd_widget_add (box,
+                      ssd_choice_new ( "Back Light On", roadmap_lang_get ("Back Light On"), BACKLIGHT_LIT_OPTIONS_COUNT,
+                                      BACKLIGHT_LIT_OPTIONS_LABELS,
+                                      ( const void** ) BACKLIGHT_LIT_OPTIONS,
+                                      SSD_ALIGN_RIGHT|SSD_ALIGN_VCENTER, NULL) );
+      ssd_widget_add(box, space(1));
+      ssd_widget_add(box, ssd_separator_new("separator", SSD_ALIGN_BOTTOM));
       ssd_widget_add (container, box);
-      ssd_widget_add (container, ssd_separator_new("separator", SSD_END_ROW));
 
       //////////////////////////////////////////////////////////
 #endif // defined(__SYMBIAN32__) || defined(ANDROID) || defined(QTMOBILITY))
@@ -800,8 +815,18 @@ void roadmap_general_settings_show(void) {
 #endif
 
 #if (defined(__SYMBIAN32__) || defined(ANDROID)) || defined(QTMOBILITY)
-      pVal = roadmap_config_match( &RoadMapConfigBackLight, yesno[0] ) ? yesno[0] : yesno[1];
-      ssd_dialog_set_data("BackLight", pVal );
+      pVal = roadmap_config_get( &RoadMapConfigBackLight );
+
+      int i = 0;
+      for ( ; i<BACKLIGHT_LIT_OPTIONS_COUNT; i++)
+      {
+          if (!strcasecmp(BACKLIGHT_LIT_OPTIONS[i], pVal))
+          {
+              pVal = BACKLIGHT_LIT_OPTIONS[i];
+              break;
+          }
+      }
+      ssd_dialog_set_data("Back Light On", pVal );
       ssd_dialog_set_data("Volume Control", ( void* ) roadmap_config_get_integer( &RoadMapConfigVolControl ) );
 #endif // Symbian or android
 
@@ -878,7 +903,7 @@ void roadmap_general_settings_init(void){
    roadmap_config_declare
       ("user", &RoadMapConfigConnectionAuto, "yes", NULL);
    roadmap_config_declare
-      ("user", &RoadMapConfigBackLight, "yes", NULL);
+      ("user", &RoadMapConfigBackLight, DEFAULT_BACKLIGHT_LIT_OPTION, NULL);
    roadmap_config_declare
       ("user", &RoadMapConfigVolControl, SND_DEFAULT_VOLUME_LVL, NULL);
    roadmap_config_declare_enumeration

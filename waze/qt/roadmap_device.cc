@@ -28,12 +28,18 @@ extern "C" {
     #include "roadmap_device.h"
     #include "roadmap_camera.h"
     #include "roadmap_qtmain.h"
+    #include "roadmap_lang.h"
 }
 
 #include <QSystemScreenSaver>
 #include <QSystemDeviceInfo>
 #include "qt_main.h"
 QTM_USE_NAMESPACE
+
+const int BACKLIGHT_LIT_OPTIONS_COUNT = 3;
+const char* BACKLIGHT_LIT_OPTIONS[] = {"Yes", "IfPlugged", "No"};
+const char* BACKLIGHT_LIT_OPTIONS_LABELS[BACKLIGHT_LIT_OPTIONS_COUNT];
+const char* DEFAULT_BACKLIGHT_LIT_OPTION = "IfPlugged";
 
 RoadMapConfigDescriptor RoadMapConfigBackLight =
                         ROADMAP_CONFIG_ITEM("Display", "BackLight");
@@ -43,27 +49,33 @@ extern RMapMainWindow* mainWindow;
 static QSystemScreenSaver *screenSaver = NULL;
 
 int roadmap_device_initialize( void ) {
+    // Initialize the labels for GUI
+    BACKLIGHT_LIT_OPTIONS_LABELS[0] = roadmap_lang_get( "Yes" );
+    BACKLIGHT_LIT_OPTIONS_LABELS[1] = roadmap_lang_get( "Only when plugged" );
+    BACKLIGHT_LIT_OPTIONS_LABELS[2] = roadmap_lang_get( "No" );
+
     // Load the configuration
-    roadmap_config_declare("user", &RoadMapConfigBackLight, "no", NULL);
+    roadmap_config_declare("user", &RoadMapConfigBackLight, DEFAULT_BACKLIGHT_LIT_OPTION, NULL);
+
+    const char* backlightValue = roadmap_config_get( &RoadMapConfigBackLight );
 
     // Log the operation
     roadmap_log( ROADMAP_DEBUG, "roadmap_backlight_initialize() - Current setting : %s",
-                                 roadmap_config_get( &RoadMapConfigBackLight ) );
+                                  backlightValue);
 
     //set initial value
-    roadmap_device_set_backlight(roadmap_config_match( &RoadMapConfigBackLight, "yes" ));
+    roadmap_device_set_backlight(backlightValue);
 }
 
-void roadmap_device_set_backlight( int alwaysOn ) {
-    const char * alwaysOnStr = alwaysOn ? "yes" : "no";
+void roadmap_device_set_backlight( const char* alwaysOnStr ) {
 
-    if (alwaysOn) {
+    if (!strcasecmp(alwaysOnStr, BACKLIGHT_LIT_OPTIONS[0])) {
         if (screenSaver == NULL) {
             screenSaver = new QSystemScreenSaver(mainWindow);
             bool result = screenSaver->setScreenSaverInhibit();
             roadmap_log(ROADMAP_INFO, "disabling the screensaver: %s", (result?"ok":"failed"));
         }
-    } else {
+    } else if (!strcasecmp(alwaysOnStr, BACKLIGHT_LIT_OPTIONS[2])){
         if (screenSaver) {
             delete screenSaver;
             screenSaver = NULL;
