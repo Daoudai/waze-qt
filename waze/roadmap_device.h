@@ -27,9 +27,13 @@
 extern "C" {
 #endif
 
+extern const int BACKLIGHT_LIT_OPTIONS_COUNT;
+extern const char* BACKLIGHT_LIT_OPTIONS[];
+extern const char* BACKLIGHT_LIT_OPTIONS_LABELS[];
+extern const char* DEFAULT_BACKLIGHT_LIT_OPTION;
 
 int roadmap_device_initialize( void );
-void roadmap_device_set_backlight( int alwaysOn );
+void roadmap_device_set_backlight( const char* alwaysOn );
 int roadmap_device_get_battery_level( void );
 void roadmap_device_call_start_callback( void );
 
