@@ -42,23 +42,22 @@ RNetworkSocket::~RNetworkSocket()
 bool RNetworkSocket::connectSocket(QUrl &url)
 {
     bool rc = false;
-    if (url.port() == 443)
+    _isSecured = url.port() == 443;
+    if (_isSecured)
     {
         QSslSocket* secSok = (QSslSocket*) _socket;
         secSok->setPeerVerifyMode(QSslSocket::VerifyNone);
         connect(secSok, SIGNAL(sslErrors(QList<QSslError>)),
                     this, SLOT(sslErrors(QList<QSslError>)));
         secSok->connectToHostEncrypted(url.host(), url.port());
-        rc = secSok->waitForEncrypted(CONNECTION_TIMEOUT);
     }
     else
     {
         _socket->connectToHost(url.host(), url.port());
-        rc = _socket->waitForConnected(CONNECTION_TIMEOUT);
     }
 
     roadmap_log(ROADMAP_INFO, "RNetworkSocket connected <%d>", _socket->socketDescriptor());
-    return rc;
+    return true;
 }
 
 void RNetworkSocket::sslErrors(const QList<QSslError> &errors)
@@ -148,6 +147,27 @@ int RNetworkSocket::read(char* data, int size)
 
 int RNetworkSocket::write(char* data, int size, bool immediate)
 {
+    bool rc = true;
+    if (_isSecured)
+    {
+        QSslSocket* secSok = (QSslSocket*) _socket;
+        if (!secSok->isEncrypted())
+        {
+            rc = secSok->waitForEncrypted(CONNECTION_TIMEOUT);
+        }
+    }
+    else
+    {
+        rc = _socket->waitForConnected(CONNECTION_TIMEOUT);
+    }
+
+    if(!rc)
+    {
+        roadmap_log(ROADMAP_ERROR, "Connection has timedout when attempting to write to socket <%d>", _socket->socketDescriptor());
+        return -1;
+    }
+
+
     int written = _socket->write(data, size);
 
     if (!immediate)
