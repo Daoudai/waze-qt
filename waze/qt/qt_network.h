@@ -58,6 +58,7 @@ private:
     bool _isCallbackExecuting;
     QMutex _callbackCheckSemaphore;
     bool _isPendingClose;
+    bool _isSecured;
 };
 
 #endif // QT_NETWORK_H
