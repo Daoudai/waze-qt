@@ -1343,11 +1343,11 @@ void search_menu_search_address(void){
    roadmap_analytics_log_event(ANALYTICS_EVENT_SEARCHADDR, NULL, NULL);
 
 #ifndef IPHONE
-   if( s_address_search_is_active)
-   {
-      assert(0);
-      return;
-   }
+//   if( s_address_search_is_active)
+//   {
+//      assert(0);
+//      return;
+//   }
 
    address_search_dlg_show( on_dlg_closed_address, NULL);
    s_address_search_is_active = TRUE;
@@ -1360,11 +1360,11 @@ void search_menu_single_search(void){
    roadmap_analytics_log_event(ANALYTICS_EVENT_SEARCHADDR, NULL, NULL);
 
 #ifndef IPHONE
-   if( s_address_search_is_active)
-   {
-      assert(0);
-      return;
-   }
+//   if( s_address_search_is_active)
+//   {
+//      assert(0);
+//      return;
+//   }
 
    single_search_dlg_show( on_dlg_closed_address, NULL);
    s_address_search_is_active = TRUE;
@@ -1376,11 +1376,11 @@ void search_menu_single_search(void){
 
 void search_menu_single_search_favorite(){
 #ifndef IPHONE
-   if( s_address_search_is_active)
-   {
-      assert(0);
-      return;
-   }
+//   if( s_address_search_is_active)
+//   {
+//      assert(0);
+//      return;
+//   }
 
    single_search_dlg_show_favorite( g_favorite_name, on_dlg_closed_address, NULL);
    s_address_search_is_active = TRUE;
@@ -1394,11 +1394,11 @@ void search_menu_search_local(void){
    roadmap_analytics_log_event(ANALYTICS_EVENT_SEARCHLOCAL, NULL, NULL);
 
 #ifndef IPHONE
-   if( s_poi_search_is_active)
-   {
-      assert(0);
-      return;
-   }
+//   if( s_poi_search_is_active)
+//   {
+//      assert(0);
+//      return;
+//   }
 
    local_search_dlg_show( on_dlg_closed_local, NULL);
    s_poi_search_is_active = TRUE;
