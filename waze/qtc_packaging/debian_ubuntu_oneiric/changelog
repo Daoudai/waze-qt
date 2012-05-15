@@ -1,4 +1,15 @@
-waze (0.0.8) oneiric precise; urgency=low
+waze (0.0.9) oneiric; urgency=low
+  * Added 'backlight stay lit only when plugged' option
+  * Fixed the freeze that occured when data was transmitted, so no more 'Close application...' dialog.
+  * Fixed network data compression (working 90% of the time)
+  * Fixed adding a favorite caused crash
+  * Fixed pinging a wazer caused crash
+  * Fixed some crashes that occured when starting a new search
+  * About menu changed a bit
+
+ -- Assaf Paz (damagedspline) <damagedspline@gmail.com>  Tue, 15 May 2012 21:58:15 +0300
+
+waze (0.0.8) oneiric; urgency=low
   * Implement secured connections
   * Fixed empty mood list
   * Fixed empty car list
