@@ -17,6 +17,7 @@
 use strict;
 use warnings;
 use Text::Wrap;
+use Cwd;
 
 $Text::Wrap::columns = 72;
 
@@ -55,43 +56,34 @@ my $pkgMeeGo           = 0;
 
 # -- Build packages...
 #
+&createNativeDebian('ubuntu_oneiric');
+
+&createNativeDebian('ubuntu_precise');
+
 &createDebian('fremantle', '1.0', 0, sub {
-  my ($version, $dir) = @_;
-  &write('5', "$dir/debian/compat");
-  system("tar", "cvzf", "$dir/${package}_${version}.orig.tar.gz",
+  my ($version) = @_;
+  &write('5', "$dir/fremantle/debian/compat");
+  system("tar", "cvzf", "$dir/fremantle/${package}_${version}.orig.tar.gz",
                       "--exclude-vcs",
                       "--exclude=qtc_packaging",
                       ".",
-                      "-C", "$dir",
+                      "-C", "$dir/fremantle",
                       "debian");
   # TODO Create as a patch
 }, 1) if $pkgDebianFremantle;
 
 &createDebian('harmattan', '3.0 (quilt)', 0, sub {
-  my ($version, $dir) = @_;
-  system("tar", "cvzf", "$dir/${package}_${version}.debian.tar.gz",
-                        "-C", "$dir",
+  my ($version) = @_;
+  system("tar", "cvzf", "$dir/harmattan/${package}_${version}.debian.tar.gz",
+                        "-C", "$dir/harmattan",
                         "--exclude-vcs",
                         "debian");
-  system("tar", "cvzf", "$dir/${package}_${version}.orig.tar.gz",
+  system("tar", "cvzf", "$dir/harmattan/${package}_${version}.orig.tar.gz",
                       "--exclude-vcs",
                       "--exclude=debian",
                       "--exclude=qtc_packaging",
                       ".");
 }) if $pkgDebianHarmattan;
-
-&createDebian('ubuntu', '3.0 (quilt)', 1, sub {
-  my ($version, $dir) = @_;
-  system("tar", "cvzf", "$dir/${package}_${version}.debian.tar.gz",
-                        "-C", "$dir",
-                        "--exclude-vcs",
-                        "debian");
-  system("tar", "cvzf", "$dir/${package}_${version}.orig.tar.gz",
-                      "--exclude-vcs",
-                      "--exclude=debian",
-                      "--exclude=qtc_packaging",
-                      ".");
-}, 1) if $pkgDebianUbuntu;
 
 &createSpec('meego', sub {
   # TODO Unsupported
@@ -116,9 +108,16 @@ sub createSpec {
 sub createDebian {
   my ($dist, $format, $is_signed, $content, $create_changes) = @_;
 
+  # -- Copy the source and rationalise the debian folder...
+  #
+  &createDist($dist);
+  system("cp", "-Lr", "qtc_packaging/debian_$dist", "$dir/$dist/debian");
+  mkdir "$dir/$dist/debian/source";
+  &write($format, "$dir/$dist/debian/source/format");
+
   # -- Fix debian/rules...
   #
-  my $rules = &read("qtc_packaging/debian_$dist/rules");
+  my $rules = &read("$dir/$dist/debian/rules");
   my $configureStamp = &readMakefile($rules, 'configure-stamp');
   my $buildStamp = &readMakefile($rules, 'build-stamp');
   my $clean = &readMakefile($rules, 'clean');
@@ -147,6 +146,8 @@ sub createDebian {
                !$1\n\tdh_shlibdeps\n!xm;
     print "+++ Adding dh_shlibdeps\n";
   }
+
+  &write($rules, "$dir/$dist/debian/rules");
 
   # -- Read control file
   #
@@ -196,54 +197,49 @@ sub createDebian {
   }
   close(CHANGELOG_FILE);
 
-  # make a dir per supported OS version
-  my @distributions = split(/[ ]+/, $distribution);
-  my $dist_count = @distributions;
-  foreach (@distributions) {
-    my $dist_version = $_;
-    my $compiled_version = $version;
-    my $compiled_dir = "$dir/${dist}";
+  # -- Execute custom content modifications...
+  #
+  &$content($version);
 
-    if ($dist_count > 1)
-    {
-        # if the is more than one OS version, creae a directory and version per each
-        $compiled_version = "$version~${dist_version}1";
-        $compiled_dir = "$dir/${dist}_$dist_version";
-    }
+  # -- Create the DSC file...
+  #
+  &mkDsc("$dir/$dist", $format, $version, $maintainer, $build_depends, $homepage, $is_signed);
 
-    # -- Copy the source and rationalise the debian folder...
-    #
-    &createDist($compiled_dir);
-    system("cp", "-Lr", "qtc_packaging/debian_$dist", "$compiled_dir/debian");
-    mkdir "$compiled_dir/debian/source";
-    &write($format, "$compiled_dir/debian/source/format");
-
-    # -- Write rules file
-    &write($rules, "$compiled_dir/debian/rules");
-
-    # -- Update version in changelog
-    my $compiled_changelog = &read("qtc_packaging/debian_$dist/changelog");
-    if ($dist_count > 1)
-    {
-        # change the version in the changelog to <version>~<OSVer> only if there is more than one OSVer
-        $compiled_changelog =~ s!^([^(]+)\(([^)]+)\)([^;]+);!$1($2$dist_version) $dist_version;!xm;
-    }
-    &write($compiled_changelog, "$compiled_dir/debian/changelog");
-
-    # -- Execute custom content modifications...
-    #
-    &$content($compiled_version, $compiled_dir);
-
-    # -- Create the DSC file...
-    #
-    &mkDsc($compiled_dir, $format, $compiled_version, $maintainer, $build_depends, $homepage, $is_signed);
-
-    # -- Create the .changes file...
-    #
-    $create_changes && &mkChanges($compiled_dir, "${package}_${compiled_version}_source.changes", $compiled_version, $maintainer, $description, $date, $changelog, $dist_version, $section, $priority, $is_signed);
-  }
+  # -- Create the .changes file...
+  #
+  $create_changes && &mkChanges("$dir/$dist", "${package}_${version}_any.changes", $version, $maintainer, $description, $date, $changelog, $distribution, $section, $priority, $is_signed);
 }
 
+sub createNativeDebian {
+  my ($dist) = @_;
+
+  # -- Read changelog file
+  #
+  my $changelog_file = "qtc_packaging/debian_$dist/changelog";
+  my $version = "";
+  open(CHANGELOG_FILE, "<$changelog_file") or die "Unable to read $changelog_file\n";
+  while (<CHANGELOG_FILE>) {
+    chomp;
+
+    if ($version eq "" and /^[^(]+\(([^)]+)\)\s+[^;]+;/)
+    {
+       $version = $1;
+       last;
+    }
+  }
+  close(CHANGELOG_FILE);
+
+  # -- Copy the source and rationalise the debian folder...
+  #
+  &createDist($dist);
+  my $cwd = getcwd;
+  system("cp", "-r", "$cwd", "$dir/$dist/$package-$version") == 0 or die "Failed to copy $cwd";
+  system("cp", "-r", "qtc_packaging/debian_$dist", "$dir/$dist/$package-$version/debian") == 0 or die "Failed to copy debian files";
+  chdir("$dir/$dist/$package-$version") or die "Failed to chdir to $dir/$dist/$package-$version";
+  my $rc = system("debuild", "-S");
+  chdir($cwd);
+  $rc == 0 or die "Failed to create package for $dist";
+}
 
 # ===========================================================================
 # createDist - Clone the source ready for packaging/distribution
@@ -251,8 +247,8 @@ sub createDebian {
 sub createDist {
   my ($dist) = @_;
 
-  system("rm", "-rf", $dist);
-  mkdir "$dist";
+  system("rm", "-rf", "$dir/$dist");
+  mkdir "$dir/$dist";
 }
 
 
@@ -268,7 +264,7 @@ sub mkDsc {
 Format: $format
 Source: $debianPackage
 Binary: $debianPackage
-Architecture: any all
+Architecture: any
 Version: $version
 Maintainer: $maintainer
 Homepage: $homepage

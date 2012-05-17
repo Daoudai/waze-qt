@@ -68,6 +68,9 @@ symbian {
         icon.path = /usr/share/icons/hicolor/80x80/apps
     } else { # Assumed to be a Desktop Unix
 
+        icon.files = $${TARGET}64.png
+        icon.path = /usr/share/icons/hicolor/64x64/apps
+
         # Desktop file & icon for Linux (assuming Linux)
         desktopfile.files = $${TARGET}.desktop
         desktopfile.path = /usr/share/applications

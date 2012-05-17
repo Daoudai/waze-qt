@@ -1,4 +1,4 @@
-waze (0.0.9) oneiric; urgency=low
+waze (0.0.9-5~oneiric1) oneiric; urgency=low
   * Added 'backlight stay lit only when plugged' option
   * Fixed the freeze that occured when data was transmitted, so no more 'Close application...' dialog.
   * Fixed network data compression (working 90% of the time)

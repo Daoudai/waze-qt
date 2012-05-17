@@ -665,12 +665,19 @@ OTHER_FILES += \
     zlib/configure \
     zlib/ChangeLog \
     zlib/algorithm.txt \
-    qtc_packaging/debian_ubuntu/rules \
-    qtc_packaging/debian_ubuntu/README \
-    qtc_packaging/debian_ubuntu/copyright \
-    qtc_packaging/debian_ubuntu/control \
-    qtc_packaging/debian_ubuntu/compat \
-    qtc_packaging/debian_ubuntu/changelog
+    qtc_packaging/debian_ubuntu_oneiric/rules \
+    qtc_packaging/debian_ubuntu_oneiric/README \
+    qtc_packaging/debian_ubuntu_oneiric/copyright \
+    qtc_packaging/debian_ubuntu_oneiric/control \
+    qtc_packaging/debian_ubuntu_oneiric/compat \
+    qtc_packaging/debian_ubuntu_oneiric/changelog \
+    qtc_packaging/debian_ubuntu_precise/rules \
+    qtc_packaging/debian_ubuntu_precise/README \
+    qtc_packaging/debian_ubuntu_precise/copyright \
+    qtc_packaging/debian_ubuntu_precise/control \
+    qtc_packaging/debian_ubuntu_precise/compat \
+    qtc_packaging/debian_ubuntu_precise/changelog
+
 
 
 # Please do not modify the following two lines. Required for deployment.
