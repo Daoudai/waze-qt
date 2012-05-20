@@ -12,7 +12,7 @@ Page {
         ListElement {
             itemImage: "report_list_all.png"
             itemText: "All"
-            itemValue: "0"
+            itemValue: "4"
             hasNext: true
             hasValue: true
         }
@@ -20,7 +20,7 @@ Page {
         ListElement {
             itemImage: "report_list_police.png"
             itemText: "Police"
-            itemValue: "0"
+            itemValue: "1"
             hasNext: true
             hasValue: true
         }
@@ -28,7 +28,7 @@ Page {
         ListElement {
             itemImage: "report_list_loads.png"
             itemText: "Traffic"
-            itemValue: "0"
+            itemValue: "1"
             hasNext: true
             hasValue: true
         }
@@ -36,7 +36,7 @@ Page {
         ListElement {
             itemImage: "report_list_accidents.png"
             itemText: "Accidents"
-            itemValue: "0"
+            itemValue: "1"
             hasNext: true
             hasValue: true
         }
@@ -44,7 +44,7 @@ Page {
         ListElement {
             itemImage: "report_list_chit_chats.png"
             itemText: "Chit Chats"
-            itemValue: "0"
+            itemValue: "1"
             hasNext: true
             hasValue: true
         }
@@ -56,6 +56,10 @@ Page {
             hasNext: true
             hasValue: true
         }
+    }
+
+    ReportDetailsPage {
+        id: details
     }
 
     Rectangle {
@@ -80,7 +84,7 @@ Page {
             model: reportTypes
             delegate: WazeListItem {
                 width: reportTypeList.width
-                onClicked: console.log(itemText)
+                onClicked: appWindow.pageStack.push(details)
             }
         }
     }
