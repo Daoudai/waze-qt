@@ -4,6 +4,51 @@ import com.nokia.meego 1.0
 Page {
     id: page1
 
+    ListModel {
+        id: reports
+
+        ListElement{
+            distance: "23.6km"
+            reporter: "benzi"
+            title: "Heavy traffic"
+            type: "Traffic"
+            location: "Azrieli, Tel-Aviv"
+            speed: "5kmh"
+            timestamp: ""
+        }
+
+        ListElement{
+            distance: "42.53km"
+            reporter: "bobo"
+            title: "Police"
+            type: "Police"
+            location: "Havazelet, Netanya"
+            speed: "15kmh"
+            timestamp: ""
+        }
+
+        ListElement{
+            distance: "60.89km"
+            reporter: "baruch"
+            title: "Accident"
+            type: "Accident"
+            location: "Jerusalem"
+            speed: "7kmh"
+            timestamp: ""
+        }
+
+        ListElement{
+            distance: "90.11km"
+            reporter: "Tambal"
+            title: "Chit Chat"
+            type: "Chit Chat"
+            location: "Dado Beach, Haifa"
+            message: "Shafot on the beach"
+            speed: "0kmh"
+            timestamp: ""
+        }
+    }
+
     MouseArea {
         id: mouse_area1
         z: -1
@@ -129,7 +174,7 @@ Page {
             DescriptiveButton {
                 text: "Reports"
                 iconSource: "map_error.png"
-                value: "40"
+                value: reports.count
                 isValueVisible: true
 
                 onClicked: pageStack.push(reportsPage)
