@@ -31,85 +31,34 @@ Page {
 
         visible: appWindow.inPortrait
 
-        MouseArea {
-            id: quitButton
-            x: 300
-            y: 10
-            width: image2.width
-            height: image2.height
-            anchors.top: parent.top
-            anchors.topMargin: 10
-            anchors.right: parent.right
-            anchors.rightMargin: 10
+        Row {
+            anchors.fill: parent
 
-            onClicked: quitDialog.open();
+            property int __numberOfChildren: 3
 
-            Image {
-                id: image2
-                x: 12
-                y: 12
-                width: 50
-                height: 50
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-                fillMode: Image.PreserveAspectFit
-                source: "exit_button.png"
+            spacing: (mainPage.width - (70*__numberOfChildren))/(__numberOfChildren-1)
+
+            DescriptiveButton {
+                text: "About"
+                iconSource: "about.png"
+                onClicked: aboutDialog.open()
             }
-        }
 
-        MouseArea {
-            id: settingsButton
-            x: 240
-            y: 10
-            width: image3.width
-            height: image3.height
-            anchors.top: parent.top
-            anchors.topMargin: 10
-            anchors.right: quitButton.left
-            anchors.rightMargin: 10
-
-            Image {
-                id: image3
-                x: 17
-                y: 15
-                width: 50
-                height: 50
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-                fillMode: Image.PreserveAspectFit
-                source: "settings_button.png"
+            DescriptiveButton {
+                text: "Settings"
+                iconSource: "settings_button.png"
             }
-        }
 
-        MouseArea {
-            id: aboutButton
-            x: 10
-            y: 10
-            width: image4.width
-            height: image4.height
-            anchors.top: parent.top
-            anchors.topMargin: 10
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-
-            onClicked: aboutDialog.open()
-
-            Image {
-                id: image4
-                x: 17
-                y: 15
-                width: 50
-                height: 50
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-                fillMode: Image.PreserveAspectFit
-                source: "about.png"
+            DescriptiveButton {
+                text: "Quit"
+                iconSource: "exit_button.png"
+                onClicked: quitDialog.open()
             }
         }
 
         Rectangle {
-            id: rectangle1
-            color: "#64000000"
+            id: upper_background
+            color: "#A4000000"
             z: -1
             anchors.fill: parent
         }
@@ -146,52 +95,77 @@ Page {
         id: reportsPage
     }
 
-    tools: ToolBarLayout {
+    Rectangle {
+        id: lower_toolbar
+        height: 70
+        color: "#00000000"
+        anchors.right: parent.right
+        anchors.rightMargin: 0
+        anchors.left: parent.left
+        anchors.leftMargin: 0
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 0
 
-        DescriptiveButton {
-            text: "Show Me"
-            iconSource: "location.png"
+        Row {
+            id: lowerButtonRow
+            anchors.fill: parent
+
+            property int __numberOfChildren: appWindow.inPortrait? 4 : 7
+
+            spacing: (mainPage.width - (70*__numberOfChildren))/(__numberOfChildren-1)
+
+            DescriptiveButton {
+                text: "Show Me"
+                iconSource: "location.png"
+            }
+
+            DescriptiveButton {
+                text: "Navigate"
+                iconSource: "search_address.png"
+
+                onClicked: pageStack.push(navigationPage)
+            }
+
+            DescriptiveButton {
+                text: "Reports"
+                iconSource: "map_error.png"
+                value: "40"
+                isValueVisible: true
+
+                onClicked: pageStack.push(reportsPage)
+            }
+
+            DescriptiveButton {
+                text: "Report New"
+                iconSource: "marked_location.png"
+            }
+
+            DescriptiveButton {
+                text: "About"
+                iconSource: "about.png"
+                visible: !appWindow.inPortrait
+                onClicked: aboutDialog.open()
+            }
+
+            DescriptiveButton {
+                text: "Settings"
+                iconSource: "settings_button.png"
+                visible: !appWindow.inPortrait
+            }
+
+            DescriptiveButton {
+                text: "Quit"
+                iconSource: "exit_button.png"
+                visible: !appWindow.inPortrait
+                onClicked: quitDialog.open()
+            }
         }
 
-        DescriptiveButton {
-            text: "Navigate"
-            iconSource: "search_address.png"
-
-            onClicked: pageStack.push(navigationPage)
-        }
-
-        DescriptiveButton {
-            text: "Reports"
-            iconSource: "map_error.png"
-            count: "40"
-            isCountVisibile: true
-
-            onClicked: pageStack.push(reportsPage)
-        }
-
-        DescriptiveButton {
-            text: "Report New"
-            iconSource: "marked_location.png"
-        }
-
-        DescriptiveButton {
-            text: "About"
-            iconSource: "about.png"
-            visible: !appWindow.inPortrait
-            onClicked: aboutDialog.open()
-        }
-
-        DescriptiveButton {
-            text: "Settings"
-            iconSource: "settings_button.png"
-            visible: !appWindow.inPortrait
-        }
-
-        DescriptiveButton {
-            text: "Quit"
-            iconSource: "exit_button.png"
-            visible: !appWindow.inPortrait
-            onClicked: quitDialog.open()
+        Rectangle {
+            id: lower_background
+            color: "#A4000000"
+            z: -1
+            anchors.fill: parent
         }
     }
 }

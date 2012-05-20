@@ -2,52 +2,70 @@
 import QtQuick 1.1
 import com.nokia.meego 1.0
 
-ToolIcon {
+MouseArea {
     id: descriptiveButton
     property string text: qsTr("text")
 
-    property bool isCountVisibile: false
-    property string count: ""
+    width: 70
+    height: 70
+
+    property bool isValueVisible: false
+    property string value: ""
+
+    property string iconSource
+
+    Image {
+        source: descriptiveButton.iconSource
+        anchors.rightMargin: 5
+        anchors.leftMargin: 5
+        anchors.bottomMargin: 10
+        anchors.topMargin: 5
+        fillMode: Image.PreserveAspectFit
+        anchors.fill: parent
+    }
 
     Rectangle {
         id: rectangle1
-        width: countText.font.pixelSize * 2
+        width: countText.width + (countText.font.pixelSize * 2)
         height: countText.font.pixelSize * 2
         color: "#7d91c0"
         radius: height/2
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
         border.width: 1
         border.color: "#000000"
         z: 1
-        anchors.right: parent.right
-        anchors.rightMargin: 5
-        anchors.verticalCenter: parent.verticalCenter
-        visible: descriptiveButton.isCountVisibile
+        visible: descriptiveButton.isValueVisible
         smooth: true
-
-        Text {
-            id: countText
-            horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: 14
-            color: "#ffffff"
-            text: descriptiveButton.count
-            style: Text.Outline
-            verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
-            smooth: true
-        }
     }
 
     Text {
         id: text1
         color: "#ffffff"
         text: descriptiveButton.text
+        anchors.top: parent.top
         style: Text.Outline
         font.bold: true
-        anchors.top: parent.top
         horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+        verticalAlignment: Text.AlignTop
         anchors.horizontalCenter: parent.horizontalCenter
         font.pixelSize: 12
+        smooth: true
+    }
+
+    Text {
+        id: countText
+        x: 7
+        horizontalAlignment: Text.AlignHCenter
+        font.pixelSize: 14
+        color: "#ffffff"
+        text: descriptiveButton.value
+        visible: descriptiveButton.isValueVisible
+        anchors.verticalCenter: rectangle1.verticalCenter
+        z: 2
+        anchors.horizontalCenter: rectangle1.horizontalCenter
+        style: Text.Outline
+        verticalAlignment: Text.AlignVCenter
         smooth: true
     }
 }
