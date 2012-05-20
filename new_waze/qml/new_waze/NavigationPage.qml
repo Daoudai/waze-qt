@@ -9,6 +9,32 @@ Page {
         id: otherNavigationOptions
 
         ListElement {
+            itemImage: "home.png"
+            itemText: "Home (Click to add)"
+            itemValue: ""
+            hasNext: false
+            hasValue: false
+        }
+
+        ListElement {
+            itemImage: "work.png"
+            itemText: "Work (Click to add)"
+            itemValue: ""
+            hasNext: false
+            hasValue: false
+        }
+
+        ListElement {
+            itemImage: ""
+            itemText: ""
+            itemValue: ""
+            hasNext: false
+            hasValue: false
+            isSpacer: true
+        }
+
+
+        ListElement {
             itemImage: "search_favorites.png"
             itemText: "My Favorites Places"
             itemValue: ""
@@ -38,6 +64,26 @@ Page {
             itemValue: ""
             hasNext: true
             hasValue: false
+        }
+    }
+
+    ListModel {
+        id: otherNavigationOptionsNoSpacers
+    }
+
+    onStatusChanged: {
+        if (status === PageStatus.Activating)
+        {
+            otherNavigationOptionsNoSpacers.clear();
+
+            for (var i = 0; i < otherNavigationOptions.count; i++)
+            {
+                var element = otherNavigationOptions.get(i);
+                if (typeof(element.isSpacer) === 'undefined' || !element.isSpacer)
+                {
+                    otherNavigationOptionsNoSpacers.append(element);
+                }
+            }
         }
     }
 
@@ -77,6 +123,7 @@ Page {
 
             ListView {
                 id: otherOptionsList
+                visible: !isGrid.checked
                 clip: true
                 anchors.bottom: parent.bottom
                 anchors.top: parent.top
@@ -86,10 +133,39 @@ Page {
                 delegate: WazeListItem {
                     width: otherOptionsList.width
                     onClicked: console.log(itemText)
+                    visible: typeof(isSpacer) === 'undefined' || !isSpacer
+                }
+            }
+
+            GridView {
+                id: otherOptionsGrid
+                visible: isGrid.checked
+
+                property int __desiredRows: appWindow.inPortrait? 3 : 2
+                property int __desiredCols: appWindow.inPortrait? 2 : 3
+                property int __optimalWidth:otherOptionsGrid.width*__desiredRows/model.count
+                property int __optimalHeight:otherOptionsGrid.height*__desiredCols/model.count
+
+                property int __dim: __optimalWidth
+                cellWidth: __optimalWidth
+                cellHeight: __optimalHeight
+                clip: true
+                anchors.bottom: parent.bottom
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                model: otherNavigationOptionsNoSpacers
+                delegate: DescriptiveButton {
+                    onClicked: console.log(itemText)
+                    text: qsTr(itemText)
+                    iconSource: itemImage
+                    isValueVisible: hasValue
+                    value: itemValue
+                    width: Math.min(otherOptionsGrid.__optimalHeight, otherOptionsGrid.__optimalWidth)
+                    height: width
                 }
             }
         }
-
     }
 
 
@@ -97,6 +173,9 @@ Page {
         ToolIcon {
            iconId: "toolbar-back"
            onClicked: pageStack.pop()
-       }
+        }
+        CheckBox {
+           id: isGrid
+        }
     }
 }
