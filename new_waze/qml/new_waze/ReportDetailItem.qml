@@ -4,11 +4,41 @@ import QtQuick 1.1
 Rectangle {
     id: rectangle1
     width: 100
-    height: 60
+    height: 110
     border.width: 3
     border.color: "#000000"
 
     signal clicked
+
+    function getImage(reportType) {
+
+        if (reportType === "All")
+        {
+            return "report_list_all.png";
+        }
+        else if (reportType === "Police")
+        {
+            return "report_list_police.png";
+        }
+        else if (reportType === "Traffic")
+        {
+            return "report_list_loads.png";
+        }
+        else if (reportType === "Accidents")
+        {
+            return "report_list_accidents.png"
+        }
+        else if (reportType === "Chit Chats")
+        {
+            return "report_list_chit_chats.png";
+        }
+        else if (reportType === "Other")
+        {
+            return "report_list_other.png"
+        }
+
+        console.log("Unknown report type: " + reportType);
+    }
 
     MouseArea {
         anchors.fill: parent
@@ -17,7 +47,6 @@ Rectangle {
 
     Image {
         id: image1
-        width: height
         anchors.bottomMargin: 5
         fillMode: Image.PreserveAspectFit
         anchors.leftMargin: 5
@@ -25,7 +54,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.bottom: speed.top
         anchors.top: parent.top
-        source: type + ".png"
+        source: getImage(type)
     }
 
     Column {
@@ -43,25 +72,25 @@ Rectangle {
         Text {
             id: titleLabel
             text: qsTr(title)
-            font.pixelSize: 12
+            font.pixelSize: 24
         }
 
         Text {
             id: locationLabel
             text: qsTr(location)
-            font.pixelSize: 12
+            font.pixelSize: 18
         }
 
         Text {
             id: messageLabel
-            text: qsTr(message)
+            text: typeof(message) !== 'undefined'? qsTr(message) : ''
             font.pixelSize: 12
         }
 
         Text {
             id: timestampLabel
             text: qsTr(timestamp)
-            font.pixelSize: 12
+            font.pixelSize: 18
         }
     }
 
@@ -71,6 +100,6 @@ Rectangle {
         anchors.bottomMargin: 5
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: image1.horizontalCenter
-        font.pixelSize: 12
+        font.pixelSize: 18
     }
 }
