@@ -30,8 +30,8 @@ Page {
         ListElement{
             distance: "60.89km"
             reporter: "baruch"
-            title: "Accident"
-            type: "Accident"
+            title: "Accidents"
+            type: "Accidents"
             location: "Jerusalem"
             speed: "7kmh"
             timestamp: ""
@@ -40,8 +40,8 @@ Page {
         ListElement{
             distance: "90.11km"
             reporter: "Tambal"
-            title: "Chit Chat"
-            type: "Chit Chat"
+            title: "Chit Chats"
+            type: "Chit Chats"
             location: "Dado Beach, Haifa"
             message: "Shafot on the beach"
             speed: "0kmh"

@@ -62,7 +62,7 @@ Rectangle {
                 id: text2
                 x: 230
                 y: 0
-                text: qsTr(itemValue)
+                text: typeof(itemValue) === 'string'? qsTr(itemValue) : itemValue
                 horizontalAlignment: Text.AlignRight
                 anchors.rightMargin: 5
                 anchors.right: image2.left

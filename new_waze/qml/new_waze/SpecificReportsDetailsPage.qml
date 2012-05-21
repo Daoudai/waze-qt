@@ -26,7 +26,7 @@ Page {
             model: reportDetails
             delegate: ReportDetailItem {
                 width: reportTypeList.width
-                onClicked: console.log(itemText)
+                onClicked: console.log(type)
             }
         }
     }
