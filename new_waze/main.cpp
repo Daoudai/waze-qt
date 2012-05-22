@@ -7,19 +7,13 @@
 #include <QImage>
 #include "qmlapplicationviewer.h"
 
-#ifdef Q_WS_SIMULATOR
-#define IMAGES_PATH_FORMAT "%1/../images"
-#else
-#define IMAGES_PATH_FORMAT "%1/images"
-#endif
-
 class WazeImageProvider : public QDeclarativeImageProvider
 {
 public:
     WazeImageProvider()
         : QDeclarativeImageProvider((QDeclarativeImageProvider::ImageType) (QDeclarativeImageProvider::Image | QDeclarativeImageProvider::Pixmap))
     {
-        _imagesPath = QString(IMAGES_PATH_FORMAT).arg(QCoreApplication::applicationDirPath());
+        _imagesPath = QString("%1/../images").arg(QCoreApplication::applicationDirPath());
     }
 
     QImage requestImage(const QString& id, QSize* size, const QSize& requestedSize)
