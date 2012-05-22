@@ -1,6 +1,7 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
 import com.nokia.meego 1.0
+import ".."
 
 Page {
     id: navigationPage
@@ -107,7 +108,7 @@ Page {
         Button {
             id: button1
             width: 70
-            iconSource: "search_address.png"
+            iconSource: "../search_address.png"
             anchors.top: parent.top
             anchors.right: parent.right
         }
