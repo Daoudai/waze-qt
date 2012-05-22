@@ -54,7 +54,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.bottom: speed.top
         anchors.top: parent.top
-        source: getImage(type)
+        source: "image://waze/" + getImage(type)
     }
 
     Column {

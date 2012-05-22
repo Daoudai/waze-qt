@@ -15,7 +15,7 @@ MouseArea {
     property string iconSource
 
     Image {
-        source: descriptiveButton.iconSource
+        source: "image://waze/" + descriptiveButton.iconSource
         anchors.rightMargin: 5
         anchors.leftMargin: 5
         anchors.bottomMargin: 10

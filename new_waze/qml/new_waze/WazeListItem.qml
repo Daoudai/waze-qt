@@ -43,7 +43,7 @@ Rectangle {
                     id: image1
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
-                    source: itemImage
+                    source: "image://waze/" + itemImage
             }
             }
 

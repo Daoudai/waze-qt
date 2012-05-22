@@ -1,5 +1,7 @@
 import QtQuick 1.1
 import com.nokia.meego 1.0
+import "reports"
+import "navigation"
 
 Page {
     id: page1
@@ -59,7 +61,7 @@ Page {
             anchors.left: parent.left
             anchors.top: parent.top
             fillMode: Image.PreserveAspectCrop
-            source: "map.png"
+            source: "image://waze/map.png"
         }
     }
 
