@@ -26,11 +26,12 @@ MouseArea {
 
     Rectangle {
         id: rectangle1
-        width: countText.width + (countText.font.pixelSize * 2)
-        height: countText.font.pixelSize * 2
+        width: countText.width + (countText.font.pixelSize)
+        height: countText.height + 5
         color: "#7d91c0"
         radius: height/2
-        anchors.bottom: parent.bottom
+        opacity: 0.690
+        anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         border.width: 1
         border.color: "#000000"
@@ -43,7 +44,8 @@ MouseArea {
         id: text1
         color: "#ffffff"
         text: descriptiveButton.text
-        anchors.top: parent.top
+        anchors.bottomMargin: 5
+        anchors.bottom: parent.bottom
         style: Text.Outline
         font.bold: true
         horizontalAlignment: Text.AlignHCenter
