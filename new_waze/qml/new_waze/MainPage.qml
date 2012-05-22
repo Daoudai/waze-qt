@@ -2,6 +2,7 @@ import QtQuick 1.1
 import com.nokia.meego 1.0
 import "reports"
 import "navigation"
+import "settings"
 
 Page {
     id: page1
@@ -94,6 +95,7 @@ Page {
             DescriptiveButton {
                 text: "Settings"
                 iconSource: "settings_button.png"
+                onClicked: pageStack.push(settingsPage)
             }
 
             DescriptiveButton {
@@ -142,6 +144,10 @@ Page {
         id: reportsPage
     }
 
+    SettingsPage {
+        id: settingsPage
+    }
+
     Rectangle {
         id: lower_toolbar
         height: 70
@@ -163,7 +169,7 @@ Page {
 
             DescriptiveButton {
                 text: "Show Me"
-                iconSource: "location.png"
+                iconSource: "On_map_anonymous.png"
             }
 
             DescriptiveButton {
@@ -198,6 +204,7 @@ Page {
                 text: "Settings"
                 iconSource: "settings_button.png"
                 visible: !appWindow.inPortrait
+                onClicked: pageStack.push(settingsPage)
             }
 
             DescriptiveButton {
