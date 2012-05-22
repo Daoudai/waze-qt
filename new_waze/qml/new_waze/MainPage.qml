@@ -117,7 +117,11 @@ Page {
     QueryDialog {
         id: quitDialog
 
-        titleText: "Exit The New Waze"
+        title: DialogTitle {
+            image: "waze64.png"
+            text: "Exit The New Waze"
+        }
+
         message: "Are you sure you want to exit?"
 
         acceptButtonText: "Yes"
@@ -129,7 +133,10 @@ Page {
     QueryDialog {
         id: aboutDialog
 
-        titleText: "The New Waze"
+        title: DialogTitle {
+            image: "about.png"
+            text: "The New Waze"
+        }
 
         message: "This is a mockup of The New Waze (Waze Qt Port)\nDone by Assaf Paz (damagedspline@gmail.com)"
 

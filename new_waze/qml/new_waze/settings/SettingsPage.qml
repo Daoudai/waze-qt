@@ -3,6 +3,8 @@ import com.nokia.meego 1.0
 import ".."
 
 Page {
+    id: settingsPage
+
     ListModel {
         id: settingsMenuOptions
 
@@ -12,6 +14,7 @@ Page {
             itemValue: "None"
             hasNext: false
             hasValue: true
+            values: [ListElement{text:"None"}, ListElement{text:"Basic"}, ListElement{text:"Full"}]
         }
 
         ListElement {
@@ -20,6 +23,7 @@ Page {
             itemValue: "2D"
             hasNext: false
             hasValue: true
+            values: [ListElement{text:"2D"}, ListElement{text:"3D"}]
         }
 
         ListElement {
@@ -28,6 +32,7 @@ Page {
             itemValue: "Night"
             hasNext: false
             hasValue: true
+            values: [ListElement{text:"Day"}, ListElement{text:"Night"}]
         }
 
         ListElement {
@@ -108,6 +113,32 @@ Page {
         }
     }
 
+    ListModel {
+        id: selectionDialogModel
+    }
+
+    SelectionDialog {
+        id: selectionDialog
+
+        titleText: ""
+
+        property string image
+        property string text
+
+        title: DialogTitle {
+            image: selectionDialog.image
+            text: selectionDialog.text
+        }
+
+        property int settingsMenuIndex
+
+        model: selectionDialogModel
+
+        onAccepted: {
+            settingsMenuOptions.get(settingsMenuIndex).itemValue = selectionDialogModel.get(selectionDialog.selectedIndex).text;
+        }
+    }
+
     ListView {
         id: settingsMenuList
         visible: !isGrid.checked
@@ -119,7 +150,30 @@ Page {
         model: settingsMenuOptions
         delegate: WazeListItem {
             width: settingsMenuList.width
-            onClicked: console.log(itemText)
+            onClicked: {
+                if (typeof(values) !== 'undefined')
+                {
+                    selectionDialogModel.clear();
+                    for (var i = 0; i < values.count; i++)
+                    {
+                        var value = values.get(i);
+                        selectionDialogModel.append(value);
+
+                        if (value.text === itemValue)
+                        {
+                            selectionDialog.selectedIndex = i;
+                        }
+                    }
+                    selectionDialog.text = itemText;
+                    selectionDialog.image = itemImage;
+                    selectionDialog.settingsMenuIndex = index;
+                    selectionDialog.open();
+                }
+                else
+                {
+                    console.log(itemText);
+                }
+            }
             visible: typeof(isSpacer) === 'undefined' || !isSpacer
         }
     }
@@ -129,7 +183,7 @@ Page {
         visible: isGrid.checked
 
         property int __desiredRows: appWindow.inPortrait? 3 : 2
-        property int __desiredCols: appWindow.inPortrait? 2 : 3
+        property int __desiredCols: appWindow.inPortrait? 3 : 4
         property int __optimalWidth:settingsMenuGrid.width*__desiredRows/model.count
         property int __optimalHeight:settingsMenuGrid.height*__desiredCols/model.count
 
@@ -143,7 +197,30 @@ Page {
         anchors.right: parent.right
         model: settingsMenuOptionsNoSpacers
         delegate: DescriptiveButton {
-            onClicked: console.log(itemText)
+            onClicked: {
+                if (typeof(values) !== 'undefined')
+                {
+                    selectionDialogModel.clear();
+                    for (var i = 0; i < values.count; i++)
+                    {
+                        var value = values.get(i);
+                        selectionDialogModel.append(value);
+
+                        if (value.text === itemValue)
+                        {
+                            selectionDialog.selectedIndex = i;
+                        }
+                    }
+                    selectionDialog.text = itemText;
+                    selectionDialog.image = itemImage;
+                    selectionDialog.settingsMenuIndex = index;
+                    selectionDialog.open();
+                }
+                else
+                {
+                    console.log(itemText);
+                }
+            }
             text: qsTr(itemText)
             iconSource: itemImage
             isValueVisible: hasValue
