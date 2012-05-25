@@ -110,7 +110,7 @@ Page {
             text: selectionDialog.text
         }
 
-        property ListElement selectedMenuItem
+        property variant selectedMenuItem
 
         model: selectionDialogModel
 
@@ -129,16 +129,13 @@ Page {
 
         isGrid: isGridEnabled.checked
 
-        desiredRows: appWindow.inPortrait? 3 : 2
-        desiredCols: appWindow.inPortrait? 3 : 4
-
         onItemSelected: {
             if (typeof(item.values) !== 'undefined')
             {
                 selectionDialogModel.clear();
                 for (var i = 0; i < item.values.count; i++)
                 {
-                    var value = values.get(i);
+                    var value = item.values.get(i);
                     selectionDialogModel.append(value);
 
                     if (value.text === item.itemValue)
@@ -159,12 +156,12 @@ Page {
     }
 
     tools: ToolBarLayout {
-            ToolIcon {
-               iconId: "toolbar-back"
-               onClicked: pageStack.pop()
-            }
-            CheckBox {
-               id: isGridEnabled
+        ToolIcon {
+           iconId: "toolbar-back"
+           onClicked: pageStack.pop()
+        }
+        CheckBox {
+           id: isGridEnabled
         }
     }
 }
