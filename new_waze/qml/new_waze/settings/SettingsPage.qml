@@ -94,26 +94,6 @@ Page {
     }
 
     ListModel {
-        id: settingsMenuOptionsNoSpacers
-    }
-
-    onStatusChanged: {
-        if (status === PageStatus.Activating)
-        {
-            settingsMenuOptionsNoSpacers.clear();
-
-            for (var i = 0; i < settingsMenuOptions.count; i++)
-            {
-                var element = settingsMenuOptions.get(i);
-                if (typeof(element.isSpacer) === 'undefined' || !element.isSpacer)
-                {
-                    settingsMenuOptionsNoSpacers.append(element);
-                }
-            }
-        }
-    }
-
-    ListModel {
         id: selectionDialogModel
     }
 
@@ -130,103 +110,51 @@ Page {
             text: selectionDialog.text
         }
 
-        property int settingsMenuIndex
+        property ListElement selectedMenuItem
 
         model: selectionDialogModel
 
         onAccepted: {
-            settingsMenuOptions.get(settingsMenuIndex).itemValue = selectionDialogModel.get(selectionDialog.selectedIndex).text;
+            selectedMenuItem.itemValue = selectionDialogModel.get(selectionDialog.selectedIndex).text;
         }
     }
 
-    ListView {
-        id: settingsMenuList
-        visible: !isGrid.checked
-        clip: true
+    BaseMenuView {
         anchors.bottom: parent.bottom
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        model: settingsMenuOptions
-        delegate: WazeListItem {
-            width: settingsMenuList.width
-            onClicked: {
-                if (typeof(values) !== 'undefined')
+
+        itemModel: settingsMenuOptions
+
+        isGrid: isGridEnabled.checked
+
+        desiredRows: appWindow.inPortrait? 3 : 2
+        desiredCols: appWindow.inPortrait? 3 : 4
+
+        onItemSelected: {
+            if (typeof(item.values) !== 'undefined')
+            {
+                selectionDialogModel.clear();
+                for (var i = 0; i < item.values.count; i++)
                 {
-                    selectionDialogModel.clear();
-                    for (var i = 0; i < values.count; i++)
+                    var value = values.get(i);
+                    selectionDialogModel.append(value);
+
+                    if (value.text === item.itemValue)
                     {
-                        var value = values.get(i);
-                        selectionDialogModel.append(value);
-
-                        if (value.text === itemValue)
-                        {
-                            selectionDialog.selectedIndex = i;
-                        }
+                        selectionDialog.selectedIndex = i;
                     }
-                    selectionDialog.text = itemText;
-                    selectionDialog.image = itemImage;
-                    selectionDialog.settingsMenuIndex = index;
-                    selectionDialog.open();
                 }
-                else
-                {
-                    console.log(itemText);
-                }
+                selectionDialog.text = item.itemText;
+                selectionDialog.image = item.itemImage;
+                selectionDialog.selectedMenuItem = item;
+                selectionDialog.open();
             }
-            visible: typeof(isSpacer) === 'undefined' || !isSpacer
-        }
-    }
-
-    GridView {
-        id: settingsMenuGrid
-        visible: isGrid.checked
-
-        property int __desiredRows: appWindow.inPortrait? 3 : 2
-        property int __desiredCols: appWindow.inPortrait? 3 : 4
-        property int __optimalWidth:settingsMenuGrid.width*__desiredRows/model.count
-        property int __optimalHeight:settingsMenuGrid.height*__desiredCols/model.count
-
-        property int __dim: __optimalWidth
-        cellWidth: __optimalWidth
-        cellHeight: __optimalHeight
-        clip: true
-        anchors.bottom: parent.bottom
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        model: settingsMenuOptionsNoSpacers
-        delegate: DescriptiveButton {
-            onClicked: {
-                if (typeof(values) !== 'undefined')
-                {
-                    selectionDialogModel.clear();
-                    for (var i = 0; i < values.count; i++)
-                    {
-                        var value = values.get(i);
-                        selectionDialogModel.append(value);
-
-                        if (value.text === itemValue)
-                        {
-                            selectionDialog.selectedIndex = i;
-                        }
-                    }
-                    selectionDialog.text = itemText;
-                    selectionDialog.image = itemImage;
-                    selectionDialog.settingsMenuIndex = index;
-                    selectionDialog.open();
-                }
-                else
-                {
-                    console.log(itemText);
-                }
+            else
+            {
+                console.log(item.itemText);
             }
-            text: qsTr(itemText)
-            iconSource: itemImage
-            isValueVisible: hasValue
-            value: itemValue
-            width: Math.min(settingsMenuGrid.__optimalHeight, settingsMenuGrid.__optimalWidth)
-            height: width
         }
     }
 
@@ -236,7 +164,7 @@ Page {
                onClicked: pageStack.pop()
             }
             CheckBox {
-               id: isGrid
+               id: isGridEnabled
         }
     }
 }
