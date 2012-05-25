@@ -7,6 +7,12 @@ Rectangle {
 
     height: mouse_area1.height
 
+    property string text: qsTr("text")
+    property bool isNextIndicatorVisible: false
+    property bool isValueVisible: false
+    property string value: ""
+    property string iconSource
+
     signal clicked
 
     MouseArea {
@@ -43,14 +49,14 @@ Rectangle {
                     id: image1
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
-                    source: (itemImage === "")? itemImage : "image://waze/" + itemImage
-            }
+                    source: (itemDelegate.iconSource === "")? itemDelegate.iconSource : "image://waze/" + itemDelegate.iconSource
+                }
             }
 
             Text {
                 id: text1
                 y: 18
-                text: qsTr(itemText)
+                text: qsTr(itemDelegate.text)
                 anchors.leftMargin: 5
                 anchors.left: rectangle1.right
                 anchors.verticalCenter: parent.verticalCenter
@@ -62,7 +68,7 @@ Rectangle {
                 id: text2
                 x: 230
                 y: 0
-                text: typeof(itemValue) === 'string'? qsTr(itemValue) : itemValue
+                text: typeof(itemDelegate.value) === 'string'? qsTr(itemDelegate.value) : itemDelegate.value
                 horizontalAlignment: Text.AlignRight
                 anchors.rightMargin: 5
                 anchors.right: image2.left
@@ -71,7 +77,7 @@ Rectangle {
                 anchors.left: parent.left
                 verticalAlignment: Text.AlignVCenter
                 font.pixelSize: 20
-                visible: hasValue
+                visible: itemDelegate.isValueVisible
             }
 
             ToolIcon {
@@ -85,7 +91,7 @@ Rectangle {
                 anchors.bottom: parent.bottom
                 anchors.top: parent.top
                 iconId: "toolbar-next"
-                visible: hasNext
+                visible: itemDelegate.isNextIndicatorVisible
             }
 
         }

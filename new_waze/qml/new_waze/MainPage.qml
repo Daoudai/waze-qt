@@ -1,6 +1,7 @@
 import QtQuick 1.1
 import com.nokia.meego 1.0
 import "reports"
+import "new_report"
 import "navigation"
 import "settings"
 
@@ -151,6 +152,12 @@ Page {
         id: reportsPage
     }
 
+    ReportNewPage {
+        id: newReportPage
+
+        anchors.fill: parent
+    }
+
     SettingsPage {
         id: settingsPage
     }
@@ -198,6 +205,7 @@ Page {
             DescriptiveButton {
                 text: "Report New"
                 iconSource: "marked_location.png"
+                onClicked: pageStack.push(newReportPage)
             }
 
             DescriptiveButton {

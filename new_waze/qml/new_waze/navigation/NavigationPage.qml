@@ -68,26 +68,6 @@ Page {
         }
     }
 
-    ListModel {
-        id: otherNavigationOptionsNoSpacers
-    }
-
-    onStatusChanged: {
-        if (status === PageStatus.Activating)
-        {
-            otherNavigationOptionsNoSpacers.clear();
-
-            for (var i = 0; i < otherNavigationOptions.count; i++)
-            {
-                var element = otherNavigationOptions.get(i);
-                if (typeof(element.isSpacer) === 'undefined' || !element.isSpacer)
-                {
-                    otherNavigationOptionsNoSpacers.append(element);
-                }
-            }
-        }
-    }
-
     Rectangle {
         id: rectangle1
         color: "#00000000"
@@ -113,59 +93,22 @@ Page {
             anchors.right: parent.right
         }
 
-        Rectangle {
+        BaseMenuView {
             id: rectangle2
-            color: "#00000000"
             anchors.topMargin: 10
             anchors.right: parent.right
             anchors.left: parent.left
             anchors.bottom: parent.bottom
             anchors.top: search.bottom
 
-            ListView {
-                id: otherOptionsList
-                visible: !isGrid.checked
-                clip: true
-                anchors.bottom: parent.bottom
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                model: otherNavigationOptions
-                delegate: WazeListItem {
-                    width: otherOptionsList.width
-                    onClicked: console.log(itemText)
-                    visible: typeof(isSpacer) === 'undefined' || !isSpacer
-                }
-            }
+            itemModel: otherNavigationOptions
 
-            GridView {
-                id: otherOptionsGrid
-                visible: isGrid.checked
+            isGrid: isGridEnabled.checked
 
-                property int __desiredRows: appWindow.inPortrait? 3 : 2
-                property int __desiredCols: appWindow.inPortrait? 2 : 3
-                property int __optimalWidth:otherOptionsGrid.width*__desiredRows/model.count
-                property int __optimalHeight:otherOptionsGrid.height*__desiredCols/model.count
+            onItemSelected: {console.log(item.itemText)}
 
-                property int __dim: __optimalWidth
-                cellWidth: __optimalWidth
-                cellHeight: __optimalHeight
-                clip: true
-                anchors.bottom: parent.bottom
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                model: otherNavigationOptionsNoSpacers
-                delegate: DescriptiveButton {
-                    onClicked: console.log(itemText)
-                    text: qsTr(itemText)
-                    iconSource: itemImage
-                    isValueVisible: hasValue
-                    value: itemValue
-                    width: Math.min(otherOptionsGrid.__optimalHeight, otherOptionsGrid.__optimalWidth)
-                    height: width
-                }
-            }
+            desiredRows: appWindow.inPortrait? 3 : 2
+            desiredCols: appWindow.inPortrait? 2 : 3
         }
     }
 
@@ -176,7 +119,7 @@ Page {
            onClicked: pageStack.pop()
         }
         CheckBox {
-           id: isGrid
+           id: isGridEnabled
         }
     }
 }

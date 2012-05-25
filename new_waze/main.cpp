@@ -56,9 +56,20 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QmlApplicationViewer viewer;
     viewer.engine()->addImageProvider("waze", new WazeImageProvider());
+#ifdef Q_WS_MAEMO_5
+    viewer.engine()->addImportPath(QString("/opt/qtm12/imports"));
+    viewer.setOrientation(QmlApplicationViewer::ScreenOrientationLockLandscape);
+#else
     viewer.setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
+#endif
+
     viewer.setMainQmlFile(QLatin1String("qml/new_waze/main.qml"));
+
+#ifdef Q_WS_MAEMO_5
+    viewer.showFullScreen();
+#else
     viewer.showExpanded();
+#endif
 
     return app->exec();
 }
