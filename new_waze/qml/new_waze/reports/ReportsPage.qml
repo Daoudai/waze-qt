@@ -40,5 +40,9 @@ Page {
             TabButton { tab: course; text: "Course" }
             TabButton { tab: groups; text: "Group" }
         }
+
+        CheckBox {
+           id: isGridEnabled
+        }
     }
 }
