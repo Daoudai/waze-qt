@@ -66,6 +66,45 @@ Page {
         }
     }
 
+    BaseReportPage {
+        id: reportPolice
+    }
+
+    BaseReportPage {
+        id: reportTraffic
+
+        option1icon: "alert_icon_traffic_jam_light.png"
+        option2icon: "alert_icon_traffic_jam_heavy.png"
+        option3icon: "alert_icon_traffic_jam_standstill.png"
+    }
+
+    BaseReportPage {
+        id: reportAccident
+
+        option1icon: "alert_icon_accident_minor.png"
+        option2icon: "alert_icon_accident_major.png"
+    }
+
+    BaseReportPage {
+        id: reportHazard
+
+        option1icon: "alert_icon_hazard_on_road.png"
+        option2icon: "alert_icon_hazard_on_shoulder.png"
+        option3icon: "alert_icon_hazard_weather.png"
+    }
+
+    BaseReportPage {
+        id: reportCamera
+
+        option1icon: "dummy_cam.png"
+        option2icon: "speedcam.png"
+        option3icon: "redlightcam.png"
+    }
+
+    BaseReportPage {
+        id: reportChitChat
+    }
+
     BaseMenuView {
         isGrid: isGridEnabled.checked
         clip: true
@@ -78,7 +117,36 @@ Page {
         desiredCols: appWindow.inPortrait? 3 : 4
 
         itemModel: newReportMenuOptions
-        onItemSelected: console.log(item.itemText);
+        onItemSelected: {
+            if (item.itemText === "Police")
+            {
+                pageStack.push(reportPolice);
+            }
+            else if (item.itemText === "Traffic")
+            {
+                pageStack.push(reportTraffic);
+            }
+            else if (item.itemText === "Accident")
+            {
+                pageStack.push(reportAccident);
+            }
+            else if (item.itemText === "Hazard")
+            {
+                pageStack.push(reportHazard);
+            }
+            else if (item.itemText === "Camera")
+            {
+                pageStack.push(reportCamera);
+            }
+            else if (item.itemText === "Chit Chat")
+            {
+                pageStack.push(reportChitChat);
+            }
+            else
+            {
+                console.log(item.itemText);
+            }
+        }
     }
 
     tools: ToolBarLayout {
