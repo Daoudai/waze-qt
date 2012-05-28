@@ -13,12 +13,29 @@ Rectangle {
 
     property ListModel __noSpacersModel: ListModel {}
 
-    property bool isGrid: false
+    property bool isGrid: config.getValue("user", "GridMode", "Off") === "On"
+
+    Connections {
+        target: config
+        onConfigChanged: {
+            if (type === "user" && name === "GridMode")
+            {
+                baseMenuView.isGrid = (newValue === "On");
+            }
+        }
+    }
 
     property int desiredRows: 3
     property int desiredCols: 3
 
     signal itemSelected(variant item)
+
+    onItemSelected: {
+        if (typeof(item.configName) !== 'undefined' && typeof(item.configType) !== 'undefined')
+        {
+            config.setValue(item.configType, item.configName, item.itemValue);
+        }
+    }
 
     onItemModelChanged: {
         __noSpacersModel.clear();
@@ -44,7 +61,7 @@ Rectangle {
         model: baseMenuView.itemModel
         delegate: WazeListItem {
             text: itemText
-            value: itemValue
+            value: (typeof(configName) === 'undefined' || typeof(configType) === 'undefined')? itemValue : config.getValue(configType, configName, itemValue)
             iconSource: itemImage
             isNextIndicatorVisible: hasNext
             isValueVisible: hasValue

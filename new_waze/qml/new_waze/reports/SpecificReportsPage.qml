@@ -86,7 +86,6 @@ Page {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        isGrid: isGridEnabled.checked
         itemModel: reportTypes
         onItemModelChanged: {
             policeReports.clear();

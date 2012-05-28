@@ -9,4 +9,8 @@ PageStackWindow {
     MainPage {
         id: mainPage
     }
+
+    Config {
+        id: config
+    }
 }
