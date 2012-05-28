@@ -8,6 +8,10 @@ import "settings"
 Page {
     id: page1
 
+    Component.onCompleted: {
+        sidebar_visibility_timer.start();
+    }
+
     ListModel {
         id: reports
 
@@ -57,6 +61,11 @@ Page {
         id: mouse_area1
         z: -1
         anchors.fill: parent
+
+        onClicked: {
+            right_side_toolbar.visible = true;
+            left_side_toolbar.visible = true;
+        }
 
         Image {
             id: image1
@@ -232,6 +241,87 @@ Page {
 
         Rectangle {
             id: lower_background
+            color: "#A4000000"
+            z: -1
+            anchors.fill: parent
+        }
+    }
+
+    Timer {
+        id: sidebar_visibility_timer
+        repeat: false
+        running: true
+        interval: 2000
+        onTriggered: {
+            left_side_toolbar.visible = false;
+            right_side_toolbar.visible = false;
+        }
+    }
+
+    Rectangle {
+        id: left_side_toolbar
+        width: 70
+        height: page1.height/3
+        color: "#00000000"
+        anchors.verticalCenterOffset: -page1.height/6
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+
+        Column {
+            property int __numberOfChildren: 2
+
+            spacing: (left_side_toolbar.height - (70*__numberOfChildren))/(__numberOfChildren-1)
+
+            DescriptiveButton {
+                text: ""
+                iconSource: "rm_zoomin.png"
+                onClicked: console.log("Zoom in")
+            }
+
+            DescriptiveButton {
+                text: ""
+                iconSource: "north.png"
+                onClicked: console.log("Compass")
+            }
+        }
+
+        Rectangle {
+            id: left_side_background
+            color: "#A4000000"
+            z: -1
+            anchors.fill: parent
+        }
+    }
+
+    Rectangle {
+        id: right_side_toolbar
+        width: 70
+        height: page1.height/3
+        color: "#00000000"
+        anchors.verticalCenterOffset: -page1.height/6
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+
+        Column {
+            property int __numberOfChildren: 2
+
+            spacing: (right_side_toolbar.height - (70*__numberOfChildren))/(__numberOfChildren-1)
+
+            DescriptiveButton {
+                text: ""
+                iconSource: "rm_zoomout.png"
+                onClicked: console.log("Zoom out")
+            }
+
+            DescriptiveButton {
+                text: ""
+                iconSource: "record_new_roads.png"
+                onClicked: console.log("Edit Map")
+            }
+        }
+
+        Rectangle {
+            id: right_side_background
             color: "#A4000000"
             z: -1
             anchors.fill: parent
