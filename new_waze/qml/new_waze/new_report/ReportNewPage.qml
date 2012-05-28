@@ -106,7 +106,7 @@ Page {
     }
 
     BaseMenuView {
-        isGrid: isGridEnabled.checked
+        id: newReportList
         clip: true
         anchors.bottom: parent.bottom
         anchors.top: parent.top
@@ -150,12 +150,9 @@ Page {
     }
 
     tools: ToolBarLayout {
-            ToolIcon {
-               iconId: "toolbar-back"
-               onClicked: pageStack.pop()
-            }
-            CheckBox {
-               id: isGridEnabled
+        ToolIcon {
+           iconId: "toolbar-back"
+           onClicked: pageStack.pop()
         }
     }
 }

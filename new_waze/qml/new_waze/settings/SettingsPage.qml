@@ -15,6 +15,8 @@ Page {
             hasNext: false
             hasValue: true
             values: [ListElement{text:"None"}, ListElement{text:"Basic"}, ListElement{text:"Full"}]
+            configType: "user"
+            configName: "VoiceNavigation"
         }
 
         ListElement {
@@ -24,15 +26,30 @@ Page {
             hasNext: false
             hasValue: true
             values: [ListElement{text:"2D"}, ListElement{text:"3D"}]
+            configType: "user"
+            configName: "Map"
         }
 
         ListElement {
             itemImage: "home.png"
             itemText: "Day/Night View"
-            itemValue: "Night"
+            itemValue: "Day"
             hasNext: false
             hasValue: true
             values: [ListElement{text:"Day"}, ListElement{text:"Night"}]
+            configType: "user"
+            configName: "NightMode"
+        }
+
+        ListElement {
+            itemImage: "home.png"
+            itemText: "Grid Mode"
+            itemValue: "Off"
+            hasNext: false
+            hasValue: true
+            values: [ListElement{text:"Off"}, ListElement{text:"On"}]
+            configType: "user"
+            configName: "GridMode"
         }
 
         ListElement {
@@ -116,6 +133,7 @@ Page {
 
         onAccepted: {
             selectedMenuItem.itemValue = selectionDialogModel.get(selectionDialog.selectedIndex).text;
+            config.setValue(selectedMenuItem.configType, selectedMenuItem.configName, selectedMenuItem.itemValue);
         }
     }
 
@@ -126,8 +144,6 @@ Page {
         anchors.right: parent.right
 
         itemModel: settingsMenuOptions
-
-        isGrid: isGridEnabled.checked
 
         onItemSelected: {
             if (typeof(item.values) !== 'undefined')
@@ -159,9 +175,6 @@ Page {
         ToolIcon {
            iconId: "toolbar-back"
            onClicked: pageStack.pop()
-        }
-        CheckBox {
-           id: isGridEnabled
         }
     }
 }

@@ -103,8 +103,6 @@ Page {
 
             itemModel: otherNavigationOptions
 
-            isGrid: isGridEnabled.checked
-
             onItemSelected: {console.log(item.itemText)}
 
             desiredRows: appWindow.inPortrait? 3 : 2
@@ -117,9 +115,6 @@ Page {
         ToolIcon {
            iconId: "toolbar-back"
            onClicked: pageStack.pop()
-        }
-        CheckBox {
-           id: isGridEnabled
         }
     }
 }
