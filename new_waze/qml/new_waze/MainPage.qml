@@ -65,6 +65,8 @@ Page {
         onClicked: {
             right_side_toolbar.visible = true;
             left_side_toolbar.visible = true;
+            sidebar_visibility_timer.stop();
+            sidebar_visibility_timer.start();
         }
 
         Image {
