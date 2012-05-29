@@ -9,6 +9,7 @@ Page {
         id: settingsMenuOptions
 
         ListElement {
+            itemIndex:0
             itemImage: "traffic.png"
             itemText: "Voice Navigation"
             itemValue: "None"
@@ -20,6 +21,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:1
             itemImage: "home.png"
             itemText: "Map 2D/3D"
             itemValue: "2D"
@@ -31,6 +33,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:2
             itemImage: "home.png"
             itemText: "Day/Night View"
             itemValue: "Day"
@@ -42,6 +45,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:3
             itemImage: "home.png"
             itemText: "Grid Mode"
             itemValue: "Off"
@@ -53,6 +57,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:4
             itemImage: ""
             itemText: ""
             itemValue: ""
@@ -62,6 +67,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:5
             itemImage: "general_settings.png"
             itemText: "General Settings"
             itemValue: ""
@@ -70,6 +76,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:6
             itemImage: "map_settings.png"
             itemText: "Map"
             itemValue: ""
@@ -78,6 +85,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:7
             itemImage: "group_settings.png"
             itemText: "Groups"
             itemValue: ""
@@ -86,6 +94,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:8
             itemImage: "search_address.png"
             itemText: "Navigation Options"
             itemValue: ""
@@ -94,6 +103,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:9
             itemImage: "download_settings.png"
             itemText: "Data Usage"
             itemValue: ""
@@ -102,6 +112,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:10
             itemImage: "about.png"
             itemText: "Help/Support"
             itemValue: ""
