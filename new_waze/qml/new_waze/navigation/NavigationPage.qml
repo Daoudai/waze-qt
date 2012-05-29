@@ -10,6 +10,7 @@ Page {
         id: otherNavigationOptions
 
         ListElement {
+            itemIndex:0
             itemImage: "home.png"
             itemText: "Home (Click to add)"
             itemValue: ""
@@ -18,6 +19,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:1
             itemImage: "work.png"
             itemText: "Work (Click to add)"
             itemValue: ""
@@ -26,6 +28,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:2
             itemImage: ""
             itemText: ""
             itemValue: ""
@@ -36,6 +39,7 @@ Page {
 
 
         ListElement {
+            itemIndex:3
             itemImage: "search_favorites.png"
             itemText: "My Favorites Places"
             itemValue: ""
@@ -44,6 +48,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:4
             itemImage: "search_history.png"
             itemText: "Last Searches"
             itemValue: ""
@@ -52,6 +57,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:5
             itemImage: "search_marked_locations.png"
             itemText: "Saved Places"
             itemValue: ""
@@ -60,6 +66,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:6
             itemImage: "search_ab.png"
             itemText: "Phonebook"
             itemValue: ""

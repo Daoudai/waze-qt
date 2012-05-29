@@ -10,10 +10,49 @@ Rectangle {
     smooth: true
 
     property ListModel itemModel: ListModel {}
-
-    property ListModel __noSpacersModel: ListModel {}
+    onItemModelChanged: {
+        isGridChanged();
+    }
 
     property bool isGrid: config.getValue("user", "GridMode", "Off") === "On"
+    onIsGridChanged: {
+        console.log("isGrid Changed to " + isGrid);
+        if (isGrid) {
+            privateFunctions.filterForGrid();
+        } else {
+            privateFunctions.unfilterForList();
+        }
+    }
+
+    Component.onCompleted: {
+        if (isGrid) {
+            privateFunctions.filterForGrid();
+        }
+    }
+
+    Item {
+        id: privateFunctions
+
+        function filterForGrid()
+        {
+            for (var j=0,i=0; j<itemModel.count; i++, j++)
+            {
+                var isSpacer = itemModel.get(j).isSpacer;
+                if (typeof(isSpacer) !== 'undefined' && isSpacer)
+                {
+                    itemModel.move(i--,itemModel.count - 1,1);
+                }
+            }
+        }
+
+        function unfilterForList()
+        {
+            for (var i=0; i<itemModel.count; i++)
+            {
+                itemModel.move(i,itemModel.get(i).itemIndex,1);
+            }
+        }
+    }
 
     Connections {
         target: config
@@ -34,19 +73,6 @@ Rectangle {
         if (typeof(item.configName) !== 'undefined' && typeof(item.configType) !== 'undefined')
         {
             config.setValue(item.configType, item.configName, item.itemValue);
-        }
-    }
-
-    onItemModelChanged: {
-        __noSpacersModel.clear();
-
-        for (var i = 0; i < itemModel.count; i++)
-        {
-            var element = itemModel.get(i);
-            if (typeof(element.isSpacer) === 'undefined' || !element.isSpacer)
-            {
-                __noSpacersModel.append(element);
-            }
         }
     }
 
@@ -86,15 +112,16 @@ Rectangle {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        model: baseMenuView.__noSpacersModel
+        model: baseMenuView.itemModel
         delegate: DescriptiveButton {
-            onClicked: baseMenuView.itemSelected(baseMenuView.__noSpacersModel.get(index))
+            onClicked: baseMenuView.itemSelected(baseMenuView.itemModel.get(index))
             text: qsTr(itemText)
             iconSource: itemImage
             isValueVisible: hasValue
             value: itemValue
             width: Math.min(menuGrid.__optimalHeight, menuGrid.__optimalWidth)
             height: width
+            visible: typeof(isSpacer) === 'undefined' || !isSpacer
         }
     }
 }

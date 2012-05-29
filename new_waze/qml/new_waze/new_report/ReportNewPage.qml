@@ -9,6 +9,7 @@ Page {
         id: newReportMenuOptions
 
         ListElement {
+            itemIndex:0
             itemImage: "reportpolice.png"
             itemText: "Police"
             itemValue: ""
@@ -17,6 +18,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:1
             itemImage: "reporttrafficjam.png"
             itemText: "Traffic"
             itemValue: ""
@@ -25,6 +27,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:2
             itemImage: "reportaccident.png"
             itemText: "Accident"
             itemValue: ""
@@ -33,6 +36,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:3
             itemImage: "reporthazard.png"
             itemText: "Hazard"
             itemValue: ""
@@ -42,6 +46,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:4
             itemImage: "add_cam.png"
             itemText: "Camera"
             itemValue: ""
@@ -50,6 +55,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:5
             itemImage: "reportincident.png"
             itemText: "Chit Chat"
             itemValue: ""
@@ -58,6 +64,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:6
             itemImage: "map_updates_menu.png"
             itemText: "Edit Map"
             itemValue: ""

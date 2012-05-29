@@ -8,6 +8,7 @@ Page {
         id: reportTypes
 
         ListElement {
+            itemIndex:0
             itemImage: "report_list_all.png"
             itemText: "All"
             itemValue: 0
@@ -16,6 +17,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:1
             itemImage: "report_list_police.png"
             itemText: "Police"
             itemValue: 0
@@ -24,6 +26,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:2
             itemImage: "report_list_loads.png"
             itemText: "Traffic"
             itemValue: 0
@@ -32,6 +35,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:3
             itemImage: "report_list_accidents.png"
             itemText: "Accidents"
             itemValue: 0
@@ -40,6 +44,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:4
             itemImage: "report_list_chit_chats.png"
             itemText: "Chit Chats"
             itemValue: 0
@@ -48,6 +53,7 @@ Page {
         }
 
         ListElement {
+            itemIndex:5
             itemImage: "report_list_other.png"
             itemText: "Other"
             itemValue: 0
