@@ -15,7 +15,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.leftMargin: 0
         fillMode: Image.PreserveAspectFit
-        source: (dialogTitle.image === "")? dialogTitle.image : "image://waze/" + dialogTitle.image
+        source: (dialogTitle.image === "")? dialogTitle.image : getImage(dialogTitle.image)
     }
 
     Text {

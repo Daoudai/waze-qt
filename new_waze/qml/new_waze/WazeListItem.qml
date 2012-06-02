@@ -49,7 +49,7 @@ Rectangle {
                     id: image1
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
-                    source: (itemDelegate.iconSource === "")? itemDelegate.iconSource : "image://waze/" + itemDelegate.iconSource
+                    source: (itemDelegate.iconSource === "")? itemDelegate.iconSource : getImage(itemDelegate.iconSource)
                 }
             }
 
