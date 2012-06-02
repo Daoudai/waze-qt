@@ -436,4 +436,43 @@ Page {
             anchors.fill: parent
         }
     }
+
+    Rectangle {
+        id: speed_bar
+        width: speedLabel.font.pixelSize*4
+        height: speedLabel.font.pixelSize +5
+        color: "#00000000"
+        anchors.rightMargin: 5
+        anchors.right: parent.right
+        anchors.bottomMargin: 10
+        anchors.bottom: lower_toolbar.top
+
+        // the following function handles switching between
+        // kilometers per hour and miles per hour for speed
+        function speedConvert(speedState) {
+            if (true)
+                return 1.00; // metric
+            else
+                return 0.62;
+        }
+
+        Text {
+            id: speedLabel
+            color: "#ffffff"
+            anchors.fill: parent
+            text: 3.6 * speed_bar.speedConvert() * positionSource.position.speed.toFixed(2) + "Kph"
+            font.pointSize: 19
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+        }
+
+        Rectangle {
+            id: speed_background
+            color: "#A4000000"
+            radius: speedLabel.height
+            z: -1
+            anchors.fill: parent
+            smooth: true
+        }
+    }
 }
