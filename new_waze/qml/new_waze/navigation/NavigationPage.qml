@@ -11,6 +11,25 @@ Page {
 
         ListElement {
             itemIndex:0
+            itemImage: "search_address.png"
+            itemText: "Search"
+            itemValue: ""
+            hasNext: true
+            hasValue: false
+        }
+
+        ListElement {
+            itemIndex:1
+            itemImage: ""
+            itemText: ""
+            itemValue: ""
+            hasNext: false
+            hasValue: false
+            isSpacer: true
+        }
+
+        ListElement {
+            itemIndex:2
             itemImage: "home.png"
             itemText: "Home (Click to add)"
             itemValue: ""
@@ -19,7 +38,7 @@ Page {
         }
 
         ListElement {
-            itemIndex:1
+            itemIndex:3
             itemImage: "work.png"
             itemText: "Work (Click to add)"
             itemValue: ""
@@ -28,7 +47,7 @@ Page {
         }
 
         ListElement {
-            itemIndex:2
+            itemIndex:4
             itemImage: ""
             itemText: ""
             itemValue: ""
@@ -39,7 +58,7 @@ Page {
 
 
         ListElement {
-            itemIndex:3
+            itemIndex:5
             itemImage: "search_favorites.png"
             itemText: "My Favorites Places"
             itemValue: ""
@@ -48,7 +67,7 @@ Page {
         }
 
         ListElement {
-            itemIndex:4
+            itemIndex:6
             itemImage: "search_history.png"
             itemText: "Last Searches"
             itemValue: ""
@@ -57,7 +76,7 @@ Page {
         }
 
         ListElement {
-            itemIndex:5
+            itemIndex:7
             itemImage: "search_marked_locations.png"
             itemText: "Saved Places"
             itemValue: ""
@@ -66,7 +85,7 @@ Page {
         }
 
         ListElement {
-            itemIndex:6
+            itemIndex:8
             itemImage: "search_ab.png"
             itemText: "Phonebook"
             itemValue: ""
@@ -75,48 +94,27 @@ Page {
         }
     }
 
-    Rectangle {
-        id: rectangle1
-        color: "#00000000"
-        anchors.rightMargin: 10
-        anchors.leftMargin: 10
-        anchors.bottomMargin: 10
-        anchors.topMargin: 10
+    BaseMenuView {
+        id: rectangle2
         anchors.fill: parent
 
-        TextField {
-            id: search
-            anchors.rightMargin: 10
-            anchors.top: parent.top
-            anchors.right: button1.left
-            anchors.left: parent.left
-        }
+        itemModel: otherNavigationOptions
 
-        Button {
-            id: button1
-            width: 70
-            iconSource: "../search_address.png"
-            anchors.top: parent.top
-            anchors.right: parent.right
-        }
-
-        BaseMenuView {
-            id: rectangle2
-            anchors.topMargin: 10
-            anchors.right: parent.right
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
-            anchors.top: search.bottom
-
-            itemModel: otherNavigationOptions
-
-            onItemSelected: {console.log(item.itemText)}
-
-            desiredRows: appWindow.inPortrait? 3 : 2
-            desiredCols: appWindow.inPortrait? 2 : 3
+        onItemSelected: {
+            if (item.itemText === "Search")
+            {
+                pageStack.push(addressSearchPage);
+            }
+            else
+            {
+                console.log(item.itemText);
+            }
         }
     }
 
+    AddressSearchPage {
+        id: addressSearchPage
+    }
 
     tools: ToolBarLayout {
         ToolIcon {

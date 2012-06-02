@@ -16,7 +16,6 @@ Rectangle {
 
     property bool isGrid: config.getValue("user", "GridMode", "Off") === "On"
     onIsGridChanged: {
-        console.log("isGrid Changed to " + isGrid);
         if (isGrid) {
             privateFunctions.filterForGrid();
         } else {
@@ -37,7 +36,7 @@ Rectangle {
         {
             for (var j=0,i=0; j<itemModel.count; i++, j++)
             {
-                var isSpacer = itemModel.get(j).isSpacer;
+                var isSpacer = itemModel.get(i).isSpacer;
                 if (typeof(isSpacer) !== 'undefined' && isSpacer)
                 {
                     itemModel.move(i--,itemModel.count - 1,1);
@@ -64,9 +63,6 @@ Rectangle {
         }
     }
 
-    property int desiredRows: 3
-    property int desiredCols: 3
-
     signal itemSelected(variant item)
 
     onItemSelected: {
@@ -84,6 +80,7 @@ Rectangle {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
+        anchors.margins: 10
         model: baseMenuView.itemModel
         delegate: WazeListItem {
             text: itemText
@@ -97,31 +94,62 @@ Rectangle {
         }
     }
 
+    DescriptiveButton {
+        id: prevButton
+
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        visible: baseMenuView.isGrid && menuGrid.currentIndex >= 8
+
+        onClicked: menuGrid.currentIndex -= 8
+
+        text: qsTr("Prev")
+        iconSource: "left_side.png"
+    }
+
     GridView {
         id: menuGrid
         visible: baseMenuView.isGrid
-
-        property int __optimalWidth:menuGrid.width*baseMenuView.desiredCols/model.count
-        property int __optimalHeight:menuGrid.height*baseMenuView.desiredRows/model.count
-
-        property int __dim: __optimalWidth
-        cellWidth: __optimalWidth
-        cellHeight: __optimalHeight
+        cellWidth: menuGrid.width / 4
+        cellHeight: menuGrid.height / 2
         clip: true
         anchors.bottom: parent.bottom
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.left: prevButton.right
+        anchors.right: nextButton.left
+        anchors.topMargin: 15
+        anchors.bottomMargin: 15
         model: baseMenuView.itemModel
+        snapMode: GridView.SnapOneRow
+        flickDeceleration: 500
+        highlightFollowsCurrentItem: true
+        highlightRangeMode: GridView.StrictlyEnforceRange
+        preferredHighlightBegin: 0; preferredHighlightEnd: 0
+        cacheBuffer: width;
+        currentIndex: 0
         delegate: DescriptiveButton {
             onClicked: baseMenuView.itemSelected(baseMenuView.itemModel.get(index))
             text: qsTr(itemText)
             iconSource: itemImage
             isValueVisible: hasValue
             value: itemValue
-            width: Math.min(menuGrid.__optimalHeight, menuGrid.__optimalWidth)
-            height: width
+            width: menuGrid.cellWidth - 5
+            height: menuGrid.cellHeight - 5
+            color: "#7d91c0"
             visible: typeof(isSpacer) === 'undefined' || !isSpacer
         }
+    }
+
+    DescriptiveButton {
+        id: nextButton
+
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        visible: baseMenuView.isGrid && menuGrid.currentIndex < menuGrid.count - 8
+
+        onClicked: menuGrid.currentIndex += 8
+
+        text: qsTr("Next")
+        iconSource: "right_side.png"
     }
 }

@@ -120,9 +120,6 @@ Page {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        desiredRows: appWindow.inPortrait? 4 : 3
-        desiredCols: appWindow.inPortrait? 3 : 4
-
         itemModel: newReportMenuOptions
         onItemSelected: {
             if (item.itemText === "Police")
