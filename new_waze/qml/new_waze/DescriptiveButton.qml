@@ -14,30 +14,22 @@ MouseArea {
 
     property string iconSource
 
+    property color color: "transparent"
+
+    property int valueSize: 28
+
     Image {
+        id: buttonImage
+        anchors.right: countText.left
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.topMargin: 5
         source: descriptiveButton.iconSource === ""? descriptiveButton.iconSource : "image://waze/" + descriptiveButton.iconSource
         anchors.rightMargin: 5
         anchors.leftMargin: 5
         anchors.bottomMargin: 10
-        anchors.topMargin: 5
         fillMode: Image.PreserveAspectFit
-        anchors.fill: parent
-    }
-
-    Rectangle {
-        id: rectangle1
-        width: countText.width + (countText.font.pixelSize)
-        height: countText.height + 5
-        color: "#7d91c0"
-        radius: height/2
-        opacity: 0.690
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        border.width: 1
-        border.color: "#000000"
-        z: 1
-        visible: descriptiveButton.isValueVisible
-        smooth: true
     }
 
     Text {
@@ -49,7 +41,7 @@ MouseArea {
         style: Text.Outline
         font.bold: true
         horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignTop
+        verticalAlignment: Text.AlignVCenter
         anchors.horizontalCenter: parent.horizontalCenter
         font.pixelSize: 12
         smooth: true
@@ -57,18 +49,28 @@ MouseArea {
 
     Text {
         id: countText
-        x: 7
         horizontalAlignment: Text.AlignHCenter
-        font.pixelSize: 14
+        font.pixelSize: descriptiveButton.valueSize
         color: "#ffffff"
         text: descriptiveButton.value
+        anchors.rightMargin: descriptiveButton.value === ""? 0 : 5
+        anchors.bottomMargin: 10
+        anchors.topMargin: 5
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
         visible: descriptiveButton.isValueVisible
-        anchors.verticalCenter: rectangle1.verticalCenter
-        z: 2
-        anchors.horizontalCenter: rectangle1.horizontalCenter
         style: Text.Outline
         verticalAlignment: Text.AlignVCenter
         smooth: true
+        wrapMode: Text.WordWrap
+    }
+
+    Rectangle {
+        id: background
+        z: -1
+        color: descriptiveButton.color
+        anchors.fill: parent
     }
 }
 
