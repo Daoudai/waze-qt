@@ -1,5 +1,6 @@
 import QtQuick 1.1
 import com.nokia.meego 1.0
+import QtMobility.location 1.2
 import "reports"
 import "new_report"
 import "navigation"
@@ -65,20 +66,50 @@ Page {
         sidebar_visibility_timer.start();
     }
 
-    MouseArea {
-        id: mouse_area1
-        z: -1
-        anchors.fill: parent
+    PositionSource {
+        id: positionSource
+        updateInterval: 1000
+        active: true
+        // nmeaSource: "nmealog.txt"
+    }
 
-        onClicked: showSideToolbars()
+    Map {
+         id: map
+         z: -1
+         plugin : Plugin {name : "nokia"}
+         anchors.fill: parent
+         size.width: parent.width
+         size.height: parent.height
+         zoomLevel: 10
 
-        Image {
-            id: image1
-            anchors.left: parent.left
-            anchors.top: parent.top
-            fillMode: Image.PreserveAspectCrop
-            source: "image://waze/map.png"
-        }
+         MapMouseArea {
+             property int lastX : -1
+             property int lastY : -1
+
+             onPressed : {
+                 lastX = mouse.x
+                 lastY = mouse.y
+             }
+
+             onReleased : {
+                 lastX = -1
+                 lastY = -1
+             }
+             onPositionChanged: {
+                 if (mouse.button === Qt.LeftButton) {
+                     if ((lastX !== -1) && (lastY !== -1)) {
+                         var dx = mouse.x - lastX
+                         var dy = mouse.y - lastY
+                         map.pan(-dx, -dy)
+                     }
+                     lastX = mouse.x
+                     lastY = mouse.y
+                 }
+             }
+
+             onClicked: showSideToolbars()
+
+         }
     }
 
     Rectangle {
@@ -282,7 +313,7 @@ Page {
                 iconSource: "rm_zoomin.png"
                 onClicked: {
                     showSideToolbars();
-                    console.log("Zoom in");
+                    map.zoomLevel++;
                 }
             }
 
@@ -323,7 +354,7 @@ Page {
                 iconSource: "rm_zoomout.png"
                 onClicked:  {
                     showSideToolbars();
-                    console.log("Zoom out");
+                    map.zoomLevel--;
                 }
             }
 
