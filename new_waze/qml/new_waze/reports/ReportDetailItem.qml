@@ -10,7 +10,7 @@ Rectangle {
 
     signal clicked
 
-    function getImage(reportType) {
+    function getImageFromReport(reportType) {
 
         if (reportType === "All")
         {
@@ -38,6 +38,7 @@ Rectangle {
         }
 
         console.log("Unknown report type: " + reportType);
+        return "";
     }
 
     MouseArea {
@@ -54,7 +55,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.bottom: speed.top
         anchors.top: parent.top
-        source: rectangle1.getImage(type)
+        source: getImage(rectangle1.getImageFromReport(type));
     }
 
     Column {
