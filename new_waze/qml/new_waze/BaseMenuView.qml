@@ -99,9 +99,18 @@ Rectangle {
 
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        visible: baseMenuView.isGrid && menuGrid.currentIndex >= 8
+        visible: baseMenuView.isGrid && menuGrid.currentIndex >= 4
 
-        onClicked: menuGrid.currentIndex -= 8
+        onClicked: {
+            if (menuGrid.currentIndex > 8)
+            {
+                menuGrid.currentIndex -= 8;
+            }
+            else
+            {
+                menuGrid.currentIndex = 0;
+            }
+        }
 
         text: qsTr("Prev")
         iconSource: "left_side.png"
@@ -110,8 +119,8 @@ Rectangle {
     GridView {
         id: menuGrid
         visible: baseMenuView.isGrid
-        cellWidth: menuGrid.width / 4
-        cellHeight: menuGrid.height / 2
+        cellWidth: menuGrid.width > menuGrid.height? menuGrid.width / 4 : menuGrid.width / 2
+        cellHeight: menuGrid.width > menuGrid.height? menuGrid.height / 2  : menuGrid.height / 4
         clip: true
         anchors.bottom: parent.bottom
         anchors.top: parent.top
@@ -147,7 +156,16 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         visible: baseMenuView.isGrid && menuGrid.currentIndex < menuGrid.count - 8
 
-        onClicked: menuGrid.currentIndex += 8
+        onClicked: {
+            if (menuGrid.currentIndex < menuGrid.count - 8)
+            {
+                menuGrid.currentIndex += 8;
+            }
+            else
+            {
+                menuGrid.currentIndex += (menuGrid.count - menuGrid.currentIndex) % 8;
+            }
+        }
 
         text: qsTr("Next")
         iconSource: "right_side.png"
