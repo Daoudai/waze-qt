@@ -57,17 +57,20 @@ Page {
         }
     }
 
+    function showSideToolbars()
+    {
+        right_side_toolbar.visible = true;
+        left_side_toolbar.visible = true;
+        sidebar_visibility_timer.stop();
+        sidebar_visibility_timer.start();
+    }
+
     MouseArea {
         id: mouse_area1
         z: -1
         anchors.fill: parent
 
-        onClicked: {
-            right_side_toolbar.visible = true;
-            left_side_toolbar.visible = true;
-            sidebar_visibility_timer.stop();
-            sidebar_visibility_timer.start();
-        }
+        onClicked: showSideToolbars()
 
         Image {
             id: image1
@@ -277,13 +280,19 @@ Page {
             DescriptiveButton {
                 text: ""
                 iconSource: "rm_zoomin.png"
-                onClicked: console.log("Zoom in")
+                onClicked: {
+                    showSideToolbars();
+                    console.log("Zoom in");
+                }
             }
 
             DescriptiveButton {
                 text: ""
                 iconSource: "north.png"
-                onClicked: console.log("Compass")
+                onClicked:  {
+                    showSideToolbars();
+                    console.log("Compass");
+                }
             }
         }
 
@@ -312,13 +321,19 @@ Page {
             DescriptiveButton {
                 text: ""
                 iconSource: "rm_zoomout.png"
-                onClicked: console.log("Zoom out")
+                onClicked:  {
+                    showSideToolbars();
+                    console.log("Zoom out");
+                }
             }
 
             DescriptiveButton {
                 text: ""
                 iconSource: "record_new_roads.png"
-                onClicked: console.log("Edit Map")
+                onClicked:  {
+                    showSideToolbars();
+                    console.log("Edit Map");
+                }
             }
         }
 
