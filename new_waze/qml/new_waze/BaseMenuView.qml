@@ -119,8 +119,8 @@ Rectangle {
     GridView {
         id: menuGrid
         visible: baseMenuView.isGrid
-        cellWidth: menuGrid.width > menuGrid.height? menuGrid.width / 4 : menuGrid.width / 2
-        cellHeight: menuGrid.width > menuGrid.height? menuGrid.height / 2  : menuGrid.height / 4
+        cellWidth: -5 + (menuGrid.width > menuGrid.height? menuGrid.width / 4 : menuGrid.width / 2)
+        cellHeight: -5 + (menuGrid.width > menuGrid.height? menuGrid.height / 2 : menuGrid.height / 4)
         clip: true
         anchors.bottom: parent.bottom
         anchors.top: parent.top
@@ -144,7 +144,7 @@ Rectangle {
             value: itemValue
             width: menuGrid.cellWidth - 5
             height: menuGrid.cellHeight - 5
-            color: "#7d91c0"
+            color: "blue"
             visible: typeof(isSpacer) === 'undefined' || !isSpacer
         }
     }

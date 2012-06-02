@@ -9,6 +9,8 @@ import "settings"
 Page {
     id: page1
 
+    property int accuracyLimit: 30
+
     Component.onCompleted: {
         sidebar_visibility_timer.start();
     }
@@ -82,13 +84,70 @@ Page {
          size.height: parent.height
          zoomLevel: 10
 
+         property bool isCentered: true
+
+         onCenterChanged: {
+             map.isCentered = map.center == positionSource.position.coordinate;
+         }
+
+         MapGroup {
+
+             MapImage {
+                 id: carCentered
+                 source: getImage("cars/car_blue.png")
+                 coordinate: positionSource.position.coordinate
+                 visible: false
+             }
+
+             MapImage {
+                 id: carNotCentered
+                 source: getImage("cars/Arrow.png")
+                 coordinate: positionSource.position.coordinate
+                 visible: false
+             }
+
+             MapImage {
+                 id: fixatingLocation
+                 source: getImage("location.png")
+                 coordinate: positionSource.position.coordinate
+                 visible: false
+             }
+
+             states: [
+                 State {
+                     name: "fixating"
+                     when: !positionSource.position.latitudeValid || !positionSource.position.longitudeValid
+                     PropertyChanges {
+                         target: fixatingLocation
+                         visible: true
+                     }
+                 },
+                 State {
+                     name: "centered"
+                     when: map.isCentered
+                     PropertyChanges {
+                         target: carCentered
+                         visible: true
+                     }
+                 },
+                 State {
+                     name: "notCentered"
+                     when: !map.isCentered
+                     PropertyChanges {
+                         target: carNotCentered
+                         visible: true
+                     }
+                 }
+             ]
+         }
+
          MapMouseArea {
              property int lastX : -1
              property int lastY : -1
 
              onPressed : {
-                 lastX = mouse.x
-                 lastY = mouse.y
+                 lastX = mouse.x;
+                 lastY = mouse.y;
              }
 
              onReleased : {
@@ -98,17 +157,17 @@ Page {
              onPositionChanged: {
                  if (mouse.button === Qt.LeftButton) {
                      if ((lastX !== -1) && (lastY !== -1)) {
-                         var dx = mouse.x - lastX
-                         var dy = mouse.y - lastY
-                         map.pan(-dx, -dy)
+                         map.center = null;
+                         var dx = mouse.x - lastX;
+                         var dy = mouse.y - lastY;
+                         map.pan(-dx, -dy);
                      }
-                     lastX = mouse.x
-                     lastY = mouse.y
+                     lastX = mouse.x;
+                     lastY = mouse.y;
                  }
              }
 
              onClicked: showSideToolbars()
-
          }
     }
 
@@ -229,6 +288,8 @@ Page {
             DescriptiveButton {
                 text: "Show Me"
                 iconSource: "On_map_anonymous.png"
+
+                onClicked: map.center = positionSource.position.coordinate;
             }
 
             DescriptiveButton {

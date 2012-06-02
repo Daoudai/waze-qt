@@ -42,16 +42,16 @@ Rectangle {
         anchors.top: parent.top
 
         Button {
-            iconSource: (option1icon === "")? option1icon : "image://waze/" + option1icon
+            iconSource: (option1icon === "")? option1icon : getImage(option1icon)
             checked: true
             visible: option1icon !== ""
         }
         Button {
-            iconSource: (option2icon === "")? option2icon : "image://waze/" + option2icon
+            iconSource: (option2icon === "")? option2icon : getImage(option2icon)
             visible: option2icon !== ""
         }
         Button {
-            iconSource: (option3icon === "")? option3icon : "image://waze/" + option3icon
+            iconSource: (option3icon === "")? option3icon : getImage(option3icon)
             visible: option3icon !== ""
         }
     }
@@ -81,7 +81,7 @@ Rectangle {
             anchors.rightMargin: 0
             anchors.verticalCenter: parent.verticalCenter
             width: 50
-            iconSource: "image://waze/recorder_record.png"
+            iconSource: getImage("recorder_record.png")
         }
     }
 
@@ -107,7 +107,7 @@ Rectangle {
             anchors.top: parent.top
             anchors.topMargin: 0
             anchors.horizontalCenter: parent.horizontalCenter
-            iconSource: "image://waze/add_image_box.png"
+            iconSource: getImage("add_image_box.png")
         }
 
         Rectangle {

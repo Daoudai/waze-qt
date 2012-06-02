@@ -25,7 +25,7 @@ MouseArea {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.topMargin: 5
-        source: descriptiveButton.iconSource === ""? descriptiveButton.iconSource : "image://waze/" + descriptiveButton.iconSource
+        source: descriptiveButton.iconSource === ""? descriptiveButton.iconSource : getImage(descriptiveButton.iconSource)
         anchors.rightMargin: 5
         anchors.leftMargin: 5
         anchors.bottomMargin: 10
@@ -60,7 +60,6 @@ MouseArea {
         anchors.bottom: parent.bottom
         anchors.right: parent.right
         visible: descriptiveButton.isValueVisible
-        style: Text.Outline
         verticalAlignment: Text.AlignVCenter
         smooth: true
         wrapMode: Text.WordWrap
