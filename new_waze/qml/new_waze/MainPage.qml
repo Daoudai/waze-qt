@@ -1,6 +1,7 @@
 import QtQuick 1.1
 import com.nokia.meego 1.0
 import QtMobility.location 1.2
+import org.waze 1.0
 import "reports"
 import "new_report"
 import "navigation"
@@ -68,107 +69,149 @@ Page {
         sidebar_visibility_timer.start();
     }
 
-    PositionSource {
+    WazePositionSource {
         id: positionSource
-        updateInterval: 1000
-        active: true
+//        active: false
         // nmeaSource: "nmealog.txt"
+
+//        onPositionChanged: positionSource.position.coordinateChanged()
     }
 
-    Map {
+
+    WazeMap {
          id: map
          z: -1
-         plugin : Plugin {name : "nokia"}
          anchors.fill: parent
-         size.width: parent.width
-         size.height: parent.height
          zoomLevel: 10
 
          property bool isCentered: true
 
          onCenterChanged: {
-             map.isCentered = map.center == positionSource.position.coordinate;
+             var coord = positionSource.position;
+             var mapCenter = map.mapCenter;
+             map.isCentered = typeof(mapCenter) !== 'undefined' &&
+                     mapCenter.longitude === coord.longitude &&
+                     mapCenter.latitude === coord.latitude &&
+                     mapCenter.altitude === coord.altitude;
          }
+    }
 
-         MapGroup {
+    Item {
+        id: positionMarkerStatesMaintainer
 
-             MapImage {
-                 id: carCentered
-                 source: getImage("cars/car_blue.png")
-                 coordinate: positionSource.position.coordinate
-                 visible: false
-             }
+        WazeMapImageItem {
+            id: carCentered
+            source: getImage("cars/car_blue.png")
+            mapCoordinate: positionSource.position
+            visible: false
+        }
 
-             MapImage {
-                 id: carNotCentered
-                 source: getImage("cars/Arrow.png")
-                 coordinate: positionSource.position.coordinate
-                 visible: false
-             }
+        WazeMapImageItem {
+            id: carNotCentered
+            source: getImage("cars/Arrow.png")
+            mapCoordinate: positionSource.position
+            visible: false
+        }
 
-             MapImage {
-                 id: fixatingLocation
-                 source: getImage("location.png")
-                 coordinate: positionSource.position.coordinate
-                 visible: false
-             }
+        WazeMapImageItem {
+            id: fixatingLocation
+            source: getImage("location.png")
+            mapCoordinate: positionSource.position
+            visible: false
+        }
 
-             states: [
-                 State {
-                     name: "fixating"
-                     when: !positionSource.position.latitudeValid || !positionSource.position.longitudeValid
-                     PropertyChanges {
-                         target: fixatingLocation
-                         visible: true
-                     }
-                 },
-                 State {
-                     name: "centered"
-                     when: map.isCentered
-                     PropertyChanges {
-                         target: carCentered
-                         visible: true
-                     }
-                 },
-                 State {
-                     name: "notCentered"
-                     when: !map.isCentered
-                     PropertyChanges {
-                         target: carNotCentered
-                         visible: true
-                     }
-                 }
-             ]
-         }
+        Component.onCompleted: {
+            map.addMapObject(carCentered);
+            map.addMapObject(carNotCentered);
+            map.addMapObject(fixatingLocation);
+        }
 
-         MapMouseArea {
-             property int lastX : -1
-             property int lastY : -1
+        states: [
+            State {
+                name: "fixating"
+                when: !positionSource.position.latitudeValid || !positionSource.position.longitudeValid
+                PropertyChanges {
+                    target: fixatingLocation
+                    visible: true
+                }
+            },
+            State {
+                name: "centered"
+                when: map.isCentered
+                PropertyChanges {
+                    target: carCentered
+                    visible: true
+                }
+            },
+            State {
+                name: "notCentered"
+                when: !map.isCentered
+                PropertyChanges {
+                    target: carNotCentered
+                    visible: true
+                }
+            }
+        ]
+    }
 
-             onPressed : {
-                 lastX = mouse.x;
-                 lastY = mouse.y;
-             }
+    PinchArea {
+       id: pincharea
 
-             onReleased : {
-                 lastX = -1
-                 lastY = -1
-             }
-             onPositionChanged: {
-                 if (mouse.button === Qt.LeftButton) {
-                     if ((lastX !== -1) && (lastY !== -1)) {
-                         map.center = null;
-                         var dx = mouse.x - lastX;
-                         var dy = mouse.y - lastY;
-                         map.pan(-dx, -dy);
-                     }
-                     lastX = mouse.x;
-                     lastY = mouse.y;
-                 }
-             }
+       property double __oldZoom
 
-             onClicked: showSideToolbars()
-         }
+       anchors.fill: parent
+
+       function calcZoomDelta(zoom, percent) {
+          return zoom + Math.log(percent)/Math.log(2)
+       }
+
+       onPinchStarted: {
+          __oldZoom = map.zoomLevel
+       }
+
+       onPinchUpdated: {
+          map.zoomLevel = calcZoomDelta(__oldZoom, pinch.scale);
+          map.bearing = pinch.rotation;
+       }
+
+       onPinchFinished: {
+          map.zoomLevel = calcZoomDelta(__oldZoom, pinch.scale)
+       }
+    }
+
+    MouseArea {
+       id: mousearea
+
+       property bool __isPanning: false
+       property int __lastX: -1
+       property int __lastY: -1
+
+       anchors.fill : parent
+
+       onPressed: {
+           showSideToolbars();
+          __isPanning = true
+          __lastX = mouse.x
+          __lastY = mouse.y
+       }
+
+       onReleased: {
+          __isPanning = false
+       }
+
+       onPositionChanged: {
+          if (__isPanning) {
+             var dx = mouse.x - __lastX
+             var dy = mouse.y - __lastY
+             map.pan(-dx, -dy)
+             __lastX = mouse.x
+             __lastY = mouse.y
+          }
+       }
+
+       onCanceled: {
+          __isPanning = false;
+       }
     }
 
     Rectangle {
@@ -289,7 +332,7 @@ Page {
                 text: "Show Me"
                 iconSource: "On_map_anonymous.png"
 
-                onClicked: map.center = positionSource.position.coordinate;
+                onClicked: map.mapCenter = positionSource.position
             }
 
             DescriptiveButton {
@@ -449,18 +492,20 @@ Page {
 
         // the following function handles switching between
         // kilometers per hour and miles per hour for speed
-        function speedConvert(speedState) {
+        function speedConvert(position, speedState) {
+            if (!position.speedValid) return 0;
+
             if (true)
-                return 1.00; // metric
+                return position.speed; // metric
             else
-                return 0.62;
+                return 0.62*position.speed;
         }
 
         Text {
             id: speedLabel
             color: "#ffffff"
             anchors.fill: parent
-            text: 3.6 * speed_bar.speedConvert() * positionSource.position.speed.toFixed(2) + "Kph"
+            text: Math.ceil(3.6 * speed_bar.speedConvert(positionSource.position), "Metric") + "Kph"
             font.pointSize: 19
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
