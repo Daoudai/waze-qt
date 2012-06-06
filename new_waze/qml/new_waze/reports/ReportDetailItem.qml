@@ -12,29 +12,20 @@ Rectangle {
 
     function getImageFromReport(reportType) {
 
-        if (reportType === "All")
+        switch (reportType)
         {
+        case "All":
             return "report_list_all.png";
-        }
-        else if (reportType === "Police")
-        {
+        case "Police":
             return "report_list_police.png";
-        }
-        else if (reportType === "Traffic")
-        {
+        case "Traffic":
             return "report_list_loads.png";
-        }
-        else if (reportType === "Accidents")
-        {
-            return "report_list_accidents.png"
-        }
-        else if (reportType === "Chit Chats")
-        {
+        case "Accidents":
+            return "report_list_accidents.png";
+        case "Chit Chats":
             return "report_list_chit_chats.png";
-        }
-        else if (reportType === "Other")
-        {
-            return "report_list_other.png"
+        case "Other":
+            return "report_list_other.png";
         }
 
         console.log("Unknown report type: " + reportType);
