@@ -69,31 +69,13 @@ Page {
         sidebar_visibility_timer.start();
     }
 
-    WazePositionSource {
-        id: positionSource
-//        active: false
-        // nmeaSource: "nmealog.txt"
-
-//        onPositionChanged: positionSource.position.coordinateChanged()
-    }
-
-
     WazeMap {
          id: map
          z: -1
          anchors.fill: parent
          zoomLevel: 10
 
-         property bool isCentered: true
-
-         onCenterChanged: {
-             var coord = positionSource.position;
-             var mapCenter = map.mapCenter;
-             map.isCentered = typeof(mapCenter) !== 'undefined' &&
-                     mapCenter.longitude === coord.longitude &&
-                     mapCenter.latitude === coord.latitude &&
-                     mapCenter.altitude === coord.altitude;
-         }
+         trackPosition: false
     }
 
     Item {
@@ -102,21 +84,21 @@ Page {
         WazeMapImageItem {
             id: carCentered
             source: getImage("cars/car_blue.png")
-            mapCoordinate: positionSource.position
+            mapCoordinate: map.currentPosition
             visible: false
         }
 
         WazeMapImageItem {
             id: carNotCentered
             source: getImage("cars/Arrow.png")
-            mapCoordinate: positionSource.position
+            mapCoordinate: map.currentPosition
             visible: false
         }
 
         WazeMapImageItem {
             id: fixatingLocation
             source: getImage("location.png")
-            mapCoordinate: positionSource.position
+            mapCoordinate: map.currentPosition
             visible: false
         }
 
@@ -129,7 +111,7 @@ Page {
         states: [
             State {
                 name: "fixating"
-                when: !positionSource.position.latitudeValid || !positionSource.position.longitudeValid
+                when: map.currentPosition.accuracy < accuracyLimit
                 PropertyChanges {
                     target: fixatingLocation
                     visible: true
@@ -137,7 +119,7 @@ Page {
             },
             State {
                 name: "centered"
-                when: map.isCentered
+                when: map.trackPosition
                 PropertyChanges {
                     target: carCentered
                     visible: true
@@ -145,7 +127,7 @@ Page {
             },
             State {
                 name: "notCentered"
-                when: !map.isCentered
+                when: !map.trackPosition
                 PropertyChanges {
                     target: carNotCentered
                     visible: true
@@ -203,6 +185,7 @@ Page {
           if (__isPanning) {
              var dx = mouse.x - __lastX
              var dy = mouse.y - __lastY
+             map.trackPosition = false;
              map.pan(-dx, -dy)
              __lastX = mouse.x
              __lastY = mouse.y
@@ -332,7 +315,7 @@ Page {
                 text: "Show Me"
                 iconSource: "On_map_anonymous.png"
 
-                onClicked: map.mapCenter = positionSource.position
+                onClicked: map.trackPosition = true
             }
 
             DescriptiveButton {
@@ -423,10 +406,10 @@ Page {
 
             DescriptiveButton {
                 text: ""
-                iconSource: "north.png"
+                iconSource: "rm_zoomout.png"
                 onClicked:  {
                     showSideToolbars();
-                    console.log("Compass");
+                    map.zoomLevel--;
                 }
             }
         }
@@ -455,10 +438,10 @@ Page {
 
             DescriptiveButton {
                 text: ""
-                iconSource: "rm_zoomout.png"
+                iconSource: "north.png"
                 onClicked:  {
                     showSideToolbars();
-                    map.zoomLevel--;
+                    console.log("Compass");
                 }
             }
 
@@ -492,20 +475,20 @@ Page {
 
         // the following function handles switching between
         // kilometers per hour and miles per hour for speed
-        function speedConvert(position, speedState) {
-            if (!position.speedValid) return 0;
+        function speedConvert(speed, speedState) {
+//            if (!position.speedValid) return 0;
 
             if (true)
-                return position.speed; // metric
+                return speed; // metric
             else
-                return 0.62*position.speed;
+                return 0.62*speed;
         }
 
         Text {
             id: speedLabel
             color: "#ffffff"
             anchors.fill: parent
-            text: Math.ceil(3.6 * speed_bar.speedConvert(positionSource.position), "Metric") + "Kph"
+            text: Math.ceil(3.6 * map.currentPosition.speed) + "Kph"
             font.pointSize: 19
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter

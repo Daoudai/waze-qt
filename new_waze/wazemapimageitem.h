@@ -14,13 +14,13 @@ public:
     WazeMapImageItem();
 
     Q_PROPERTY(WazePosition mapCoordinate READ mapCoordinate WRITE setMapCoordinate NOTIFY mapCoordinateChanged)
-    Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged)
+    Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
 
     WazePosition& mapCoordinate();
-    void setMapCoordinate(const WazePosition &coordinate);
+    void setMapCoordinate(WazePosition &coordinate);
 
-    QUrl source();
-    void setSource(QUrl source);
+    QString source();
+    void setSource(QString source);
 
 protected:
     
@@ -32,7 +32,7 @@ public slots:
 
 private:
     WazePosition _mapCoordinate;
-    QUrl _source;
+    QString _source;
 };
 
 #endif // WAZEMAPIMAGEITEM_H

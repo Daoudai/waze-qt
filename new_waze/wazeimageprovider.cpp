@@ -15,7 +15,5 @@ QString WazeImageProvider::getImage(QString imageName)
 
     if (QFile::exists(imagePath)) return imagePath;
 
-    qDebug("Image file not found: %s", imagePath.toLocal8Bit().data());
-
     return QString();
 }

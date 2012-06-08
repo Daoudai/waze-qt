@@ -13,24 +13,29 @@ class WazeMap : public QGraphicsGeoMap
 public:
     WazeMap();
     Q_INVOKABLE void addMapObject(WazeMapImageItem* imageItem);
+    Q_PROPERTY (bool trackPosition READ trackPosition WRITE setTrackPosition NOTIFY trackPositionChanged)
+    Q_PROPERTY (WazePosition currentPosition READ currentPosition NOTIFY currentPositionChanged)
 
-    Q_PROPERTY (WazePosition mapCenter READ mapCenter WRITE setMapCenter NOTIFY mapCenterChanged)
+    bool trackPosition();
+    void setTrackPosition(bool trackPosition);
 
-    WazePosition& mapCenter();
-    void setMapCenter(WazePosition& position);
+    WazePosition& currentPosition();
 
 signals:
-    void mapCenterChanged();
+    void trackPositionChanged();
+    void currentPositionChanged();
 
 public slots:
 
 private slots:
-    void onCenterChanged(QGeoCoordinate center);
+    void onPositionChanged();
+    void onTrackPositionChanged();
 
 protected:
 
 private:
-    WazePosition _mapCenter;
+    WazePositionSource _positionSource;
+    bool _trackPosition;
 };
 
 #endif // WAZEMAP_H
