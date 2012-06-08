@@ -23,6 +23,8 @@ WazePosition& WazePosition::operator=(const WazePosition& other)
 
     emit positionInfoChanged(_positionInfo);
     emit coordinateChanged(_coordinate);
+
+    return *this;
 }
 
 
@@ -43,55 +45,76 @@ int WazePosition::altitude()
 
 int WazePosition::speed()
 {
-    int _speed = (int) _positionInfo.attribute(QGeoPositionInfo::GroundSpeed);
-    if (_speed == -1) {
-        _speed = 0;
+    int speed = (int) _positionInfo.attribute(QGeoPositionInfo::GroundSpeed);
+    if (speed == -1) {
+        speed = 0;
     } else {
 #ifdef Q_WS_MAEMO_5
-        _speed = (int) _speed*0.5399;  // convert from kph to knots - to overcome the bug of wrong speed reading unit in QtMobility 1.0
+        speed = (int) speed*0.5399;  // convert from kph to knots - to overcome the bug of wrong speed reading unit in QtMobility 1.0
 #else
-        _speed = (int) _speed*1.944;  // convert from m/s to knots
+        speed = (int) speed*1.944;  // convert from m/s to knots
 #endif
     }
-    return _speed;
+    return speed;
 }
 
 int WazePosition::azymuth()
 {
-    int _azymuth = (int) _positionInfo.attribute(QGeoPositionInfo::Direction);
-    if (_azymuth == -1) {
-        _azymuth = 0;
+    int azymuth = (int) _positionInfo.attribute(QGeoPositionInfo::Direction);
+    if (azymuth == -1) {
+        azymuth = 0;
     }
 
-    return _azymuth;
+    return azymuth;
 }
 
 qreal WazePosition::accuracy()
 {
-    int _accuracy = (int) _positionInfo.attribute(QGeoPositionInfo::HorizontalAccuracy);
-    if (_accuracy == -1) {
-        _accuracy = 0;
+    int accuracy = (int) _positionInfo.attribute(QGeoPositionInfo::HorizontalAccuracy);
+    if (accuracy == -1) {
+        accuracy = 0;
     }
 
-    return _accuracy;
+    return accuracy;
 }
 
 void WazePosition::fromCoordinate(const QGeoPositionInfo &gpsPos)
 {
     _positionInfo = gpsPos;
-    _coordinate = gpsPos.coordinate();
+    fromCoordinate(gpsPos.coordinate());
 
     emit positionInfoChanged(_positionInfo);
-    emit coordinateChanged(_coordinate);
 }
 
 void WazePosition::fromCoordinate(const QGeoCoordinate &coord)
 {
-    _coordinate.setAltitude(coord.altitude());
-    _coordinate.setLatitude(coord.latitude());
-    _coordinate.setLongitude(coord.longitude());
+    bool hasChanged = false;
+    qreal alt = coord.altitude();
+    qreal lat = coord.latitude();
+    qreal lon = coord.longitude();
 
-    emit coordinateChanged(_coordinate);
+    if (_coordinate.altitude() != alt)
+    {
+        _coordinate.setAltitude(alt);
+        hasChanged = true;
+    }
+
+    if (_coordinate.latitude() != lat)
+    {
+        _coordinate.setLatitude(lat);
+        hasChanged = true;
+    }
+
+    if (_coordinate.longitude() != lon)
+    {
+        _coordinate.setLongitude(lon);
+        hasChanged = true;
+    }
+
+    if(hasChanged)
+    {
+        emit coordinateChanged(_coordinate);
+    }
 }
 
 QGeoCoordinate WazePosition::toCoordinate()
@@ -123,7 +146,7 @@ WazePositionSource::~WazePositionSource() {
     delete _location;
 }
 
-WazePosition WazePositionSource::position()
+WazePosition& WazePositionSource::position()
 {
     return _lastKnownPosition;
 }

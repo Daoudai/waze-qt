@@ -17,9 +17,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     qmlRegisterType<WazeImageProvider>("org.waze", 1, 0, "WazeImageProvider");
     qmlRegisterType<WazeMap>("org.waze", 1, 0, "WazeMap");
     qmlRegisterType<WazeMapImageItem>("org.waze", 1, 0, "WazeMapImageItem");
-    qmlRegisterType<WazePosition>("org.waze", 1, 0, "WazePosition");
     qRegisterMetaType<WazePosition>("WazePosition");
-    qmlRegisterType<WazePositionSource>("org.waze", 1, 0, "WazePositionSource");
 
     QmlApplicationViewer viewer;
 #ifdef Q_WS_MAEMO_5

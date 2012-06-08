@@ -49,13 +49,11 @@ public:
     explicit WazePositionSource(QObject *parent = 0);
     virtual ~WazePositionSource();
 
-    Q_PROPERTY (WazePosition position CONSTANT READ position NOTIFY positionUpdated)
-
-    WazePosition position();
+    WazePosition& position();
 
 signals:
     // QGeoPositionInfoSource
-    void positionUpdated(const WazePosition &gpsPos);
+    void positionUpdated(WazePosition &gpsPos);
 
 public slots:
 

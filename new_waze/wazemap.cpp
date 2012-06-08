@@ -12,32 +12,54 @@ WazeMap::WazeMap() :
     if (!supportsBearing())
         qDebug("Bearing not supported");
 
-    connect(this, SIGNAL(centerChanged(QGeoCoordinate)), this, SLOT(onCenterChanged(QGeoCoordinate)));
+    connect(&_positionSource, SIGNAL(positionUpdated(WazePosition&)), this, SLOT(onPositionChanged()));
+    connect(this, SIGNAL(trackPositionChanged()), this, SLOT(onTrackPositionChanged()));
 }
 
-WazePosition& WazeMap::mapCenter()
-{
-    return _mapCenter;
-}
-
-void WazeMap::setMapCenter(WazePosition& position)
-{
-    _mapCenter = position;
-
-    QGeoCoordinate coord = _mapCenter.toCoordinate();
-    setCenter(coord);
-
-    emit mapCenterChanged();
-}
 
 void WazeMap::addMapObject(WazeMapImageItem* imageItem)
 {
     QGraphicsGeoMap::addMapObject(imageItem);
 }
 
-void WazeMap::onCenterChanged(QGeoCoordinate center)
+bool WazeMap::trackPosition()
 {
-    _mapCenter.fromCoordinate(center);
+    return _trackPosition;
+}
 
-    emit mapCenterChanged();
+void WazeMap::setTrackPosition(bool trackPosition)
+{
+    if (_trackPosition == trackPosition) return;
+
+    _trackPosition = trackPosition;
+
+    emit trackPositionChanged();
+}
+
+WazePosition& WazeMap::currentPosition()
+{
+    return _positionSource.position();
+}
+
+void WazeMap::onPositionChanged()
+{
+    WazePosition& posSource =  _positionSource.position();
+    QGeoCoordinate center = QGraphicsGeoMap::center();
+    if (_trackPosition &&
+        (center.longitude() != posSource.longitude() ||
+         center.latitude() != posSource.latitude()))
+    {
+        setCenter(posSource.toCoordinate());
+        //pan(center.longitude() - posSource.longitude(), center.latitude() - posSource.latitude());
+    }
+
+    emit currentPositionChanged();
+}
+
+void WazeMap::onTrackPositionChanged()
+{
+    if (_trackPosition)
+    {
+        setCenter(_positionSource.position().toCoordinate());
+    }
 }

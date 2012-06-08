@@ -11,8 +11,12 @@ WazePosition& WazeMapImageItem::mapCoordinate()
     return _mapCoordinate;
 }
 
-void WazeMapImageItem::setMapCoordinate(const WazePosition &coordinate)
+void WazeMapImageItem::setMapCoordinate(WazePosition &coordinate)
 {
+    if (coordinate.longitude() == _mapCoordinate.longitude() &&
+            coordinate.latitude() == _mapCoordinate.latitude())
+        return;
+
     _mapCoordinate = coordinate;
 
     setCoordinate(_mapCoordinate.toCoordinate());
@@ -20,16 +24,16 @@ void WazeMapImageItem::setMapCoordinate(const WazePosition &coordinate)
     emit mapCoordinate();
 }
 
-QUrl WazeMapImageItem::source()
+QString WazeMapImageItem::source()
 {
     return _source;
 }
 
-void WazeMapImageItem::setSource(QUrl source)
+void WazeMapImageItem::setSource(QString source)
 {
     _source = source;
 
-    QPixmap pixmap(_source.toLocalFile());
+    QPixmap pixmap(_source);
     setPixmap(pixmap);
 
     emit sourceChanged();
