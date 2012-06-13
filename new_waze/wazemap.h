@@ -15,15 +15,25 @@ public:
     Q_INVOKABLE void addMapObject(WazeMapImageItem* imageItem);
     Q_PROPERTY (bool trackPosition READ trackPosition WRITE setTrackPosition NOTIFY trackPositionChanged)
     Q_PROPERTY (WazePosition currentPosition READ currentPosition NOTIFY currentPositionChanged)
+    Q_PROPERTY (int speed READ speed NOTIFY speedChanged)
+    Q_PROPERTY(int azymuth READ azymuth NOTIFY azymuthChanged)
+    Q_PROPERTY(qreal accuracy READ accuracy NOTIFY accuracyChanged)
 
     bool trackPosition();
     void setTrackPosition(bool trackPosition);
 
     WazePosition& currentPosition();
 
+    int speed();
+    int accuracy();
+    int azymuth();
+
 signals:
     void trackPositionChanged();
     void currentPositionChanged();
+    void speedChanged();
+    void accuracyChanged();
+    void azymuthChanged();
 
 public slots:
 
