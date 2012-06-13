@@ -6,7 +6,7 @@ Rectangle {
 
     width: 800
     height: 400
-    color: "#00000000"
+    color: isGrid? "black" : "transparent"
     smooth: true
 
     property ListModel itemModel: ListModel {}
