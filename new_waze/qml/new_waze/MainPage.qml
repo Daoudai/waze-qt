@@ -111,7 +111,7 @@ Page {
         states: [
             State {
                 name: "fixating"
-                when: map.currentPosition.accuracy < accuracyLimit
+                when: map.accuracy > accuracyLimit
                 PropertyChanges {
                     target: fixatingLocation
                     visible: true
@@ -473,25 +473,25 @@ Page {
         anchors.bottomMargin: 10
         anchors.bottom: lower_toolbar.top
 
-        // the following function handles switching between
-        // kilometers per hour and miles per hour for speed
-        function speedConvert(speed, speedState) {
-//            if (!position.speedValid) return 0;
-
-            if (true)
-                return speed; // metric
-            else
-                return 0.62*speed;
-        }
-
         Text {
             id: speedLabel
             color: "#ffffff"
             anchors.fill: parent
-            text: Math.ceil(3.6 * map.currentPosition.speed) + "Kph"
+            text: Math.ceil(3.6 * speedConvert(map.speed)) + "Kph"
             font.pointSize: 19
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
+
+            // the following function handles switching between
+            // kilometers per hour and miles per hour for speed
+            function speedConvert(speed, speedState) {
+            //  if (!position.speedValid) return 0;
+
+                if (true)
+                    return speed; // metric
+                else
+                    return 0.62*speed;
+            }
         }
 
         Rectangle {

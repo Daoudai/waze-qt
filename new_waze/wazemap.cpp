@@ -14,6 +14,9 @@ WazeMap::WazeMap() :
 
     connect(&_positionSource, SIGNAL(positionUpdated(WazePosition&)), this, SLOT(onPositionChanged()));
     connect(this, SIGNAL(trackPositionChanged()), this, SLOT(onTrackPositionChanged()));
+    connect(this, SIGNAL(currentPositionChanged()), this, SIGNAL(speedChanged()));
+    connect(this, SIGNAL(currentPositionChanged()), this, SIGNAL(azymuthChanged()));
+    connect(this, SIGNAL(currentPositionChanged()), this, SIGNAL(accuracyChanged()));
 }
 
 
@@ -39,6 +42,21 @@ void WazeMap::setTrackPosition(bool trackPosition)
 WazePosition& WazeMap::currentPosition()
 {
     return _positionSource.position();
+}
+
+int WazeMap::speed()
+{
+    return _positionSource.position().speed();
+}
+
+int WazeMap::azymuth()
+{
+    return _positionSource.position().azymuth();
+}
+
+int WazeMap::accuracy()
+{
+    return _positionSource.position().accuracy();
 }
 
 void WazeMap::onPositionChanged()
