@@ -50,19 +50,19 @@ typedef struct tag_cyclic_buffer
 // o  read_processed - Out of 'read_size', how much was processed.
 //
 // o  data_size      - Over size of all expected data
-//                      This value is set once, and remains const during
+//                      thiz value is set once, and remains const during
 //                      the transaction
 // o  data_processed - Out of 'data_size', how much was processed.
-//                      This value is incremented-only during the transaction
+//                      thiz value is incremented-only during the transaction
 //
 // When (data_processed == data_size) transaction completed
 
-void  cyclic_buffer_init   (  cyclic_buffer_ptr this);
-void  cyclic_buffer_recycle(  cyclic_buffer_ptr this);
+void  cyclic_buffer_init   (  cyclic_buffer_ptr thiz);
+void  cyclic_buffer_recycle(  cyclic_buffer_ptr thiz);
 void  cyclic_buffer_update_processed_data(
-                              cyclic_buffer_ptr this,
+                              cyclic_buffer_ptr thiz,
                               const char*       data,
                               const char*       data_to_skip);
 const char* cyclic_buffer_get_unprocessed_data(
-                              cyclic_buffer_ptr this);
+                              cyclic_buffer_ptr thiz);
 #endif   //   __CYCLIC_BUFFER_H__

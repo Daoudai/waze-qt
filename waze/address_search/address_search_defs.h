@@ -117,8 +117,8 @@ typedef struct tag_address_candidate
    char     address[ADSR_ADDRESS_MAX_SIZE  + 1];
 
 }     address_candidate;
-void  address_candidate_init( address_candidate* this);
-BOOL  address_candidate_build_address_string( address_candidate* this);
+void  address_candidate_init( address_candidate* thiz);
+BOOL  address_candidate_build_address_string( address_candidate* thiz);
 
 #endif   // __ADDRESS_SEARCH_DEFS_H__
 

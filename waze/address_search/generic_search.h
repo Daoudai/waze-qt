@@ -4,7 +4,7 @@
  *
  *   Copyright 2009 Avi Ben-Shoshan
  *
- *   This file is part of RoadMap.
+ *   thiz file is part of RoadMap.
  *
  *   RoadMap is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License V2 as published by
@@ -51,7 +51,7 @@ const address_candidate* generic_search_results();
 const address_candidate* generic_search_result( int index);
 int generic_search_result_count();
 const address_candidate* address_search_result( int index);
-void address_candidate_init( address_candidate* this);
+void address_candidate_init( address_candidate* thiz);
 
 BOOL navigate_with_coordinates( BOOL take_me_there, search_types type, int   selected_list_item);
 const char* get_house_number__str( int i);

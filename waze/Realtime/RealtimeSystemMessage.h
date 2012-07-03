@@ -44,16 +44,16 @@ typedef struct tagRTSystemMessage
 
 }  RTSystemMessage, *LPRTSystemMessage;
 
-void RTSystemMessage_Init( LPRTSystemMessage this);
-void RTSystemMessage_Free( LPRTSystemMessage this);
+void RTSystemMessage_Init( LPRTSystemMessage thiz);
+void RTSystemMessage_Free( LPRTSystemMessage thiz);
 
 void RTSystemMessagesInit(void);
 void RTSystemMessagesDisplay(void);
 int RTSystemMessagesGetLastMessageDisplayed(void);
 
 // System-Message queue
-void  RTSystemMessageQueue_Push( LPRTSystemMessage this);
-BOOL  RTSystemMessageQueue_Pop ( LPRTSystemMessage this);
+void  RTSystemMessageQueue_Push( LPRTSystemMessage thiz);
+BOOL  RTSystemMessageQueue_Pop ( LPRTSystemMessage thiz);
 int   RTSystemMessageQueue_Size();
 BOOL  RTSystemMessageQueue_IsEmpty();
 BOOL  RTSystemMessageQueue_IsFull();

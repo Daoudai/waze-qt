@@ -32,7 +32,7 @@
 
 
 typedef int  (*RoadMapHttpAsyncCallbackSize)     (void *context, size_t size);
-typedef void (*RoadMapHttpAsyncCallbackProgress) (void *context, char *data, size_t size);
+typedef void (*RoadMapHttpAsyncCallbackProgress) (void *context, const char *data, size_t size);
 typedef void (*RoadMapHttpAsyncCallbackError)    (void *context, int connection_failure, const char *format, ...);
 typedef void (*RoadMapHttpAsyncCallbackDone)     (void *context, char *last_modified, const char *format, ... );
 

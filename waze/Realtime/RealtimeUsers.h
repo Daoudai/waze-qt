@@ -75,8 +75,8 @@ typedef struct tagRTUserLocation
 }  RTUserLocation, *LPRTUserLocation;
 
 
-void   RTUserLocation_Init       ( LPRTUserLocation this);
-void   RTUserLocation_CreateGUIID( LPRTUserLocation this);   //   Create ID for the GUI
+void   RTUserLocation_Init       ( LPRTUserLocation thiz);
+void   RTUserLocation_CreateGUIID( LPRTUserLocation thiz);   //   Create ID for the GUI
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -90,27 +90,27 @@ typedef struct tagRTUsers
 
 }  RTUsers, *LPRTUsers;
 
-void  RTUsers_Init         ( LPRTUsers this, PFN_ONUSER pfnOnAddUser, PFN_ONUSER pfnOnMoveUser, PFN_ONUSER pfnOnRemoveUser);
-void  RTUsers_Reset        ( LPRTUsers this);
-void  RTUsers_Term         ( LPRTUsers this);
-int   RTUsers_Count        ( LPRTUsers this);
-BOOL  RTUsers_IsEmpty      ( LPRTUsers this);
-BOOL  RTUsers_Add          ( LPRTUsers this, LPRTUserLocation pUser);
-BOOL  RTUsers_Update       ( LPRTUsers this, LPRTUserLocation pUser);   /* change position */
-BOOL  RTUsers_UpdateOrAdd  ( LPRTUsers this, LPRTUserLocation pUser);
-BOOL  RTUsers_RemoveByID   ( LPRTUsers this, int              iUserID);
-BOOL  RTUsers_RemoveByIndex( LPRTUsers this, int              iIndex);
-BOOL  RTUsers_Exists       ( LPRTUsers this, int              iUserID);
-void  RTUsers_ClearAll     ( LPRTUsers this);
+void  RTUsers_Init         ( LPRTUsers thiz, PFN_ONUSER pfnOnAddUser, PFN_ONUSER pfnOnMoveUser, PFN_ONUSER pfnOnRemoveUser);
+void  RTUsers_Reset        ( LPRTUsers thiz);
+void  RTUsers_Term         ( LPRTUsers thiz);
+int   RTUsers_Count        ( LPRTUsers thiz);
+BOOL  RTUsers_IsEmpty      ( LPRTUsers thiz);
+BOOL  RTUsers_Add          ( LPRTUsers thiz, LPRTUserLocation pUser);
+BOOL  RTUsers_Update       ( LPRTUsers thiz, LPRTUserLocation pUser);   /* change position */
+BOOL  RTUsers_UpdateOrAdd  ( LPRTUsers thiz, LPRTUserLocation pUser);
+BOOL  RTUsers_RemoveByID   ( LPRTUsers thiz, int              iUserID);
+BOOL  RTUsers_RemoveByIndex( LPRTUsers thiz, int              iIndex);
+BOOL  RTUsers_Exists       ( LPRTUsers thiz, int              iUserID);
+void  RTUsers_ClearAll     ( LPRTUsers thiz);
 
-void  RTUsers_ResetUpdateFlag       ( LPRTUsers this);
-void  RTUsers_RedoUpdateFlag         ( LPRTUsers this);
-void  RTUsers_RemoveUnupdatedUsers  ( LPRTUsers this, int* pUpdatedCount, int* pRemovedCount);
+void  RTUsers_ResetUpdateFlag       ( LPRTUsers thiz);
+void  RTUsers_RedoUpdateFlag         ( LPRTUsers thiz);
+void  RTUsers_RemoveUnupdatedUsers  ( LPRTUsers thiz, int* pUpdatedCount, int* pRemovedCount);
 
-void  RTUsers_Popup        (LPRTUsers this, const char *id, int iCenterAround);
+void  RTUsers_Popup        (LPRTUsers thiz, const char *id, int iCenterAround);
 
-LPRTUserLocation  RTUsers_User      ( LPRTUsers this, int  iIndex);
-LPRTUserLocation  RTUsers_UserByID  ( LPRTUsers this, int  iUserID);
+LPRTUserLocation  RTUsers_User      ( LPRTUsers thiz, int  iIndex);
+LPRTUserLocation  RTUsers_UserByID  ( LPRTUsers thiz, int  iUserID);
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 

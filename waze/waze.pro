@@ -115,7 +115,6 @@ SOURCES += \
     roadmap_keyboard_text.c \
     roadmap_jpeg.c \
     roadmap_input.c \
-    roadmap_httpcopy_async.c \
     roadmap_httpcopy.c \
     roadmap_http_comp.c \
     roadmap_history.c \
@@ -225,7 +224,6 @@ SOURCES += \
     Realtime/RealtimeOffline.c \
     Realtime/RealtimeNetRec.c \
     Realtime/RealtimeNetDefs.c \
-    Realtime/RealtimeNet.c \
     Realtime/RealtimeMath.c \
     Realtime/RealtimeDefs.c \
     Realtime/RealtimeBonus.c \
@@ -458,7 +456,6 @@ HEADERS += \
     roadmap_keyboard_text.h \
     roadmap_jpeg.h \
     roadmap_input.h \
-    roadmap_httpcopy_async.h \
     roadmap_httpcopy.h \
     roadmap_http_comp.h \
     roadmap_history.h \

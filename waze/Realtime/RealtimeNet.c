@@ -2526,7 +2526,7 @@ void RTNet_AbortTransaction( ETransactionStatus* new_state, BOOL bStopNow)
       wst_stop_trans( gs_WST, bStopNow);
       (*new_state) = RTNet_GetTransactionState(gs_WST);
    }
-   
+
    State = RTNet_GetTransactionState(gs_WST_Routing);
    if( TS_Idle != State)
       wst_stop_trans( gs_WST_Routing, bStopNow);
