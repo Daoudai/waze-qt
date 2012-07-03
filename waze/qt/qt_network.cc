@@ -148,6 +148,9 @@ int RNetworkSocket::read(char* data, int size)
 int RNetworkSocket::write(char* data, int size, bool immediate)
 {
     bool rc = true;
+
+    qDebug(data);
+
     if (_isSecured)
     {
         QSslSocket* secSok = (QSslSocket*) _socket;

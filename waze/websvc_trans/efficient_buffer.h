@@ -26,7 +26,7 @@
    Abstract:   Will allocate memory statically or dynamically, depends on the 
                requested size.
                Up to size 'EBUFFER_STATIC_SIZE', ebuffer will use the static 
-               memory. Above this size data will be allocated from the heap.
+               memory. Above thiz size data will be allocated from the heap.
 
    Note:       It is assumed that data can be a string, thus allocated buffer 
                will always be NULL terminated.                                                           
@@ -36,7 +36,8 @@
 #define  EBUFFER_ECONOMIC_BUFFER_FACTOR         (5.5F)
 #define  EBUFFER_BIG_SIZE                       (0x3000) // 12K
 #define  EBUFFER_STATIC_SIZE                    \
-               ((int)((double)EBUFFER_BIG_SIZE/EBUFFER_ECONOMIC_BUFFER_FACTOR))
+                2234
+               //((int)((double)EBUFFER_BIG_SIZE/EBUFFER_ECONOMIC_BUFFER_FACTOR))
 
 typedef struct tagebuffer
 {
@@ -46,13 +47,13 @@ typedef struct tagebuffer
 
 }  ebuffer, *ebuffer_ptr;
 
-void  ebuffer_init            ( ebuffer_ptr   this);
-char* ebuffer_alloc           ( ebuffer_ptr   this, int size);
-void  ebuffer_free            ( ebuffer_ptr   this);
+void  ebuffer_init            ( ebuffer_ptr   thiz);
+char* ebuffer_alloc           ( ebuffer_ptr   thiz, int size);
+void  ebuffer_free            ( ebuffer_ptr   thiz);
 
-char* ebuffer_get_buffer      ( ebuffer_ptr   this);
-int   ebuffer_get_buffer_size ( ebuffer_ptr   this);
-int   ebuffer_get_string_size ( ebuffer_ptr   this);
+char* ebuffer_get_buffer      ( ebuffer_ptr   thiz);
+int   ebuffer_get_buffer_size ( ebuffer_ptr   thiz);
+int   ebuffer_get_string_size ( ebuffer_ptr   thiz);
 
 void  ebuffer_getStatistics(  int*  StaticAllocationsCount,
                               int*  DynamicAllocationsCount);

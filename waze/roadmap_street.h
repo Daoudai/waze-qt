@@ -167,7 +167,7 @@ void roadmap_street_get_street_range
 
 int roadmap_street_replace
               (RoadMapNeighbour *neighbours, int count, int max,
-               const RoadMapNeighbour *this);
+               const RoadMapNeighbour *thiz);
 
 int  roadmap_street_search (const char *city, const char *str,
                             int max_results,

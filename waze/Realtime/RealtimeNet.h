@@ -452,6 +452,14 @@ BOOL  RTNet_Stats(  LPRTConnectionInfo   pCI,
                     char*                packet_only);
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+const char* RT_GetWebServiceAddress();
 
+const char* RT_GetWebServiceSecuredAddress();
+
+const char* RT_GetWebServiceSecuredAddressResolved();
+
+const char* RT_GetWebServiceV2Suffix();
+
+void convert_int_coordinate_to_float_string(char* buffer, int value);
 //////////////////////////////////////////////////////////////////////////////////////////////////
 #endif   //   __FREEMAP_REALTIMENET_H__

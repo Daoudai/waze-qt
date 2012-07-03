@@ -275,7 +275,7 @@ typedef struct tagVersionUpgradeInfo
 
 }  VersionUpgradeInfo, *LPVersionUpgradeInfo;
 
-void  VersionUpgradeInfo_Init( LPVersionUpgradeInfo this);
+void  VersionUpgradeInfo_Init( LPVersionUpgradeInfo thiz);
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -296,8 +296,8 @@ typedef struct tagStatusStatistics
 
 }  StatusStatistics, *LPStatusStatistics;
 
-void  StatusStatistics_Init   ( LPStatusStatistics this);
-void  StatusStatistics_Reset  ( LPStatusStatistics this);
+void  StatusStatistics_Init   ( LPStatusStatistics thiz);
+void  StatusStatistics_Reset  ( LPStatusStatistics thiz);
 
 typedef enum tagETransactionStatus
 {

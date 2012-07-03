@@ -102,8 +102,8 @@ void roadmap_login_set_pwd( LoginDetails* login_details, const char* pwd );
 void roadmap_login_set_nickname( LoginDetails* login_details, const char* nickname );
 void roadmap_login_on_login_cb( BOOL bDetailsVerified, roadmap_result rc );
 void roadmap_login_update_login_cb( BOOL bDetailsVerified, roadmap_result rc );
-int roadmap_login_on_login( SsdWidget this, const char *new_value );
-int roadmap_login_on_ok( SsdWidget this, const char *new_value);
+int roadmap_login_on_login( SsdWidget thiz, const char *new_value );
+int roadmap_login_on_ok( SsdWidget thiz, const char *new_value);
 void roadmap_login_set_show_function( RoadmapLoginDlgShowFn callback );
 void roadmap_login_on_signup_skip( void );
 int roadmap_login_get_referrers_count (void);
@@ -120,7 +120,7 @@ const char *roadmap_login_dlg_get_password();
 const char *roadmap_login_dlg_get_nickname();
 const char *roadmap_login_dlg_get_allowPing();
 #ifdef __cplusplus
-}
+//}
 #endif
 #endif /* INCLUDE__ROADMAP_LOGIN__H */
 

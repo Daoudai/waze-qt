@@ -86,8 +86,8 @@ typedef struct tag_http_response_status
 
 }  http_response_status;
 
-void                 http_response_status_init( http_response_status*   this);
-transaction_result   http_response_status_load( http_response_status*   this,
+void                 http_response_status_init( http_response_status*   thiz);
+transaction_result   http_response_status_load( http_response_status*   thiz,
                                                 const char*             szResponse,
                                                 BOOL                    verify_tag,
                                                 int*                    pBytesRead);
@@ -122,7 +122,7 @@ typedef void (*CB_OnWSTCompleted)( void* context, roadmap_result res);
 //                               "abc\n", then method should return pointer
 //                               to "cbs".
 //    On failure     -  NULL
-//                      In this case parsing is stopped and transaction fails.
+//                      In thiz case parsing is stopped and transaction fails.
 typedef const char* (*CB_OnWSTResponse)(  /* IN  */   const char*       data,
                                           /* IN  */   void*             context,
                                           /* OUT */   BOOL*             more_data_needed,
@@ -174,8 +174,8 @@ typedef struct tag_wst_context
          void                 *connect_context;
 
 }     wst_context, *wst_context_ptr;
-void  wst_context_init  (  wst_context_ptr      this);
-void  wst_context_free  (  wst_context_ptr      this);
+void  wst_context_init  (  wst_context_ptr      thiz);
+void  wst_context_free  (  wst_context_ptr      thiz);
 
 // Same function, but buffer is ready formatted:
 BOOL RTNet_HttpAsyncTransaction_FormattedBuffer(

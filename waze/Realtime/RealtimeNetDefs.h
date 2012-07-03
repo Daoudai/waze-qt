@@ -240,11 +240,11 @@ typedef struct tagRTConnectionInfo
 /*22*/   int                  iInboxCount;
 }  RTConnectionInfo, *LPRTConnectionInfo;
 
-void RTConnectionInfo_Init             ( LPRTConnectionInfo this, PFN_ONUSER pfnOnAddUser, PFN_ONUSER pfnOnMoveUser, PFN_ONUSER pfnOnRemoveUser);
-void RTConnectionInfo_FullReset        ( LPRTConnectionInfo this);
-void RTConnectionInfo_ResetLogin       ( LPRTConnectionInfo this);
-void RTConnectionInfo_ResetTransaction ( LPRTConnectionInfo this);
-void RTConnectionInfo_ResetParser      ( LPRTConnectionInfo this);
+void RTConnectionInfo_Init             ( LPRTConnectionInfo thiz, PFN_ONUSER pfnOnAddUser, PFN_ONUSER pfnOnMoveUser, PFN_ONUSER pfnOnRemoveUser);
+void RTConnectionInfo_FullReset        ( LPRTConnectionInfo thiz);
+void RTConnectionInfo_ResetLogin       ( LPRTConnectionInfo thiz);
+void RTConnectionInfo_ResetTransaction ( LPRTConnectionInfo thiz);
+void RTConnectionInfo_ResetParser      ( LPRTConnectionInfo thiz);
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 

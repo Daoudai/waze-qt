@@ -32,7 +32,7 @@ roadmap_result address_search_resolve_address(
 
 roadmap_result address_search_report_wrong_address(const char* user_input);
 
-BOOL address_candidate_build_address_string( address_candidate* this);
+BOOL address_candidate_build_address_string( address_candidate* thiz);
 const char* on_address_option(   /* IN  */   const char*       data,
                                  /* IN  */   void*             context,
                                  /* OUT */   BOOL*             more_data_needed,
