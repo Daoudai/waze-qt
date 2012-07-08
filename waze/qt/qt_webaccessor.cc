@@ -141,7 +141,7 @@ void WazeWebAccessor::replyDone(QNetworkReply* reply)
             if (roadmap_error == succeeded)
             {
                 QString data = QString::fromUtf8(reply->readAll());
-                std::string dataStr = data.toStdString();
+                std::string dataStr = data.toUtf8().constData();
                 cd.callback.callbacks->size(cd.context, dataStr.length());
                 cd.callback.callbacks->progress(cd.context, dataStr.c_str(), dataStr.length() );
                 cd.callback.callbacks->done(cd.context, NULL, NULL);
@@ -237,7 +237,7 @@ void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QNetworkR
        }
 
        //   Activate the appropriate server-request handler function:
-       std::string dataStr = data.toStdString();
+       std::string dataStr = data.toUtf8().constData();
        next = parser(dataStr.c_str(), cd.context, &more_data_needed, &rc);
        data.remove(0, next - dataStr.c_str());
        data = data.trimmed();
@@ -250,14 +250,14 @@ void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QNetworkR
 
 void WazeWebAccessor::getRequest(QString url, int flags, RoadMapHttpAsyncCallbacks *callbacks, time_t update_time, void* context)
 {
-
     QNetworkRequest request;
     request.sslConfiguration().setPeerVerifyMode(QSslSocket::VerifyNone);
-    request.setUrl(url);
-//    if (TEST_NET_COMPRESS(flags))
-//    {
-//        request.setRawHeader(QByteArray("Accept-Encoding"), QByteArray("gzip, deflate"));
-//    }
+    request.setUrl(QUrl::fromEncoded(url.toAscii()));
+    qDebug() << request.url();
+    if (TEST_NET_COMPRESS(flags))
+    {
+        request.setRawHeader(QByteArray("Accept-Encoding"), QByteArray("gzip, deflate"));
+    }
     request.setRawHeader(QByteArray("User-Agent"), QString::fromAscii("FreeMap/%1").arg(roadmap_start_version()).toAscii());
     request.setRawHeader(QByteArray("If-Modified-Since"), QLocale::c().toString(QDateTime::fromTime_t(update_time), QLatin1String("ddd, dd MMM yyyy hh:mm:ss 'GMT'")).toAscii());
 
