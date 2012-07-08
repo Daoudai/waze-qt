@@ -51,6 +51,11 @@ HttpAsyncContext *roadmap_http_async_copy (RoadMapHttpAsyncCallbacks *callbacks,
                              const char *source,
                              time_t update_time);
 
+HttpAsyncContext *roadmap_http_async_copy_old (RoadMapHttpAsyncCallbacks *callbacks,
+                                      void *context,
+                             const char *source,
+                             time_t update_time);
+
 void	roadmap_http_async_copy_abort (HttpAsyncContext *context);
 
 HttpAsyncContext * roadmap_http_async_post( RoadMapHttpAsyncCallbacks *callbacks, void *context,

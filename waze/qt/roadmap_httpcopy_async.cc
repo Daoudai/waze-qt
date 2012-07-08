@@ -623,6 +623,15 @@ HttpAsyncContext * roadmap_http_async_copy (RoadMapHttpAsyncCallbacks *callbacks
     return new HttpAsyncContext;
 }
 
+HttpAsyncContext * roadmap_http_async_copy_old (RoadMapHttpAsyncCallbacks *callbacks,
+                                      void *context,
+                             const char *source,
+                             time_t update_time) {
+
+    WazeWebAccessor::getInstance().getRequestOld(QString::fromAscii(source), 0, callbacks, update_time, context);
+
+    return new HttpAsyncContext;
+}
 
 void roadmap_http_async_copy_abort (HttpAsyncContext *context) {
     // TODO
