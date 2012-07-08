@@ -5,6 +5,7 @@
 #include <QHash>
 #include <QNetworkReply>
 #include <QSslError>
+#include <QHttp>
 
 extern "C" {
 #include "Realtime/RealtimeNetDefs.h"
@@ -44,6 +45,7 @@ public:
                      const QString &data);
 
     void getRequest(QString url, int flags, RoadMapHttpAsyncCallbacks *callbacks, time_t update_time, void* context);
+    void getRequestOld(QString url, int flags, RoadMapHttpAsyncCallbacks *callbacks, time_t update_time, void* context);
 
     void setV2Suffix(QString suffix);
 
@@ -54,6 +56,7 @@ public:
 private slots:
     void replyDone(QNetworkReply* reply);
     void onIgnoreSSLErrors(QNetworkReply *reply, QList<QSslError> error);
+    void oldStyleFinished(bool isError);
 
 private:
     explicit WazeWebAccessor(QObject* parent = 0);
@@ -61,6 +64,7 @@ private:
     void runParsersAndCallback(WazeWebConnectionData& cd, QNetworkReply* response, roadmap_result result);
 
     QHash<QNetworkReply*, WazeWebConnectionData> _connectionDataHash;
+    QHash<QHttp*, WazeWebConnectionData> _oldStyleConnectionDataHash;
     QString _address;
     QString _securedAddress;
     QString _v2Suffix;

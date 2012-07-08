@@ -420,7 +420,7 @@ static void load_next_tile (void) {
 	tile_time = roadmap_square_timestamp (tile_index);
 
 	Connections[conn].http_context =
-		roadmap_http_async_copy (&callbacks,
+        roadmap_http_async_copy_old (&callbacks,
 										 &Connections[conn],
 										 Connections[conn].url,
 										 tile_time);
