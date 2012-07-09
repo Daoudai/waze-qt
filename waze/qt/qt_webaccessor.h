@@ -19,6 +19,8 @@ struct WazeWebConnectionData
 {
     void* context;
     CallbackType type;
+    qint64 sentBytes;
+    qint64 receivedBytes;
 
     union {
         struct {
@@ -57,6 +59,10 @@ private slots:
     void replyDone(QNetworkReply* reply);
     void onIgnoreSSLErrors(QNetworkReply *reply, QList<QSslError> error);
     void oldStyleFinished(bool isError);
+    void requestBytesWritten(qint64 bytesSent, qint64 bytesTotal);
+    void responseBytesRead(qint64 bytesReceived, qint64 bytesTotal);
+    void requestBytesWrittenOld(int bytesSent, int bytesTotal);
+    void responseBytesReadOld(int bytesReceived, int bytesTotal);
 
 private:
     explicit WazeWebAccessor(QObject* parent = 0);
