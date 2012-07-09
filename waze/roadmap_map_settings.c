@@ -95,10 +95,10 @@ static char*  AlertString[] = {"Chit Chats","Police traps","Accidents","Traffic 
 
 static int alertsUserCanToggle [] = {0,1,2,3,5,7}; // we will let user decide not to show these reports.
 
-#define MAP_SCHEMES 9
-static char *map_labels[MAP_SCHEMES] = {"Vitamin C", "The Blues", "Mochaccino", "Snow Day", "Twilight", "Tutti-fruiti", "Rosebud", "Electrolytes", "Map editors"};
-static void *map_values[MAP_SCHEMES]= {"", "1", "2", "3", "4", "5", "6", "7", "8"};
-static void *map_icons[MAP_SCHEMES] = {"schema", "schema1", "schema2", "schema3", "schema4", "schema5", "schema6", "schema7", "schema8" };
+#define MAP_SCHEMES 10
+static char *map_labels[MAP_SCHEMES] = {"Vitamin C", "The Blues", "Mochaccino", "Snow Day", "Twilight", "Tutti-fruiti", "Rosebud", "Electrolytes", "Map editors", "AMOLED"};
+static void *map_values[MAP_SCHEMES]= {"", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+static void *map_icons[MAP_SCHEMES] = {"schema", "schema1", "schema2", "schema3", "schema4", "schema5", "schema6", "schema7", "schema8", "schema9" };
 
 
 #if 0
