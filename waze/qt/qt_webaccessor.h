@@ -69,6 +69,8 @@ private:
 
     void runParsersAndCallback(WazeWebConnectionData& cd, QNetworkReply* response, roadmap_result result);
 
+    char* getTimeStr(QDateTime time);
+
     QHash<QNetworkReply*, WazeWebConnectionData> _connectionDataHash;
     QHash<QHttp*, WazeWebConnectionData> _oldStyleConnectionDataHash;
     QString _address;

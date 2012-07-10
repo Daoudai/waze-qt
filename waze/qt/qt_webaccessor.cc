@@ -137,28 +137,31 @@ void WazeWebAccessor::replyDone(QNetworkReply* reply)
         }
 
         WazeWebConnectionData cd = _connectionDataHash[reply];
+
+        int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
         switch (cd.type)
         {
         case ParserBased:
-            if (roadmap_error != succeeded)
+            if (roadmap_error != succeeded || statusCode != 200)
             {
-                roadmap_log(ROADMAP_ERROR ,"Error during request (Qt ErrorCode: %d)", error);
+                roadmap_log(ROADMAP_ERROR ,"Error during request (Qt ErrorCode: %d, HTTP StatusCode: %d)", error, statusCode);
             }
 
             runParsersAndCallback(cd, reply, roadmap_error);
             break;
         case ProgressBased:
-            if (roadmap_error == succeeded)
+            if (roadmap_error == succeeded && statusCode == 200)
             {
                 QString data = QString::fromUtf8(reply->readAll());
                 std::string dataStr = data.toUtf8().constData();
                 cd.callback.callbacks->size(cd.context, dataStr.length());
                 cd.callback.callbacks->progress(cd.context, dataStr.c_str(), dataStr.length() );
-                cd.callback.callbacks->done(cd.context, NULL, NULL);
+                cd.callback.callbacks->done(cd.context, getTimeStr(QDateTime::currentDateTime()), NULL);
             }
             else
             {
-                cd.callback.callbacks->error(cd.context, 1, "Error during request (Qt ErrorCode: %d)", error);
+                cd.callback.callbacks->error(cd.context, 1, "Error during request (Qt ErrorCode: %d, HTTP StatusCode: %d)", error, statusCode);
             }
             break;
         }
@@ -305,7 +308,9 @@ void WazeWebAccessor::getRequestOld(QString url, int flags, RoadMapHttpAsyncCall
     header.setValue("User-Agent", QString::fromAscii("FreeMap/%1").arg(roadmap_start_version()));
     if (update_time > 0)
     {
-        header.setValue("If-Modified-Since", QLocale::c().toString(QDateTime::fromTime_t(update_time), QLatin1String("ddd, dd MMM yyyy hh:mm:ss 'GMT'")));
+        char* timeStr = getTimeStr(QDateTime::fromTime_t(update_time));
+        header.setValue("If-Modified-Since", QString::fromAscii(timeStr));
+        delete timeStr;
     }
 
     QHttp* http = new QHttp(this);
@@ -349,7 +354,7 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
         QByteArray response = http->readAll();
         cd.callback.callbacks->size(cd.context, response.length());
         cd.callback.callbacks->progress(cd.context, response.constData(), response.length() );
-        cd.callback.callbacks->done(cd.context, NULL, NULL);
+        cd.callback.callbacks->done(cd.context, getTimeStr(QDateTime::currentDateTime()), NULL);
         roadmap_net_mon_recv(response.length());
     }
     else
@@ -418,4 +423,9 @@ void WazeWebAccessor::responseBytesReadOld(int bytesReceived, int bytesTotal)
         return;
     roadmap_net_mon_recv(bytes);
     cd.receivedBytes = bytesReceived;
+}
+
+char* WazeWebAccessor::getTimeStr(QDateTime time)
+{
+    return strdup(QLocale::c().toString(time, QLatin1String("ddd, dd MMM yyyy hh:mm:ss 'GMT'")).toAscii().data());
 }
