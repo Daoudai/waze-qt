@@ -349,7 +349,9 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
 
     WazeWebConnectionData cd = _oldStyleConnectionDataHash[http];
 
-    if (!isError)
+    int statusCode = http->lastResponse().statusCode();
+
+    if (!isError && statusCode == 200)
     {
         QByteArray response = http->readAll();
         cd.callback.callbacks->size(cd.context, response.length());
@@ -359,7 +361,7 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
     }
     else
     {
-        cd.callback.callbacks->error(cd.context, 1, "Error during request (%s)", http->errorString().toLocal8Bit().constData());
+        cd.callback.callbacks->error(cd.context, 1, "Error during request (%d: %s)", statusCode, http->errorString().toLocal8Bit().constData());
     }
 
     _oldStyleConnectionDataHash.remove(http);
