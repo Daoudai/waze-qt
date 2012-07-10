@@ -105,7 +105,8 @@ static void roadmap_skin_set_subskin_int (const char *sub_skin, BOOL save) {
    char *subskin_path;
    const char *cursor;
    char *subskin_path2 = NULL;
-   CurrentSubSkin = sub_skin;
+   const char* map_schema = get_map_schema();
+   CurrentSubSkin = (!strcmp("9", map_schema))? "day" : sub_skin;
 
    for ( cursor = roadmap_path_first ("skin");
          cursor != NULL;
@@ -136,11 +137,11 @@ static void roadmap_skin_set_subskin_int (const char *sub_skin, BOOL save) {
    roadmap_path_set ("skin", path);
    
    if (save && !auto_night_mode_cfg_on()) {
-      roadmap_config_set(&RoadMapConfigMapSubSkin,sub_skin );
+      roadmap_config_set(&RoadMapConfigMapSubSkin, CurrentSubSkin);
    }
 
    if (save && !auto_night_mode_cfg_on()) {
-      roadmap_config_set(&RoadMapConfigMapSubSkin,sub_skin );
+      roadmap_config_set(&RoadMapConfigMapSubSkin, CurrentSubSkin);
    }
 
    roadmap_config_reload ("schema");
