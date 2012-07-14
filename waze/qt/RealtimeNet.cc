@@ -165,7 +165,7 @@ BOOL  RTNet_Init()
 {
 
 #ifdef _DEBUG
-   assert(RTNet_LoadParams());
+  waze_assert(RTNet_LoadParams());
 #else
    RTNet_LoadParams();
 #endif   // _DEBUG
@@ -519,7 +519,7 @@ BOOL RTNet_Login( LPRTConnectionInfo   pCI,
                   roadmap_lang_get_system_lang());
 
    // Perform WebService Transaction:
-   WazeWebAccessor::getInstance().postRequest(wst_flags,
+   WazeWebAccessor::getInstance().postRequestParser(wst_flags,
                             "login",
                             login_parser,
                             sizeof(login_parser)/sizeof(wst_parser),
@@ -552,7 +552,7 @@ BOOL RTNet_RandomUserRegister( LPRTConnectionInfo pCI, CB_OnWSTCompleted pfnOnCo
                   roadmap_start_version());
 
    // Perform WebService Transaction:
-   WazeWebAccessor::getInstance().postRequest(
+   WazeWebAccessor::getInstance().postRequestParser(
                            wst_flags,
                            "static",
                            register_parser,
@@ -585,7 +585,7 @@ BOOL RTNet_GuestLogin( LPRTConnectionInfo pCI, CB_OnWSTCompleted pfnOnCompleted)
                   roadmap_start_version());
 
    // Perform WebService Transaction:
-   WazeWebAccessor::getInstance().postRequest(wst_flags,
+   WazeWebAccessor::getInstance().postRequestParser(wst_flags,
                            "login",
                            login_parser,
                            sizeof(login_parser)/sizeof(wst_parser),
@@ -626,7 +626,7 @@ static BOOL wst_start_session_trans( const wst_parser_ptr parsers,       // Arra
 
    if( !pCI || !parsers || !parsers_count || !cbOnCompleted || !szFormat || !(*szFormat))
    {
-      assert(0);  // Invalid argument(s)
+     waze_assert(0);  // Invalid argument(s)
       return FALSE;
    }
 
@@ -668,7 +668,7 @@ static BOOL wst_start_session_trans( const wst_parser_ptr parsers,       // Arra
 
    Data = AppendPrefix_ShiftOriginalRight( Header, Data);
 
-   WazeWebAccessor::getInstance().postRequest(wst_flags,
+   WazeWebAccessor::getInstance().postRequestParser(wst_flags,
                             "command",
                             parsers,
                             parsers_count,
@@ -844,7 +844,7 @@ BOOL RTNet_CreateNewRoads( LPRTConnectionInfo   pCI,
       bStatus = !bStatus;
    }
 
-   assert(*CreateNewRoadsBuffer);
+  waze_assert(*CreateNewRoadsBuffer);
    roadmap_log(ROADMAP_DEBUG, "RTNet_CreateNewRoads() - Output command: '%s'", CreateNewRoadsBuffer);
 
    if( packet_only)
@@ -888,7 +888,7 @@ void RTNet_GPSPath_BuildCommand( char*             Packet,
           if( i)
              seconds_gap = (int)(points[i].GPS_time - points[i-1].GPS_time);
 
-          assert( !GPSPOINTINTIME_IS_INVALID(points[i]));
+         waze_assert( !GPSPOINTINTIME_IS_INVALID(points[i]));
 /*
           if (points[i].Position.longitude < 20000000 ||
              points[i].Position.longitude > 40000000 ||
@@ -975,7 +975,7 @@ BOOL RTNet_GPSPath(  LPRTConnectionInfo   pCI,
       RTNet_GPSPath_BuildCommand( Buffer, FirstPoint, iPointsCount, FALSE);
    }
 
-   assert(*GPSPathBuffer);
+  waze_assert(*GPSPathBuffer);
    roadmap_log(ROADMAP_DEBUG, "RTNet_GPSPath() - Output command: '%s'", GPSPathBuffer);
 
    if( packet_only)
@@ -1822,7 +1822,7 @@ BOOL  RTNet_CreateAccount (
                   send_updates ? "true" : "false",
                   referrer);
 
-   WazeWebAccessor::getInstance().postRequest(wst_flags,
+   WazeWebAccessor::getInstance().postRequestParser(wst_flags,
                             "createaccount",
                             general_parser,
                             sizeof(general_parser)/sizeof(wst_parser),
@@ -2636,7 +2636,7 @@ BOOL RTNet_RequestRoute(LPRTConnectionInfo   pCI,
 
    wst_flags = wst_flags_for_commnand(command);
 
-   WazeWebAccessor::getInstance().postRequest(wst_flags,
+   WazeWebAccessor::getInstance().postRequestParser(wst_flags,
                             "command",
                             general_parser,
                             sizeof(general_parser)/sizeof(wst_parser),
