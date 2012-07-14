@@ -263,7 +263,7 @@ int roadmap_alert_count (void) {
 void roadmap_alert_get_position(int alert, RoadMapPosition *position, int *steering) {
 
    RoadMapAlert *alert_st = roadmap_alert_get_alert (alert);
-   assert(alert_st != NULL);
+  waze_assert(alert_st != NULL);
 
    position->longitude = alert_st->pos.longitude;
    position->latitude = alert_st->pos.latitude;
@@ -274,14 +274,14 @@ void roadmap_alert_get_position(int alert, RoadMapPosition *position, int *steer
 
 unsigned int roadmap_alert_get_speed(int alert){
    RoadMapAlert *alert_st = roadmap_alert_get_alert (alert);
-   assert(alert_st != NULL);
+  waze_assert(alert_st != NULL);
    return (int) alert_st->speed;
 }
 
 int roadmap_alert_get_category(int alert) {
 
    RoadMapAlert *alert_st = roadmap_alert_get_alert (alert);
-   assert(alert_st != NULL);
+  waze_assert(alert_st != NULL);
 
    return (int) alert_st->category;
 }
@@ -289,7 +289,7 @@ int roadmap_alert_get_category(int alert) {
 
 int roadmap_alert_get_id(int alert){
    RoadMapAlert *alert_st = roadmap_alert_get_alert (alert);
-   assert(alert_st != NULL);
+  waze_assert(alert_st != NULL);
 
    return (int) alert_st->id;
 }

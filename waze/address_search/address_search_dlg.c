@@ -166,7 +166,7 @@ static void on_address_resolved( void*                context,
 
    roadmap_main_set_cursor( ROADMAP_CURSOR_NORMAL);
 
-   assert(list_cont);
+  waze_assert(list_cont);
 
    list = ssd_widget_get( list_cont, ASD_RC_LIST_NAME);
 
@@ -203,7 +203,7 @@ static void on_address_resolved( void*                context,
       return;
    }
 
-   assert( size <= ADSR_MAX_RESULTS);
+  waze_assert( size <= ADSR_MAX_RESULTS);
    
    if (size == 1 && s_auto_start_nav) {
       s_auto_start_nav = FALSE;
@@ -384,7 +384,7 @@ static int get_selected_list_item()
 
    dlg = generic_search_dlg_get_search_dlg(search_address);
    list = ssd_widget_get( dlg, ASD_RC_LIST_NAME);
-   assert(list);
+  waze_assert(list);
 
    return (int)ssd_list_selected_value( list);
 }
@@ -458,7 +458,7 @@ static void on_option_selected(  BOOL              made_selection,
          break;
 
       default:
-         assert(0);
+        waze_assert(0);
          break;
    }
 
@@ -490,7 +490,7 @@ int on_options(SsdWidget widget, const char *new_value, void *context)
    roadmap_screen_refresh();
 #endif
 
-   assert( !s_menu);
+  waze_assert( !s_menu);
 
    if  (ssd_widget_rtl (NULL))
 	   menu_x = SSD_X_SCREEN_RIGHT;
@@ -606,7 +606,7 @@ BOOL address_search_auto_search( const char* address)
 
 //   if( s_cb || s_ctx)
 //   {
-//      assert(0);  // Dialog is in use now
+//     waze_assert(0);  // Dialog is in use now
 //      return FALSE;
 //   }
 

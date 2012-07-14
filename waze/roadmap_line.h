@@ -142,7 +142,7 @@ INLINE_DEC int roadmap_line_shapes (int line, int *first_shape, int *last_shape)
 
 INLINE_DEC int roadmap_line_in_square (int square, int cfcc, int *first, int *last) {
 
-   assert (cfcc > 0 && cfcc <= ROADMAP_CATEGORY_RANGE);
+  waze_assert (cfcc > 0 && cfcc <= ROADMAP_CATEGORY_RANGE);
 
    if (square < 0) {
       return 0;   /* This square is empty. */

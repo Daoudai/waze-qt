@@ -584,7 +584,7 @@ fh_consolidate(struct fibheap *h)
 		x = w;
 		fh_removerootlist(h, w);
 		d = x->fhe_degree;
-		/* XXX - assert that d < D */
+		/* XXX -waze_assert that d < D */
 		while(a[d] != NULL) {
 			y = a[d];
 			if (fh_compare(h, x, y) > 0)

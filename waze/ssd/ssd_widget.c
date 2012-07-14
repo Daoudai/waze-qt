@@ -871,10 +871,10 @@ static void ssd_widget_sort_children (SsdWidget widget) {
 
    /* No support for first widget as ORDER_LAST */
    /* Comment by AGA. THere is no assignment for this flag
-    *  assert (! (widget->flags & SSD_ORDER_LAST));
+    * waze_assert (! (widget->flags & SSD_ORDER_LAST));
     */
 
-   assert( widget != widget->next);
+  waze_assert( widget != widget->next);
 
    /* Comment by AGA. THere is no assignment for this flag
    while (widget) {
@@ -998,8 +998,8 @@ SsdWidget ssd_widget_remove(SsdWidget parent, SsdWidget child)
    SsdWidget cur_child     = parent->children;
    SsdWidget child_behind  = NULL;
 
-   assert(parent);
-   assert(child);
+  waze_assert(parent);
+  waze_assert(child);
 
    while( cur_child)
    {
@@ -1030,9 +1030,9 @@ SsdWidget ssd_widget_replace(SsdWidget parent, SsdWidget old_child, SsdWidget ne
    SsdWidget cur_child     = parent->children;
    SsdWidget child_behind  = NULL;
 
-   assert(parent);
-   assert(old_child);
-   assert(new_child);
+  waze_assert(parent);
+  waze_assert(old_child);
+  waze_assert(new_child);
 
    while( cur_child)
    {

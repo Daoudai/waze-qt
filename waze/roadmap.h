@@ -121,19 +121,19 @@ extern int USING_PHONE_KEYPAD;
 #include <java/lang.h>
 #include <javax/microedition/lcdui.h>
 
-static NOPH_Display_t assert_display;
+static NOPH_Display_t waze_assert_display;
 
 static inline void do_assert(char *text) {
 
   printf ("do_assert:%s********************************************************************************************\n", text);
-  if (!assert_display) assert_display = NOPH_Display_getDisplay(NOPH_MIDlet_get());
+  if (!assert_display)waze_assert_display = NOPH_Display_getDisplay(NOPH_MIDlet_get());
   NOPH_Alert_t msg = NOPH_Alert_new("ASSERT!", text, 0, NOPH_AlertType_get(NOPH_AlertType_INFO));
   NOPH_Alert_setTimeout(msg, NOPH_Alert_FOREVER);
   NOPH_Display_setCurrent(assert_display, msg);
   NOPH_Thread_sleep( 10000 );
 }
 
-# define assert(x) do { \
+# define waze_assert(x) do { \
  if ( ! (x) ) \
  {\
      char msg[256]; \
@@ -336,6 +336,8 @@ FILE * roadmap_log_get_log_file();
 #ifdef LOCALE_SAFE
 double atof_locale_safe(const char* str);
 #endif
+
+#define waze_assert(condition) { if(!(condition)){ roadmap_log(ROADMAP_FATAL, "ASSERT FAILED: %s @ (%s:%s)", #condition, __FILE__, __LINE__); } }
 
 #endif // INCLUDE__ROADMAP__H
 

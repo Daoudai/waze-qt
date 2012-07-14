@@ -50,7 +50,7 @@ static RoadMapHash *TileHash = NULL;
 
 static TileStatus *tile_status (int position) {
 	
-	assert (position >= 0 && position < NumTiles);
+waze_assert (position >= 0 && position < NumTiles);
 	return Tiles[position / TS_BLOCK_SIZE] + (position % TS_BLOCK_SIZE);
 }
 

@@ -108,7 +108,7 @@ static int resolve_add (KnownCandidatePath *path, int point_id,
 
       entry++;
       entry->point_id = p;
-      assert(p >= 0);
+     waze_assert(p >= 0);
       entry->line = *candidate;
       entry->street = *street;
       entry->street.entry_fuzzyfied = entry->street.cur_fuzzyfied = fuzzy;
@@ -314,7 +314,7 @@ int editor_track_known_end_segment (PluginLine *previous_line,
 
    editor_log_push ("editor_track_end_known_segment");
 
-   assert (last_point_id != 0);
+  waze_assert (last_point_id != 0);
    if (!last_point_id) return 0;
 
    if (editor_db_activate (line->fips) == -1) {
@@ -343,7 +343,7 @@ int editor_track_known_end_segment (PluginLine *previous_line,
     */
 
 	/*SRUL*: avoid this problem, see above comment 
-   assert (line_length > 0);
+  waze_assert (line_length > 0);
 
    if (line_length == 0) {
       editor_log (ROADMAP_ERROR, "line %d (plugin_id:%d) has length of zero.",

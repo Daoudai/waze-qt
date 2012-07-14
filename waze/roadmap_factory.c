@@ -194,7 +194,7 @@ static BOOL roadmap_factory_load_menu_item(
       
       if( CONTEXT_MENU_LABEL_MAX_SIZE < size)
       {
-         assert(0);
+        waze_assert(0);
          return FALSE;
       }
       
@@ -230,7 +230,7 @@ static BOOL roadmap_factory_load_menu_item(
       {
          if( CONTEXT_MENU_MAX_ITEMS_COUNT == menu->item_count)
          {
-            assert(0);
+           waze_assert(0);
             return FALSE;
          }
          
@@ -248,7 +248,7 @@ static BOOL roadmap_factory_load_menu_item(
    
    if( CONTEXT_MENU_MAX_ITEMS_COUNT == menu->item_count)
    {
-      assert(0);
+     waze_assert(0);
       return FALSE;
    }
    
@@ -290,7 +290,7 @@ static ssd_contextmenu_ptr roadmap_factory_load_menu_file(
 
    if( !file)
    {
-      assert(0);
+     waze_assert(0);
       return NULL;
    }
    
@@ -319,7 +319,7 @@ static ssd_contextmenu_ptr roadmap_factory_load_menu_file(
       
       if( !roadmap_factory_load_menu_item( menu, p, actions))
       {
-         assert(0);
+        waze_assert(0);
          ssd_contextmenu_delete( menu, FALSE);
          menu = NULL;
          break;

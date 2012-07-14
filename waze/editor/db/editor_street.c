@@ -88,7 +88,7 @@ int editor_street_create (const char *_name,
             (editor_db_street *) editor_db_get_item
                         (ActiveStreetDB, i, 0, NULL);
 
-         assert (street_ptr != NULL);
+        waze_assert (street_ptr != NULL);
 
          if ((street_ptr != NULL) &&
                !memcmp (street_ptr, &street, sizeof (editor_db_street))) {
@@ -387,7 +387,7 @@ const char *editor_street_get_street_fename
    street =
       (editor_db_street *) editor_db_get_item
                               (ActiveStreetDB, street_id, 0, NULL);
-   assert (street != NULL);
+  waze_assert (street != NULL);
 
    if (street->fename < 0) {
       return "";
@@ -407,7 +407,7 @@ const char *editor_street_get_street_fetype
    street =
       (editor_db_street *) editor_db_get_item
                               (ActiveStreetDB, street_id, 0, NULL);
-   assert (street != NULL);
+  waze_assert (street != NULL);
 
    if (street->fename < 0) {
       return "";
@@ -427,7 +427,7 @@ const char *editor_street_get_street_city
    street =
       (editor_db_street *) editor_db_get_item
                               (ActiveStreetDB, street_id, 0, NULL);
-   assert (street != NULL);
+  waze_assert (street != NULL);
 
    if (street->fename < 0) {
       return "";
@@ -447,7 +447,7 @@ const char *editor_street_get_street_t2s
    street =
       (editor_db_street *) editor_db_get_item
                               (ActiveStreetDB, street_id, 0, NULL);
-   assert (street != NULL);
+  waze_assert (street != NULL);
 
    if (street->t2s < 0) {
       return "";

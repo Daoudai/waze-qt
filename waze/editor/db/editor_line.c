@@ -115,7 +115,7 @@ int editor_line_add
    id = editor_db_add_item (ActiveLinesDB, &line, 1);
 
    if (id == -1) return -1;
-   assert (editor_line_length (id) > 0);
+  waze_assert (editor_line_length (id) > 0);
 
    if (editor_line_length (id) == 0) return -1;
 
@@ -147,7 +147,7 @@ void editor_line_get (int line,
    line_db = (editor_db_line *) editor_db_get_item
                            (ActiveLinesDB, line, 0, NULL);
 
-	assert (line_db);
+waze_assert (line_db);
 	if (!line_db) return;
 	
    if (from) editor_point_position (line_db->point_from, from);
@@ -166,7 +166,7 @@ void editor_line_get_points (int line, int *from, int *to) {
    line_db = (editor_db_line *) editor_db_get_item
                            (ActiveLinesDB, line, 0, NULL);
 
-	assert (line_db);
+waze_assert (line_db);
 	if (!line_db) return;
 
    if (from) *from = line_db->point_from;
@@ -183,7 +183,7 @@ void editor_line_modify_properties (int line,
    line_db = (editor_db_line *) editor_db_get_item
                            (ActiveLinesDB, line, 0, NULL);
 
-   assert (line_db != NULL);
+  waze_assert (line_db != NULL);
 
    if (line_db == NULL) return;
 
@@ -202,7 +202,7 @@ void editor_line_set_flag (int line, int flag) {
    line_db = (editor_db_line *) editor_db_get_item
                            (ActiveLinesDB, line, 0, NULL);
 
-   assert (line_db != NULL);
+  waze_assert (line_db != NULL);
 
    if (line_db == NULL) return;
 
@@ -219,7 +219,7 @@ void editor_line_reset_flag (int line, int flag) {
    line_db = (editor_db_line *) editor_db_get_item
                            (ActiveLinesDB, line, 0, NULL);
 
-   assert (line_db != NULL);
+  waze_assert (line_db != NULL);
 
    if (line_db == NULL) return;
 

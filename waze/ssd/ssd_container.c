@@ -918,9 +918,9 @@ void ssd_container_get_zero_offset(
    RoadMapGuiRect org_rect;
    RoadMapGuiRect dra_rect;
 
-   assert(this);
-   assert(zero_offset_x);
-   assert(zero_offset_y);
+  waze_assert(this);
+  waze_assert(zero_offset_x);
+  waze_assert(zero_offset_y);
 
    org_rect.minx = this->position.x;
    org_rect.miny = this->position.y;
@@ -939,9 +939,9 @@ void ssd_container_get_visible_dimentions(
                      RoadMapGuiPoint*  position,
                      SsdSize*          size)
 {
-   assert(this);
-   assert(position);
-   assert(size);
+  waze_assert(this);
+  waze_assert(position);
+  waze_assert(size);
 
    (*position) = this->position;
    (*size)     = this->size;

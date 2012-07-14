@@ -396,7 +396,7 @@ int ssd_button_change_icon( SsdWidget widget, const char **bitmap_names, int num
     RoadMapImage bitmap_images[MAX_STATES];
     int i, res;
 
-    assert( num_bitmaps <= MAX_STATES);
+   waze_assert( num_bitmaps <= MAX_STATES);
 
     for ( i=0; i<num_bitmaps; i++ )
 	{

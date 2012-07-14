@@ -186,7 +186,7 @@ static void roadmap_dialog_hide_window (RoadMapDialogItem dialog) {
 
       if (!itr) return;
       
-      assert (itr);
+     waze_assert (itr);
       itr->prev_dialog = itr->prev_dialog->prev_dialog;
 
       return;
@@ -354,7 +354,7 @@ static void roadmap_dialog_chosen (char *name, void *context) {
             roadmap_log(ROADMAP_DEBUG, "****** callback(%s) not current (%s)!\n", item->name, RoadMapDialogCurrent->name);
             RoadMapDialogCurrent = item;
             (*selection->callback) (item->name, item->context);
-            assert (item == RoadMapDialogCurrent);
+           waze_assert (item == RoadMapDialogCurrent);
             RoadMapDialogCurrent = current;
             //item->prev_dialog = RoadMapDialogCurrent;
             //RoadMapDialogCurrent = item;

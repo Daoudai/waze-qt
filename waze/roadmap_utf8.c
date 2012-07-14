@@ -75,7 +75,7 @@ int utf8_strlen (const char* utf8) {
 
 #ifdef   _DEBUG
       if ((1 < sizeof_current_char) && (0 == (0x40 & (*utf8))))
-         assert(0);  // not a valid case in utf8
+        waze_assert(0);  // not a valid case in utf8
 #endif   // _DEBUG
 
       len++;
@@ -255,7 +255,7 @@ char** utf8_to_char_array( const char* utf8, int* count)
    array = (char**)malloc( sizeof(char*) * (*count));
    if( !array)
    {
-      assert(0);
+     waze_assert(0);
       (*count) = 0;
       return NULL;
    }
@@ -276,18 +276,18 @@ char** utf8_to_char_array( const char* utf8, int* count)
 
 #ifdef   _DEBUG
       if ((1 < sizeof_current_char) && (0 == (0x40 & (*utf8))))
-         assert(0);  // not a valid case in utf8
+        waze_assert(0);  // not a valid case in utf8
 #endif   // _DEBUG
 
       if( !sizeof_current_char)
       {
-         assert(0);
+        waze_assert(0);
          (*count) = 0;
          return NULL;
       }
       
       array[index] = (char*)malloc(sizeof_current_char+1);
-      assert(array[index]);
+     waze_assert(array[index]);
       strncpy( array[index], utf8, sizeof_current_char);
       array[index][sizeof_current_char] = '\0';
       
@@ -295,7 +295,7 @@ char** utf8_to_char_array( const char* utf8, int* count)
       utf8 += sizeof_current_char;     
    }
    
-   assert( index == (*count));
+  waze_assert( index == (*count));
    
    return array;   
 }

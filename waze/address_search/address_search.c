@@ -100,7 +100,7 @@ BOOL address_candidate_build_address_string( address_candidate* this)
          }
          else
          {
-            assert(0);
+           waze_assert(0);
             return FALSE;
          }
       }
@@ -135,7 +135,7 @@ BOOL address_candidate_build_address_string( address_candidate* this)
          }
          else
          {
-            assert(0);
+           waze_assert(0);
             return FALSE;
          }
       }
@@ -151,7 +151,7 @@ BOOL address_search_init()
 
    if( INVALID_WEBSVC_HANDLE != s_websvc)
    {
-      assert(0);  // Called twice?
+     waze_assert(0);  // Called twice?
       return TRUE;
    }
 
@@ -376,7 +376,7 @@ const char* on_address_option(   /* IN  */   const char*       data,
    }
 
 #ifdef _DEBUG
-   assert( address_candidate_build_address_string( &ac));
+  waze_assert( address_candidate_build_address_string( &ac));
 #else
    address_candidate_build_address_string( &ac);
 #endif   // _DEBUG
@@ -417,7 +417,7 @@ roadmap_result address_search_report_wrong_address(const char* user_input)
    if( INVALID_WEBSVC_HANDLE == s_websvc)
    {
       roadmap_log( ROADMAP_ERROR, "address_search_report_wrong_address() - MODULE NOT INITIALIZED");
-      assert(0);  // 'address_search_init()' was not called
+     waze_assert(0);  // 'address_search_init()' was not called
       return err_internal_error;
 
    }

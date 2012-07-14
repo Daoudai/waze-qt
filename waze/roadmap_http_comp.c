@@ -116,7 +116,7 @@ void roadmap_http_comp_add_data (RoadMapHttpCompCtx ctx, int received) {
       return;
    } else {
       ctx->buffer_ptr += received;
-      assert(ctx->buffer_ptr <= READ_BUFFER_SIZE);
+     waze_assert(ctx->buffer_ptr <= READ_BUFFER_SIZE);
       ctx->buffer[ctx->buffer_ptr] = '\0';
    }
 

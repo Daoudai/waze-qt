@@ -267,7 +267,7 @@ void roadmap_canvas_image_set_mutable (RoadMapImage src) { /* no implementation 
 void roadmap_canvas_draw_image (RoadMapImage image, const RoadMapGuiPoint *pos,
                                 int opacity, int mode) {
     if (!image){
-         assert(1);
+        waze_assert(1);
          return;
     }
 
@@ -282,7 +282,7 @@ void roadmap_canvas_draw_image_scaled( RoadMapImage image, const RoadMapGuiPoint
                                 int opacity, int mode ) {
     /* never called */
     if (!image){
-         assert(1);
+        waze_assert(1);
          return;
     }
 
@@ -297,7 +297,7 @@ void roadmap_canvas_draw_image_stretch( RoadMapImage image, const RoadMapGuiPoin
                                          const RoadMapGuiPoint *pivot_pos, int opacity, int mode ) {
     /* never called */
     if (!image){
-         assert(1);
+        waze_assert(1);
          return;
     }
 

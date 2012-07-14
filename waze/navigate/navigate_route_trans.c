@@ -849,7 +849,7 @@ const char *on_routing_response (/* IN  */   const char*       data,
 	   	roadmap_log (ROADMAP_ERROR, "on_routing_response() - does not support status %d", status);
 	   	return NULL;
    }
-   assert(RoutingContext.next_result < MAX_RESULTS);
+  waze_assert(RoutingContext.next_result < MAX_RESULTS);
 
    curr_result = &RoutingContext.result[RoutingContext.next_result];
    curr_result->route_status = status;
@@ -1021,7 +1021,7 @@ const char *on_route_points (/* IN  */   const char*       data,
    // alt_id
    iresult = verify_alt_id (&data, rc);
    if (iresult < 0) return data;
-   assert(iresult < MAX_RESULTS);
+  waze_assert(iresult < MAX_RESULTS);
    geometry = &RoutingContext.result[iresult].geometry;
 
    // num_total_points

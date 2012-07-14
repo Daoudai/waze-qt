@@ -638,7 +638,7 @@ BOOL ssd_dialog_set_dialog_focus( SsdDialog dialog, SsdWidget new_focus)
          Note that 'ssd_dialog_draw' will call 'ssd_dialog_sort_tab_order()',
          thus no need to call it directly.                                          */
 
-      // assert( 0 && "ssd_dialog_set_dialog_focus() - widget does not belong to this dialog");
+      //waze_assert( 0 && "ssd_dialog_set_dialog_focus() - widget does not belong to this dialog");
       return FALSE;
    }
 
@@ -654,7 +654,7 @@ BOOL ssd_dialog_set_dialog_focus( SsdDialog dialog, SsdWidget new_focus)
 
    if( !ssd_widget_set_focus(new_focus))
    {
-      assert(0);
+     waze_assert(0);
       if( ssd_widget_set_focus( last_focus))
          dialog->in_focus = last_focus;
       return FALSE;
@@ -679,7 +679,7 @@ BOOL ssd_dialog_set_focus( SsdWidget new_focus)
 {
    if( !RoadMapDialogCurrent)
    {
-//      assert( 0 && "ssd_dialog_set_focus() - Invalid state");
+//     waze_assert( 0 && "ssd_dialog_set_focus() - Invalid state");
       return FALSE;
    }
 
@@ -689,7 +689,7 @@ BOOL ssd_dialog_set_focus( SsdWidget new_focus)
 
 void ssd_dialog_move_focus (int direction) {
 
-   assert(RoadMapDialogCurrent);
+  waze_assert(RoadMapDialogCurrent);
 
    if (!RoadMapDialogCurrent->in_focus) {
       ssd_dialog_set_dialog_focus(RoadMapDialogCurrent,
@@ -926,8 +926,8 @@ static BOOL OnKeyPressed( const char* utf8char, uint32_t flags) {
    }
    else
    {
-      assert(utf8char);
-      assert(*utf8char);
+     waze_assert(utf8char);
+     waze_assert(*utf8char);
 
       // Other special keys:
       if( KEYBOARD_ASCII & flags)

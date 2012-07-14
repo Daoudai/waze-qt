@@ -629,7 +629,7 @@ static RoadMapScreenObj roadmap_screen_obj_by_pos (RoadMapGuiPoint *point) {
 
 
 static void roadmap_screen_obj_repeat (void) {
-   assert(RoadMapScreenObjSelected);
+  waze_assert(RoadMapScreenObjSelected);
 
    if (RoadMapScreenObjSelected && RoadMapScreenObjSelected->action) {
       (*(RoadMapScreenObjSelected->action->callback)) ();

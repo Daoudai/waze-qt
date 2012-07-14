@@ -311,7 +311,7 @@ static const char* get_street_name_from_address( const char* address, char* stre
 
    if( ADDRESS_STREET_NAME_MAX_SIZE < size)
    {
-      assert(0);
+     waze_assert(0);
       return NULL;
    }
 
@@ -591,11 +591,11 @@ void on_text_changed__street( atc_tab_info_ptr ti, const char* new_text)
 
    if( !count)
    {
-      assert( !li->size);
+     waze_assert( !li->size);
       return;
    }
 
-   assert(li->size);
+  waze_assert(li->size);
 
    for( i=0; i<li->size; i++)
       remove_string_last_decorations( li->labels[i]);
@@ -623,7 +623,7 @@ void on_timer__on_text_changed(void)
          break;
 
       default:
-         assert(0);
+        waze_assert(0);
    }
 
    update_title();
@@ -1008,7 +1008,7 @@ static BOOL on_unhandled_key_pressed(
 
    if( !default_widget || !ssd_dialog_set_focus( default_widget))
    {
-      assert(0);
+     waze_assert(0);
       return FALSE;
    }
 
@@ -1394,7 +1394,7 @@ void address_tabcontrol_show( RoadMapCallback on_tabcontrol_closed)
 
    if( !tc)
    {
-      assert(0);
+     waze_assert(0);
       return;
    }
 

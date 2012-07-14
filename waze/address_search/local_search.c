@@ -222,7 +222,7 @@ BOOL local_search_init()
 
    if( INVALID_WEBSVC_HANDLE != s_websvc)
    {
-      assert(0);  // Called twice?
+     waze_assert(0);  // Called twice?
       return TRUE;
    }
 
@@ -618,7 +618,7 @@ const char* on_local_option(   /* IN  */   const char*       data,
 //   }
 
 #ifdef _DEBUG
-   assert( local_candidate_build_address_string( &ac));
+  waze_assert( local_candidate_build_address_string( &ac));
 #else
    local_candidate_build_address_string( &ac);
 #endif   // _DEBUG

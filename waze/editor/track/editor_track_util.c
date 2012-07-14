@@ -242,7 +242,7 @@ static int find_split_point (PluginLine *line,
             }
 
          } else {
-            assert (0);
+           waze_assert (0);
          }
       }
 
@@ -314,7 +314,7 @@ static int find_split_point (PluginLine *line,
       if (!roadmap_math_compare_points (&split_pos, &from_pos)) {
          connect_point->id = from;
       } else {
-         assert (!roadmap_math_compare_points (&split_pos, &to_pos));
+        waze_assert (!roadmap_math_compare_points (&split_pos, &to_pos));
          connect_point->id = to;
       }
 
@@ -800,7 +800,7 @@ int editor_track_util_connect_roads (PluginLine *from,
                     3, from_direction, &from_node);
 
       if (from_point == -1) {
-         assert (0);
+        waze_assert (0);
          editor_log (ROADMAP_ERROR, "Can't create a connection point.");
          editor_log_pop ();
          return -1;
@@ -1016,7 +1016,7 @@ int editor_track_util_create_line (int gps_first_point,
    int square = roadmap_square_active ();
    int flags = 0;
 
-   //   assert (gps_first_point != gps_last_point); 
+   //  waze_assert (gps_first_point != gps_last_point); 
 
    editor_log_push ("editor_track_create_line");
 

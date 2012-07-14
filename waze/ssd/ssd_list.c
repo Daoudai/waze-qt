@@ -783,7 +783,7 @@ const char* ssd_list_selected_string( SsdWidget list)
    relative_index   = (int)(long)item->context;
    absolute_index   = data->first_row_index + relative_index;
 
-   assert( (0 <= absolute_index) && (absolute_index < data->num_values));
+  waze_assert( (0 <= absolute_index) && (absolute_index < data->num_values));
 
    return data->labels[absolute_index];
 }
@@ -801,7 +801,7 @@ const void* ssd_list_selected_value( SsdWidget list)
    relative_index   = (int)(long)item->context;
    absolute_index   = data->first_row_index + relative_index;
 
-   assert( (0 <= absolute_index) && (absolute_index < data->num_values));
+  waze_assert( (0 <= absolute_index) && (absolute_index < data->num_values));
 
    return data->data[absolute_index];
 }
@@ -810,7 +810,7 @@ const void* ssd_list_row_value( SsdWidget list, int index)
 {
    ssd_list_data_ptr data = (ssd_list_data_ptr)list->data;
 
-   assert( (0 <= index) && (index < data->num_values));
+  waze_assert( (0 <= index) && (index < data->num_values));
 
    return data->data[index];
 }
@@ -922,7 +922,7 @@ SsdWidget ssd_list_get_first_item( SsdWidget list)
 {
    ssd_list_data_ptr data = (ssd_list_data_ptr)list->data;
 
-   assert(data);
+  waze_assert(data);
 
    if( !data->num_values || !data->alloc_rows)
       return NULL;
@@ -933,14 +933,14 @@ SsdWidget ssd_list_get_first_item( SsdWidget list)
 void ssd_list_taborder__set_widget_before_list( SsdWidget list, SsdWidget w)
 {
    ssd_list_data_ptr data = (ssd_list_data_ptr)list->data;
-   assert(data);
+  waze_assert(data);
    data->widget_before_list = w;
 }
 
 void ssd_list_taborder__set_widget_after_list( SsdWidget list, SsdWidget w)
 {
    ssd_list_data_ptr data = (ssd_list_data_ptr)list->data;
-   assert(data);
+  waze_assert(data);
    data->widget_after_list = w;
 }
 

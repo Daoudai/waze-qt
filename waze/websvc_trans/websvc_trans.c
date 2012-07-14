@@ -231,7 +231,7 @@ wst_handle wst_init( const char* service_name,  // e.g. - rtserver
 
    if( !service_name || !(*service_name))
    {
-      assert(0);  // Please supply service name
+     waze_assert(0);  // Please supply service name
       return session;
    }
 
@@ -278,7 +278,7 @@ void wst_term( wst_handle h)
       if( trans_idle != session->state)
       {
          //assert(0);  // THIS IS NOT AN ERROR
-                     // Just left this assert in order to see if this case happens...
+                     // Just left thiswaze_assert in order to see if this case happens...
 
          session->delete_on_idle = TRUE;
          wst_stop_trans( h, FALSE);
@@ -298,7 +298,7 @@ void wst_queue_clear( wst_handle h)
 {
    wst_context_ptr session = (wst_context_ptr)h;
 
-   assert(session);
+  waze_assert(session);
 
    wstq_clear( &(session->queue));
 }
@@ -307,7 +307,7 @@ BOOL wst_queue_is_empty( wst_handle h)
 {
    wst_context_ptr session = (wst_context_ptr)h;
 
-   assert(session);
+  waze_assert(session);
 
    return wstq_is_empty( &(session->queue));
 }
@@ -549,7 +549,7 @@ static BOOL wst_start_trans__int(wst_context_ptr      session,
          !parsers || !parsers_count || !cbOnCompleted ||
          !packet  || !(*packet))
       {
-         assert(0);  // Invalid arguments
+        waze_assert(0);  // Invalid arguments
          return FALSE;
       }
       
@@ -566,7 +566,7 @@ static BOOL wst_start_trans__int(wst_context_ptr      session,
       
       if( ROADMAP_INVALID_SOCKET != session->Socket)
       {
-         assert(0);  // No session is active - Socket should be invalid..
+        waze_assert(0);  // No session is active - Socket should be invalid..
          roadmap_log( ROADMAP_ERROR, "wst_start_trans() - socket should be invalid");
          return FALSE;
       }
@@ -660,7 +660,7 @@ transaction_state wst_get_trans_state( wst_handle h)
 {
    wst_context_ptr   session = (wst_context_ptr)h;
 
-   assert(session);
+  waze_assert(session);
 
    return session->state;
 }
@@ -669,7 +669,7 @@ static void wst_stop_trans__int( wst_handle h, BOOL bStopNow, BOOL bNotifyCb)
 {
    wst_context_ptr   session = (wst_context_ptr)h;
 
-   assert(session);
+  waze_assert(session);
    
    if (trans_idle == session->state)
       return;
@@ -709,13 +709,13 @@ BOOL wst_start_trans(wst_handle           h,             // Session object
 
    if( !h || !action || !(*action) || !parsers || !parsers_count || !cbOnCompleted || !szFormat || !(*szFormat))
    {
-      assert(0);  // Invalid arguments
+     waze_assert(0);  // Invalid arguments
       return FALSE;
    }
 
    if( (parsers_count < WST_MIN_PARSERS_COUNT) || (WST_MAX_PARSERS_COUNT < parsers_count))
    {
-      assert(0);  // Invalid parsers count
+     waze_assert(0);  // Invalid parsers count
       return FALSE;
    }
 
@@ -736,7 +736,7 @@ BOOL wst_start_trans(wst_handle           h,             // Session object
          {
             if( default_parser_found)
             {
-               assert(0);  // More then one 'default parser'
+              waze_assert(0);  // More then one 'default parser'
                return FALSE;
             }
 
@@ -789,7 +789,7 @@ transaction_result on_socket_connected_(  RoadMapSocket     Socket,
    // Verify Socket is valid:
    if( ROADMAP_INVALID_SOCKET == Socket)
    {
-      assert( succeeded != res);
+     waze_assert( succeeded != res);
       roadmap_log( ROADMAP_ERROR, "on_socket_connected() - INVALID SOCKET - Failed to create Socket; Error '%s'", roadmap_result_string( res));
       /*
        * In this case the context is deallocated in the net layer.
@@ -798,7 +798,7 @@ transaction_result on_socket_connected_(  RoadMapSocket     Socket,
       return trans_failed;
    }
 
-   assert( succeeded == res);
+  waze_assert( succeeded == res);
 
    packet         = ebuffer_get_buffer( &(session->packet));
    session->Socket= Socket;
@@ -857,7 +857,7 @@ transaction_result on_data_received_( void* data, int size, wst_context_ptr sess
    http_parsing_state   http_parser_state;
    transaction_result   res;
 
-   assert(session);
+  waze_assert(session);
 
    // Were we asked to abort transaction?
    if( trans_stopping == session->state)
@@ -1169,10 +1169,10 @@ static transaction_result OnCustomResponse( wst_context_ptr session)
    int                  i;
    roadmap_result		rc						= succeeded;
 
-   assert(session);
-   assert(CB);
-   assert(parsers);
-   assert(parsers_count);
+  waze_assert(session);
+  waze_assert(CB);
+  waze_assert(parsers);
+  waze_assert(parsers_count);
 
    // Select default parser:
    for( i=0; i<parsers_count; i++)
@@ -1282,7 +1282,7 @@ static transaction_result OnCustomResponse( wst_context_ptr session)
       {
          if( succeeded == rc)
          {
-            assert(0);  // Client parser failed but did not set 'last error'
+           waze_assert(0);  // Client parser failed but did not set 'last error'
             rc = err_failed;
          }
          
@@ -1308,7 +1308,7 @@ static transaction_result OnCustomResponse( wst_context_ptr session)
    }
 
 
-	assert( CB->read_size == CB->read_processed );
+waze_assert( CB->read_size == CB->read_processed );
     return ((succeeded == session->rc) ? trans_succeeded : trans_failed); 
 }
 

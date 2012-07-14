@@ -665,7 +665,7 @@ static int navigate_route_calc_segments (PluginLine *from_line,
       }
    }
 
-   assert(curr_segment >= NavigateSegments);
+  waze_assert(curr_segment >= NavigateSegments);
 
 	*segments = curr_segment;
 

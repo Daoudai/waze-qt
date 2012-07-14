@@ -129,9 +129,9 @@ static BOOL on_key_pressed__delegate_to_editbox(
 {
    SsdWidget   editbox  = NULL;
 
-   assert( this);
-   assert( this->children);
-   assert( this->children->key_pressed);
+  waze_assert( this);
+  waze_assert( this->children);
+  waze_assert( this->children->key_pressed);
 
    if( KEY_IS_ENTER)
    {
@@ -318,8 +318,8 @@ void ssd_show_keyboard_dialog_ext( const char*       title,		/* Title at the top
    int box_height = SSD_MIN_SIZE;
    int label_width = SSD_KB_DLG_LABEL_WIDTH;
 
-   assert(cbOnDone);
-  // assert(!s_cbOnDone);
+  waze_assert(cbOnDone);
+  //waze_assert(!s_cbOnDone);
 
 #ifndef TOUCH_SCREEN
    entry_height = 23;

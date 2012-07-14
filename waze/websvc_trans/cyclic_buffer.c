@@ -65,7 +65,7 @@ void cyclic_buffer_update_processed_data(
 {
    int read_processed;
 
-   assert(data);
+  waze_assert(data);
 
    if(data_to_skip && (*data_to_skip))
       data = EatChars( data, data_to_skip, TRIM_ALL_CHARS);
@@ -75,8 +75,8 @@ void cyclic_buffer_update_processed_data(
    // Note:
    //    The value 'read_processed' includes any previous processed values
    
-   assert( 0 <= read_processed);
-   assert( read_processed <= this->read_size);
+  waze_assert( 0 <= read_processed);
+  waze_assert( read_processed <= this->read_size);
    
    this->read_processed = read_processed;   
 }                       

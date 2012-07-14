@@ -82,9 +82,9 @@ static void shift_one_item_up(cyclic_array_context_ptr   this,
 {
    int i;
    
-   assert(0           <= range_begin);
-   assert(range_end   <= this->items_count);
-   assert(range_begin <= range_end);
+  waze_assert(0           <= range_begin);
+  waze_assert(range_end   <= this->items_count);
+  waze_assert(range_begin <= range_end);
    
    // From: 6
    // To:   9
@@ -116,9 +116,9 @@ static void shift_one_item_down( cyclic_array_context_ptr   this,
 {
    int i;
    
-   assert(0           <= range_begin);
-   assert(range_end   <= this->items_count);
-   assert(range_begin <= range_end);
+  waze_assert(0           <= range_begin);
+  waze_assert(range_end   <= this->items_count);
+  waze_assert(range_begin <= range_end);
    
    // From: 6
    // To:   9
@@ -156,14 +156,14 @@ void cyclic_array_init( cyclic_array_context_ptr this,
                         copy_array_item          copy_item,
                         are_same_items           items_are_same)
 {
-   assert(this);
-   assert(items_buffer);
-   assert(sizeof_item);
-   assert(max_items_count);
-   assert(init_item);
-   assert(free_item);
-   assert(copy_item);
-   assert(items_are_same);
+  waze_assert(this);
+  waze_assert(items_buffer);
+  waze_assert(sizeof_item);
+  waze_assert(max_items_count);
+  waze_assert(init_item);
+  waze_assert(free_item);
+  waze_assert(copy_item);
+  waze_assert(items_are_same);
    
    this->sizeof_item    = sizeof_item;
    this->max_items_count= max_items_count;
@@ -324,12 +324,12 @@ void* cyclic_array_get_same_item( cyclic_array_context_ptr this, void* item)
 {
    int logical_index;
    
-   assert(item);
+  waze_assert(item);
 
    for( logical_index=0; logical_index<cyclic_array_size(this); logical_index++)
    {
       void* current = get_item_by_logical_index( this, logical_index);
-      assert(current);
+     waze_assert(current);
       if( this->items_are_same( item, current))
          return cyclic_array_get_item( this, logical_index);
    }
@@ -349,7 +349,7 @@ BOOL cyclic_array_remove_item( cyclic_array_context_ptr this, int logical_index)
 
    if( (logical_index < 0) || (this->items_count <= logical_index))
    {
-      assert(0);
+     waze_assert(0);
       return FALSE;
    }
 
@@ -382,12 +382,12 @@ BOOL  cyclic_array_remove_same_item( cyclic_array_context_ptr this, void* item)
 {
    int logical_index;
    
-   assert(item);
+  waze_assert(item);
 
    for( logical_index=0; logical_index<cyclic_array_size(this); logical_index++)
    {
       void* current = get_item_by_logical_index( this, logical_index);
-      assert(current);
+     waze_assert(current);
       if( this->items_are_same( item, current))
          return cyclic_array_remove_item( this, logical_index);
    }

@@ -32,7 +32,7 @@ double relative_part_factor_from_absolute_value( int range_begin, int range_end,
    int  range_size     = get_range_size( range_begin, range_end);
    int  relative_value = value - range_begin;
    
-   assert( range_size);
+  waze_assert( range_size);
    
    return (double)relative_value/(double)range_size;
 }
@@ -61,7 +61,7 @@ double time_relative_part_factor_from_absolute_value( time_t range_begin, time_t
    
    if( !range_size)
    {
-      assert( range_size);
+     waze_assert( range_size);
       return 0.F;
    }
    

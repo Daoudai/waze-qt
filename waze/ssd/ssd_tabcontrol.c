@@ -111,7 +111,7 @@ SsdWidget ssd_tabcontrol_get_tab( SsdTcCtx tcx, int tab)
 SsdWidget ssd_tabcontrol_get_active_tab( SsdTcCtx tcx)
 { 
    tabcontrol_info_ptr tci = tcx;
-   assert( INVALID_TAB_INDEX != tci->active_tab);
+  waze_assert( INVALID_TAB_INDEX != tci->active_tab);
    return ssd_tabcontrol_get_tab( tcx, tci->active_tab);
 }
 
@@ -303,11 +303,11 @@ void ssd_tabcontrol_set_active_tab( SsdTcCtx tcx, int tab)
       }
       
       cur_tab = ssd_tabcontrol_get_active_tab(tcx);
-      assert(cur_tab);
+     waze_assert(cur_tab);
       
       tci->active_tab=  tab;
       new_tab        = ssd_tabcontrol_get_active_tab(tcx);
-      assert(new_tab);
+     waze_assert(new_tab);
 
       ssd_widget_replace( tci->container, cur_tab, new_tab);
       if(tci->on_tab_gain_focus)
@@ -622,13 +622,13 @@ static void create_tabs( tabcontrol_info_ptr tci)
    ssd_icon_image_set*  right_arrow;
    int                  arrow_images_count = LEFT_ARROW_IMAGES_COUNT;
    
-   assert( NULL == tci->tli.tabs_container);
+  waze_assert( NULL == tci->tli.tabs_container);
 
    RTL         = roadmap_lang_rtl();
    left_arrow  = RTL? right_arrow_images: left_arrow_images;
    right_arrow = RTL? left_arrow_images: right_arrow_images;      
    
-   assert(LEFT_ARROW_IMAGES_COUNT==RIGHT_ARROW_IMAGES_COUNT);
+  waze_assert(LEFT_ARROW_IMAGES_COUNT==RIGHT_ARROW_IMAGES_COUNT);
    
    tci->tli.tabs_container = ssd_container_new(TABS_LINE__CONTAINER, "", SSD_MAX_SIZE,SSD_MIN_SIZE, SSD_END_ROW|SSD_CONTAINER_BORDER);
    ssd_widget_set_color(tci->tli.tabs_container, NULL, NULL);
@@ -683,10 +683,10 @@ SsdTcCtx ssd_tabcontrol_new(  const char*             name,
    tabcontrol_info      tc;
    int                  i;
    
-   assert(title);
-   assert(tabs_titles);
-   assert(tabs);
-   assert(tabs_count);
+  waze_assert(title);
+  waze_assert(tabs_titles);
+  waze_assert(tabs);
+  waze_assert(tabs_count);
    
    tabcontrol_info_init( &tc);
    
@@ -730,7 +730,7 @@ SsdTcCtx ssd_tabcontrol_new(  const char*             name,
       tc.tabs[i].title  = tab_title;
       tc.tabs[i].tab    = tab;
       
-      assert( NULL == tab->parent);
+     waze_assert( NULL == tab->parent);
    }
    
    tc.orientation_change_id   

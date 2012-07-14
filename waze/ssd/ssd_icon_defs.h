@@ -29,7 +29,7 @@
    this->_part_ = roadmap_res_get( RES_BITMAP, RES_SKIN|RES_NOCACHE, filenames->_part_);  \
    if( !this->_part_)                                                                  \
    {                                                                                   \
-      assert(0);                                                                       \
+     waze_assert(0);                                                                       \
       return FALSE;                                                                    \
    }                                                                                   \
    /* Verify sizes:  */                                                                \
@@ -39,7 +39,7 @@
    {                                                                                   \
       if( s_height != roadmap_canvas_image_height( this->_part_))                      \
       {                                                                                \
-         assert(0);                                                                    \
+        waze_assert(0);                                                                    \
          return FALSE;                                                                 \
       }                                                                                \
    }

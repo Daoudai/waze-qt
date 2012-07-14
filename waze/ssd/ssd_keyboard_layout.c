@@ -224,13 +224,13 @@ static const char* get_button_value( const button_info* button, int value_index)
          return s_special_keys;
       }
 
-      assert(0);
+     waze_assert(0);
       return NULL;
    }
 
    if( (BUTTON_FLAG_COMMAND & button->flags) || !data)
    {
-      assert(0);
+     waze_assert(0);
       return NULL;
    }
 
@@ -239,7 +239,7 @@ static const char* get_button_value( const button_info* button, int value_index)
 
    if( !data->count)
    {
-      assert(0);
+     waze_assert(0);
       return NULL;
    }
 
@@ -307,7 +307,7 @@ static void draw_button( button_info* button, int value_index)
 
 		 image = roadmap_res_get( RES_BITMAP, RES_SKIN|RES_NOCACHE, image_name);
 
-		 assert( image);
+		waze_assert( image);
 
 		 data->image_width = roadmap_canvas_image_width ( image);
 		 data->image_height= roadmap_canvas_image_height( image);
@@ -387,8 +387,8 @@ static void fix_button_dimentions(  buttons_layout_info* layout,
 
       if( !Widths[i] || !Heights[i])
       {
-         assert(!Widths[i]);
-         assert(!Heights[i]);
+        waze_assert(!Widths[i]);
+        waze_assert(!Heights[i]);
 #ifndef PROFILING
          roadmap_log( ROADMAP_DEBUG, "\tBUTTON - (%d, %d)", width, height);
 #endif   // PROFILING
@@ -541,7 +541,7 @@ static void calc_layout( buttons_layout_info* layout, RoadMapGuiRect *rect, BOOL
       }
 
       // Verify selected image was loaded:
-      assert( -1 != selected_image);
+     waze_assert( -1 != selected_image);
       if( NULL == bbdi->image)
       {
 		  image_info* ii = key_images + selected_image;
@@ -556,7 +556,7 @@ static void calc_layout( buttons_layout_info* layout, RoadMapGuiRect *rect, BOOL
 		 if( NULL == ii->image)
 		 {
 			roadmap_log( ROADMAP_ERROR, "ssd_keyboard_layout_mgr::calc_layout() - Image bitmap file missing (%s)", ii->name);
-			assert(0);
+		waze_assert(0);
 		 }
 
 		 bbdi->image = ii->image;
@@ -698,7 +698,7 @@ static int on_button_down( kbl_ctx*                ctx,
       if( !value)
          return 0;
 
-      assert(*value);
+     waze_assert(*value);
 
       if( !value[1])
          flags |= KEYBOARD_ASCII;
@@ -834,7 +834,7 @@ void ssd_keyboard_set_layout( SsdWidget   kb,
       ctx->current_layout = layout;
 #ifdef _DEBUG
    else
-      assert(0);
+     waze_assert(0);
 #endif // _DEBUG
 }
 
@@ -850,7 +850,7 @@ void ssd_keyboard_increment_value_index( SsdWidget kb)
 
       if( cur_index == layout->value_index)
       {
-         assert(0);
+        waze_assert(0);
          return;
       }
       if( layout->max_values_count <= layout->value_index)
@@ -874,7 +874,7 @@ void ssd_keyboard_set_value_index( SsdWidget kb, int index)
 
 	   if( (index < 0) || (layout->max_values_count <= index))
 	   {
-		  assert(0);
+		 waze_assert(0);
 		  return;
 	   }
 	   if( ctx->cbOnApproveValueType( ctx->context, index))
@@ -965,17 +965,17 @@ SsdWidget ssd_keyboard_layout_create(
    SsdWidget   w  = ssd_widget_new( name, on_key_pressed, flags);
    kbl_ctx*    ctx= malloc( sizeof(kbl_ctx));
 
-   assert(name);
-   assert(layouts);
-   assert(layouts_count);
-   assert(cbOnKey);
-   assert(cbOnCommand);
+  waze_assert(name);
+  waze_assert(layouts);
+  waze_assert(layouts_count);
+  waze_assert(cbOnKey);
+  waze_assert(cbOnCommand);
 
    init();
 
    for( i=0; i<layouts_count; i++)
    {
-      assert( layouts[i]->buttons_count < MAX_BUTTONS_COUNT);
+     waze_assert( layouts[i]->buttons_count < MAX_BUTTONS_COUNT);
       buttons_layout_info_reset( layouts[i]);
    }
 

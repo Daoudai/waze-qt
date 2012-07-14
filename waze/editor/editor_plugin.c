@@ -126,7 +126,7 @@ static void editor_plugin_street_properties
 	int rc;
 
    rc = editor_line_get_street (line_id, &street_id);
-   assert (rc >= 0);
+  waze_assert (rc >= 0);
 
    props->address = editor_street_get_street_address (street_id);
    props->street = editor_street_get_street_name (street_id);

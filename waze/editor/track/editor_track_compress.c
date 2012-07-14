@@ -56,7 +56,7 @@ static double time_relative_part_factor_from_absolute_value( time_t range_begin,
    
    if( !range_size)
    {
-		assert( range_size);
+	waze_assert( range_size);
       //return 0.5F;
    }
    
