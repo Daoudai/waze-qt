@@ -1,12 +1,9 @@
 #include "qt_webaccessor.h"
 
 #include <QUrl>
-#include <QNetworkRequest>
-#include <QNetworkReply>
-#include <QSslConfiguration>
 #include <QLatin1String>
-#include <QDataStream>
 #include <QDateTime>
+#include <QtCore>
 
 extern "C" {
 #include "roadmap.h"
@@ -24,14 +21,12 @@ WazeWebAccessor& WazeWebAccessor::getInstance()
 }
 
 WazeWebAccessor::WazeWebAccessor(QObject *parent) :
-    QNetworkAccessManager(parent)
+    QObject(parent)
 {
-    connect(this, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyDone(QNetworkReply*)));
-    connect(this, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), this, SLOT(onIgnoreSSLErrors(QNetworkReply*,QList<QSslError>)));
 
 }
 
-void WazeWebAccessor::postRequest(int flags,
+void WazeWebAccessor::postRequestParser(int flags,
                                   const char* action,
                                   wst_parser parsers[],
                                   int parser_count,
@@ -44,22 +39,23 @@ void WazeWebAccessor::postRequest(int flags,
                .arg((flags & WEBSVC_FLAG_SECURED)? _securedAddress : _address)
                .arg((flags & WEBSVC_FLAG_V2)? _v2Suffix : QString())
                .arg(QString::fromAscii(action)));
+    QByteArray ba = data.toUtf8();
 
-    // HTTP Connection, using system configuration for Proxy
-
-    QNetworkRequest request;
-    request.sslConfiguration().setPeerVerifyMode(QSslSocket::VerifyNone);
-    request.setUrl(url);
-    if (roadmap_net_get_compress_enabled())
+    QHttpRequestHeader header;
+    roadmap_log(ROADMAP_INFO, "%s", qPrintable(url.toString()));
+    if (TEST_NET_COMPRESS(flags))
     {
-        request.setRawHeader(QByteArray("Accept-Encoding"), QByteArray("gzip, deflate"));
+        header.setValue("Accept-Encoding", "gzip, deflate");
     }
-    request.setRawHeader(QByteArray("User-Agent"), QString::fromAscii("FreeMap/%1").arg(roadmap_start_version()).toAscii());
-    request.setHeader(QNetworkRequest::ContentTypeHeader, QString::fromAscii("binary/octet-stream"));
-    request.setHeader(QNetworkRequest::ContentLengthHeader, data.length());
+    header.setValue("User-Agent", QString::fromAscii("FreeMap/%1").arg(roadmap_start_version()));
+    header.setContentType(QString::fromAscii("binary/octet-stream"));
+    header.setContentLength(ba.length());
 
-    roadmap_net_mon_connect ();
-    QNetworkReply* reply = post(request, data.toLocal8Bit());
+    QHttp* http = new QHttp(this);
+    connect(http, SIGNAL(done(bool)), this, SLOT(oldStyleFinished(bool)));
+
+    connect(http, SIGNAL(dataSendProgress(int,int)), this, SLOT(requestBytesWrittenOld(int,int)));
+    connect(http, SIGNAL(dataReadProgress(int,int)), this, SLOT(responseBytesReadOld(int,int)));
 
     WazeWebConnectionData cd;
     cd.type = ParserBased;
@@ -69,10 +65,13 @@ void WazeWebAccessor::postRequest(int flags,
     cd.context = pci;
     cd.receivedBytes = 0;
     cd.sentBytes = 0;
-    _connectionDataHash[reply] = cd;
+    cd.ignoreContentLength = false;
+    _oldStyleConnectionDataHash[http] = cd;
 
-    connect(reply, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(requestBytesWritten(qint64,qint64)));
-    connect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(responseBytesRead(qint64,qint64)));
+    http->setHost(url.host());
+
+    roadmap_net_mon_connect();
+    http->post(url.path(), ba);
 }
 
 void WazeWebAccessor::setV2Suffix(QString suffix)
@@ -90,91 +89,7 @@ void WazeWebAccessor::setSecuredResolvedAddress(QString securedAddress)
     _securedAddress = securedAddress;
 }
 
-void WazeWebAccessor::replyDone(QNetworkReply* reply)
-{
-    disconnect(reply, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(requestBytesWritten(qint64,qint64)));
-    disconnect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(responseBytesRead(qint64,qint64)));
-
-    if (_connectionDataHash.contains(reply))
-    {
-        roadmap_result roadmap_error;
-
-        QNetworkReply::NetworkError error = reply->error();
-
-        switch (error) {
-        case QNetworkReply::NoError:
-            roadmap_error = succeeded;
-            break;
-        case QNetworkReply::ProtocolUnknownError:
-        case QNetworkReply::ProtocolInvalidOperationError:
-        case QNetworkReply::ProtocolFailure:
-            roadmap_error = err_net_unknown_protocol;
-            break;
-
-        case QNetworkReply::ConnectionRefusedError:
-        case QNetworkReply::RemoteHostClosedError:
-        case QNetworkReply::TimeoutError:
-        case QNetworkReply::SslHandshakeFailedError:
-        case QNetworkReply::TemporaryNetworkFailureError:
-
-        // also content related
-        case QNetworkReply::ContentAccessDenied:
-        case QNetworkReply::ContentOperationNotPermittedError:
-        case QNetworkReply::ContentNotFoundError:
-        case QNetworkReply::AuthenticationRequiredError:
-        case QNetworkReply::ContentReSendError:
-        case QNetworkReply::UnknownContentError:
-            roadmap_error = err_net_remote_error;
-            break;
-
-        case QNetworkReply::HostNotFoundError:
-            roadmap_error = err_net_no_path_to_destination;
-            break;
-
-        default:
-            roadmap_error = err_net_failed;
-            break;
-        }
-
-        WazeWebConnectionData cd = _connectionDataHash[reply];
-
-        int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-
-        switch (cd.type)
-        {
-        case ParserBased:
-            if (roadmap_error != succeeded || statusCode != 200)
-            {
-                roadmap_log(ROADMAP_ERROR ,"Error during request (Qt ErrorCode: %d, HTTP StatusCode: %d)", error, statusCode);
-            }
-
-            runParsersAndCallback(cd, reply, roadmap_error);
-            break;
-        case ProgressBased:
-            if (roadmap_error == succeeded && statusCode == 200)
-            {
-                QString data = QString::fromUtf8(reply->readAll());
-                std::string dataStr = data.toUtf8().constData();
-                cd.callback.callbacks->size(cd.context, dataStr.length());
-                cd.callback.callbacks->progress(cd.context, dataStr.c_str(), dataStr.length() );
-                cd.callback.callbacks->done(cd.context, getTimeStr(QDateTime::currentDateTime()), NULL);
-            }
-            else
-            {
-                cd.callback.callbacks->error(cd.context, 1, "Error during request (Qt ErrorCode: %d, HTTP StatusCode: %d)", error, statusCode);
-            }
-            break;
-        }
-
-        _connectionDataHash.remove(reply);
-    }
-
-    reply->close();
-    reply->deleteLater();
-    roadmap_net_mon_disconnect();
-}
-
-void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QNetworkReply *response, roadmap_result result)
+void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QByteArray& response, roadmap_result result)
 {
     QString              tag;
     wst_parser_ptr       parsers           = cd.callback.parsers;
@@ -188,8 +103,8 @@ void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QNetworkR
     int                  i;
     roadmap_result		 rc						= succeeded;
 
-    assert(parsers);
-    assert(parsers_count);
+   waze_assert(parsers);
+   waze_assert(parsers_count);
 
     // Select default parser:
     for( i=0; i<parsers_count; i++)
@@ -205,11 +120,11 @@ void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QNetworkR
 
     //   As long as we have data - keep on parsing:
 
-    QString data = QString::fromUtf8(response->readAll());
+    QString data = QString::fromUtf8(response);
     data.replace(QString("\\n"), QString("\n"), Qt::CaseInsensitive)
         .replace(QString("\\r"), QString("\r"), Qt::CaseInsensitive)
         .replace(QString("\\t"), QString("\t"), Qt::CaseInsensitive);
-    qDebug() << "Response:\n" << data;
+    roadmap_log(ROADMAP_INFO, "Response:\n%s\n", qPrintable(data));
     while(!data.isEmpty())
     {
         int tagEndIndex;
@@ -253,9 +168,23 @@ void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QNetworkR
        }
 
        //   Activate the appropriate server-request handler function:
-       std::string dataStr = data.toUtf8().constData();
-       next = parser(dataStr.c_str(), cd.context, &more_data_needed, &rc);
-       data.remove(0, next - dataStr.c_str());
+       QByteArray ba = data.toUtf8();
+       next = parser(ba.constData(), cd.context, &more_data_needed, &rc);
+//       if (next != NULL && next[0] != '\r' && next[0] != '\0')
+//       {
+//           std::string leftover = next;
+//           // possible issue where the server return fields that are "new"
+//           roadmap_log(ROADMAP_ERROR,
+//                       "\nDear Waze developers,\n\n"
+//                       "If you read this it means that the server return fields to requests which\n"
+//                       "the latest opensource code (v2.4) is not familiar with,\n"
+//                       "please FIX!!!\n\n"
+//                       "Thanks,\nAssaf Paz (damagedspline@gmail.com)\n\n\n"
+//                       "P.S.\nThe troublesome response line is '%s' where '%s' was not collected by the parser.",
+//                       dataStr.substr(0, dataStr.find('\r') - 1).c_str(),
+//                       leftover.substr(0,leftover.find('\r') - 1).c_str());
+//       }
+       data.remove(0, next - ba.constData());
        data = data.trimmed();
      }
 
@@ -265,42 +194,10 @@ void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QNetworkR
 }
 
 void WazeWebAccessor::getRequest(QString url, int flags, RoadMapHttpAsyncCallbacks *callbacks, time_t update_time, void* context)
-{   
-    QNetworkRequest request;
-    request.sslConfiguration().setPeerVerifyMode(QSslSocket::VerifyNone);
-    request.setUrl(QUrl::fromEncoded(url.toAscii()));
-    qDebug() << request.url();
-    if (TEST_NET_COMPRESS(flags))
-    {
-        request.setRawHeader(QByteArray("Accept-Encoding"), QByteArray("gzip, deflate"));
-    }
-    request.setRawHeader(QByteArray("User-Agent"), QString::fromAscii("FreeMap/%1").arg(roadmap_start_version()).toAscii());
-    if (update_time > 0)
-    {
-        request.setRawHeader(QByteArray("If-Modified-Since"), QLocale::c().toString(QDateTime::fromTime_t(update_time), QLatin1String("ddd, dd MMM yyyy hh:mm:ss 'GMT'")).toAscii());
-    }
-    roadmap_net_mon_connect();
-    QNetworkReply* reply = get(request);
-
-    WazeWebConnectionData cd;
-    cd.type = ProgressBased;
-    cd.callback.callbacks = callbacks;
-    cd.context = context;
-    cd.receivedBytes = 0;
-    cd.sentBytes = 0;
-    _connectionDataHash[reply] = cd;
-
-    connect(reply, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(requestBytesWritten(qint64,qint64)));
-    connect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(responseBytesRead(qint64,qint64)));
-
-    callbacks->progress(context, NULL, 0);
-}
-
-void WazeWebAccessor::getRequestOld(QString url, int flags, RoadMapHttpAsyncCallbacks *callbacks, time_t update_time, void* context)
 {
     QUrl encodedUrl = QUrl::fromEncoded(url.toAscii());
     QHttpRequestHeader header;
-    qDebug() << url;
+    roadmap_log(ROADMAP_INFO, "%s", qPrintable(url));
     if (TEST_NET_COMPRESS(flags))
     {
         header.setValue("Accept-Encoding", "gzip, deflate");
@@ -325,6 +222,7 @@ void WazeWebAccessor::getRequestOld(QString url, int flags, RoadMapHttpAsyncCall
     cd.context = context;
     cd.receivedBytes = 0;
     cd.sentBytes = 0;
+    cd.ignoreContentLength = flags & HTTPCOPY_FLAG_IGNORE_CONTENT_LEN;
     _oldStyleConnectionDataHash[http] = cd;
 
     callbacks->progress(context, NULL, 0);
@@ -335,9 +233,43 @@ void WazeWebAccessor::getRequestOld(QString url, int flags, RoadMapHttpAsyncCall
     http->get(encodedUrl.path());
 }
 
-void WazeWebAccessor::onIgnoreSSLErrors(QNetworkReply *reply, QList<QSslError> error)
+void WazeWebAccessor::postRequestProgress(QString url, int flags, RoadMapHttpAsyncCallbacks *callbacks, void *context, const char* req_header, const void* data, int data_length)
 {
-    reply->ignoreSslErrors(error);
+    QUrl encodedUrl = QUrl::fromEncoded(url.toAscii());
+
+    QByteArray ba((const char*) data, data_length);
+
+    QHttpRequestHeader header;
+    roadmap_log(ROADMAP_INFO, "%s", qPrintable(url));
+    if (TEST_NET_COMPRESS(flags))
+    {
+        header.setValue("Accept-Encoding", "gzip, deflate");
+    }
+    header.setValue("User-Agent", QString::fromAscii("FreeMap/%1").arg(roadmap_start_version()));
+    header.setContentType(QString::fromAscii("binary/octet-stream"));
+    header.setContentLength(ba.length());
+
+    QHttp* http = new QHttp(this);
+    connect(http, SIGNAL(done(bool)), this, SLOT(oldStyleFinished(bool)));
+
+    connect(http, SIGNAL(dataSendProgress(int,int)), this, SLOT(requestBytesWrittenOld(int,int)));
+    connect(http, SIGNAL(dataReadProgress(int,int)), this, SLOT(responseBytesReadOld(int,int)));
+
+    WazeWebConnectionData cd;
+    cd.type = ProgressBased;
+    cd.callback.callbacks = callbacks;
+    cd.context = context;
+    cd.receivedBytes = 0;
+    cd.sentBytes = 0;
+    cd.ignoreContentLength = flags & HTTPCOPY_FLAG_IGNORE_CONTENT_LEN;
+    _oldStyleConnectionDataHash[http] = cd;
+
+    callbacks->progress(context, NULL, 0);
+
+    http->setHost(encodedUrl.host());
+
+    roadmap_net_mon_connect();
+    http->post(encodedUrl.path(), ba);
 }
 
 void WazeWebAccessor::oldStyleFinished(bool isError)
@@ -351,17 +283,36 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
 
     int statusCode = http->lastResponse().statusCode();
 
-    if (!isError && statusCode == 200)
+    QByteArray response = http->readAll();
+
+    switch (cd.type)
     {
-        QByteArray response = http->readAll();
-        cd.callback.callbacks->size(cd.context, response.length());
-        cd.callback.callbacks->progress(cd.context, response.constData(), response.length() );
-        cd.callback.callbacks->done(cd.context, getTimeStr(QDateTime::currentDateTime()), NULL);
-        roadmap_net_mon_recv(response.length());
-    }
-    else
-    {
-        cd.callback.callbacks->error(cd.context, 1, "Error during request (%d: %s)", statusCode, http->errorString().toLocal8Bit().constData());
+    case ParserBased:
+        if (isError || statusCode != 200)
+        {
+            roadmap_log(ROADMAP_ERROR ,"Error during request (HTTP StatusCode: %d, Qt Error String: %s)", statusCode, http->errorString().toAscii().constData());
+        }
+
+        runParsersAndCallback(cd, response, (isError)? err_net_failed : succeeded);
+        break;
+    case ProgressBased:
+        if (!isError && statusCode == 200)
+        {
+            cd.callback.callbacks->size(cd.context, response.length());
+            cd.callback.callbacks->progress(cd.context, response.constData(), response.length() );
+            cd.callback.callbacks->done(cd.context, getTimeStr(QDateTime::currentDateTime()), NULL);
+        }
+        else
+        {
+            roadmap_log(ROADMAP_ERROR, "HTTP error during request (%d)", statusCode);
+            cd.callback.callbacks->error(cd.context, 1, "Error during request (%s)", http->errorString().toLocal8Bit().constData());
+        }
+//        else
+//        {
+//            roadmap_log(ROADMAP_ERROR, "HTTP error during request (%d)", statusCode);
+//            cd.callback.callbacks->done(cd.context, getTimeStr(QDateTime::currentDateTime()), NULL);
+//        }
+        break;
     }
 
     _oldStyleConnectionDataHash.remove(http);
@@ -369,34 +320,6 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
     http->deleteLater();
 
     roadmap_net_mon_disconnect();
-}
-
-void WazeWebAccessor::requestBytesWritten(qint64 bytesSent, qint64 bytesTotal)
-{
-    QNetworkReply* reply = dynamic_cast<QNetworkReply*>(sender());
-
-    if (!_connectionDataHash.contains(reply)) return;
-
-    WazeWebConnectionData& cd = _connectionDataHash[reply];
-    int bytes = bytesSent - cd.sentBytes;
-    if (bytes <= 0)
-        return;
-    roadmap_net_mon_send(bytes);
-    cd.sentBytes = bytesSent;
-}
-
-void WazeWebAccessor::responseBytesRead(qint64 bytesReceived, qint64 bytesTotal)
-{
-    QNetworkReply* reply = dynamic_cast<QNetworkReply*>(sender());
-
-    if (!_connectionDataHash.contains(reply)) return;
-
-    WazeWebConnectionData& cd = _connectionDataHash[reply];
-    int bytes = bytesReceived - cd.receivedBytes;
-    if (bytes <= 0)
-        return;
-    roadmap_net_mon_recv(bytes);
-    cd.receivedBytes = bytesReceived;
 }
 
 void WazeWebAccessor::requestBytesWrittenOld(int bytesSent, int bytesTotal)

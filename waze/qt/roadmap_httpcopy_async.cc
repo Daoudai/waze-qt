@@ -572,32 +572,12 @@ const char* roadmap_http_async_get_upload_header( const char* content_type, cons
 }
 
 HttpAsyncContext * roadmap_http_async_post( RoadMapHttpAsyncCallbacks *callbacks, void *context,
-                                                 const char *source, const char* header, const void* data, int data_length, int flags )
+                                            const char *source, const char* header, const void* data, int data_length, int flags )
 {
-   HttpAsyncContext *hcontext = new HttpAsyncContext;
-   hcontext->callbacks = callbacks;
-   hcontext->cb_context = context;
-   hcontext->io.os.socket = ROADMAP_INVALID_SOCKET;
-   hcontext->last_modified_buffer[0] = '\0';
-   hcontext->header_buffer[0] = '\0';
-   hcontext->error_buffer[0] = '\0';
-   hcontext->data = data;
-   hcontext->data_len = data_length;
-   hcontext->method = _http_async_method__post;
-   hcontext->flags = flags;
+    static HttpAsyncContext hcontext;
 
-   if ( header != NULL )
-      strncpy( hcontext->header_buffer, header, sizeof( hcontext->header_buffer ) );
-
-   if ( roadmap_net_connect_async( "http_post", source, source, 0, 80, 0,
-               roadmap_http_async_connect_cb, hcontext ) == NULL )
-      {
-         callbacks->error(context, 1, "Can't create http connection.");
-         delete (hcontext);
-         return NULL;
-      }
-
-      return hcontext;
+    WazeWebAccessor::getInstance().postRequestProgress(QString::fromAscii(source), flags, callbacks, context, header, data, data_length);
+    return &hcontext;
 }
 
 const char* roadmap_http_async_get_simple_header( const char* content_type, int content_len )
@@ -618,22 +598,15 @@ HttpAsyncContext * roadmap_http_async_copy (RoadMapHttpAsyncCallbacks *callbacks
                              const char *source,
                              time_t update_time) {
 
+    static HttpAsyncContext hcontext;
+
     WazeWebAccessor::getInstance().getRequest(QString::fromAscii(source), 0, callbacks, update_time, context);
 
-    return new HttpAsyncContext;
-}
-
-HttpAsyncContext * roadmap_http_async_copy_old (RoadMapHttpAsyncCallbacks *callbacks,
-                                      void *context,
-                             const char *source,
-                             time_t update_time) {
-
-    WazeWebAccessor::getInstance().getRequestOld(QString::fromAscii(source), 0, callbacks, update_time, context);
-
-    return new HttpAsyncContext;
+    return &hcontext;
 }
 
 void roadmap_http_async_copy_abort (HttpAsyncContext *context) {
     // TODO
+    roadmap_log(ROADMAP_FATAL, "roadmap_http_async_copy_abort called and it is not implemented yet");
 }
 

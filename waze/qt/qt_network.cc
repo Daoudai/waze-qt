@@ -149,7 +149,7 @@ int RNetworkSocket::write(char* data, int size, bool immediate)
 {
     bool rc = true;
 
-    qDebug(data);
+    roadmap_log(ROADMAP_INFO, data);
 
     if (_isSecured)
     {
