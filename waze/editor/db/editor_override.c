@@ -63,7 +63,7 @@ int editor_override_get (int index, int *line_id, int *square_id, int *direction
    rec = (editor_db_override *) editor_db_get_item
                            (ActiveOverridesDB, index, 0, NULL);
 
-   assert (rec);
+  waze_assert (rec);
    if (!rec) return 0;
 
    if (line_id)   *line_id = rec->line;

@@ -1345,7 +1345,7 @@ void search_menu_search_address(void){
 #ifndef IPHONE
 //   if( s_address_search_is_active)
 //   {
-//      assert(0);
+//     waze_assert(0);
 //      return;
 //   }
 
@@ -1362,7 +1362,7 @@ void search_menu_single_search(void){
 #ifndef IPHONE
 //   if( s_address_search_is_active)
 //   {
-//      assert(0);
+//     waze_assert(0);
 //      return;
 //   }
 
@@ -1378,7 +1378,7 @@ void search_menu_single_search_favorite(){
 #ifndef IPHONE
 //   if( s_address_search_is_active)
 //   {
-//      assert(0);
+//     waze_assert(0);
 //      return;
 //   }
 
@@ -1396,7 +1396,7 @@ void search_menu_search_local(void){
 #ifndef IPHONE
 //   if( s_poi_search_is_active)
 //   {
-//      assert(0);
+//     waze_assert(0);
 //      return;
 //   }
 
@@ -1681,10 +1681,10 @@ static BOOL on_key_pressed__delegate_to_editbox(
    SsdWidget main_cont= this->parent;
    SsdWidget edit;
 
-   assert( this);
-   assert( main_cont);
-   assert( this->children);
-   assert( this->children->key_pressed);
+  waze_assert( this);
+  waze_assert( main_cont);
+  waze_assert( this->children);
+  waze_assert( this->children->key_pressed);
 
    editbox = this->children;
    ssd_widget_hide(ssd_widget_get(editbox, "BgText"));
@@ -1712,10 +1712,10 @@ static BOOL on_add_favorite_key_pressed__delegate_to_editbox(
    SsdWidget main_cont= this->parent;
    SsdWidget edit;
 
-   assert( this);
-   assert( main_cont);
-   assert( this->children);
-   assert( this->children->key_pressed);
+  waze_assert( this);
+  waze_assert( main_cont);
+  waze_assert( this->children);
+  waze_assert( this->children->key_pressed);
 
    editbox = this->children;
    ssd_widget_hide(ssd_widget_get(editbox, "BgText"));
@@ -2019,14 +2019,14 @@ void roadmap_search_menu(void){
 
       if( !s_main_menu)
       {
-         assert(0);
+        waze_assert(0);
          return;
       }
    }
 
    if( !get_menu_item_names( "search_menu", s_main_menu, grid_menu_labels, &count))
    {
-      assert(0);
+     waze_assert(0);
       return;
    }
 
@@ -2086,14 +2086,14 @@ void roadmap_search_menu(void){
 
       if( !s_main_menu)
       {
-         assert(0);
+        waze_assert(0);
          return;
       }
    }
 
    if( !get_menu_item_names( "search_menu", s_main_menu, grid_menu_labels, &count))
    {
-      assert(0);
+     waze_assert(0);
       return;
    }
 

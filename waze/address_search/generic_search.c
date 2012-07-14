@@ -76,7 +76,7 @@ const address_candidate* generic_search_result( int index)
 {
    if( (index < 0) || (s_results_count <= index))
    {
-      assert(0);
+     waze_assert(0);
       return NULL;
    }
 
@@ -185,12 +185,12 @@ roadmap_result generic_search_resolve_address(
    if (type == WEBSVC_NO_TYPE)
       type = wst_get_unique_type();
 
-//   assert( address && (*address));
+//  waze_assert( address && (*address));
 
    if( INVALID_WEBSVC_HANDLE == websvc)
    {
       roadmap_log( ROADMAP_ERROR, "address_search_resolve_address() - MODULE NOT INITIALIZED");
-      assert(0);  // 'address_search_init()' was not called
+     waze_assert(0);  // 'address_search_init()' was not called
       return err_internal_error;
    }
 
@@ -375,7 +375,7 @@ BOOL navigate_with_coordinates( BOOL take_me_there, search_types type, int   sel
 
    if( !selection)
    {
-      assert(0);
+     waze_assert(0);
       return FALSE;
    }
    position.longitude= (int)(selection->longtitude* 1000000);;

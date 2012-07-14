@@ -386,7 +386,7 @@ static void load_next_tile (void) {
 			return;
 		}
 		tile_status = roadmap_tile_status_get (tile_index);
-		assert (tile_status != NULL);
+    waze_assert (tile_status != NULL);
 		if (((*tile_status) & ROADMAP_TILE_STATUS_FLAG_UPTODATE ) && tile_callback) {
 			tile_callback ();
 		}
@@ -402,7 +402,7 @@ static void load_next_tile (void) {
 		if (Connections[conn].tile_status == NULL) break;
 	}
 
-	assert (conn < TM_MAX_CONCURRENT);
+waze_assert (conn < TM_MAX_CONCURRENT);
 
 	Connections[conn].tile_index = tile_index;
 	Connections[conn].tile_status = tile_status;
@@ -420,7 +420,7 @@ static void load_next_tile (void) {
 	tile_time = roadmap_square_timestamp (tile_index);
 
 	Connections[conn].http_context =
-        roadmap_http_async_copy_old (&callbacks,
+        roadmap_http_async_copy (&callbacks,
 										 &Connections[conn],
 										 Connections[conn].url,
 										 tile_time);
@@ -499,7 +499,7 @@ static void queue_tile (int index, int priority, RoadMapCallback on_loaded) {
 			if (RequestQueue[QueueHead].callback != NULL) {
 
 				int before_last = (QueueHead + TM_MAX_QUEUE - 1) % TM_MAX_QUEUE;
-				assert (RequestQueue[before_last].callback == NULL);
+            waze_assert (RequestQueue[before_last].callback == NULL);
 				*roadmap_tile_status_get (RequestQueue[before_last].tile_index) &= ~ROADMAP_TILE_STATUS_FLAG_QUEUED;
 				RequestQueue[before_last] = RequestQueue[QueueHead];
 			}

@@ -160,7 +160,7 @@ BOOL RTUsers_IsEmpty( LPRTUsers this)
 
 BOOL RTUsers_Add( LPRTUsers this, LPRTUserLocation pUser)
 {
-   assert(gs_pfnOnAddUser);
+  waze_assert(gs_pfnOnAddUser);
 
    //   Full?
    if( RL_MAXIMUM_USERS_COUNT == this->iCount)
@@ -197,7 +197,7 @@ BOOL RTUsers_Update( LPRTUsers this, LPRTUserLocation pUser)
 {
    LPRTUserLocation pUI = RTUsers_UserByID( this, pUser->iID);
 
-   assert(gs_pfnOnMoveUser);
+  waze_assert(gs_pfnOnMoveUser);
 
    if( !pUI)
       return FALSE;
@@ -227,7 +227,7 @@ BOOL  RTUsers_RemoveByIndex( LPRTUsers this, int iIndex)
 {
    int i;
 
-   assert(gs_pfnOnRemoveUser);
+  waze_assert(gs_pfnOnRemoveUser);
 
    //   Are we empty?
    if( (iIndex < 0) || (this->iCount <= iIndex))
@@ -274,7 +274,7 @@ void RTUsers_ClearAll( LPRTUsers this)
 {
    int i;
 
-   assert(gs_pfnOnRemoveUser);
+  waze_assert(gs_pfnOnRemoveUser);
 
    //   Find user:
    for( i=0; i<this->iCount; i++)
@@ -901,7 +901,7 @@ static void prepareValueString ( int value, char * resultString, const char * ni
 	unsigned int i;
 	int lowVal;
 	int highVal;
-	assert(value>=0);
+waze_assert(value>=0);
 	if (strcmp(nickName,roadmap_lang_get("anonymous")))
 	{
 		snprintf(resultString, MAX_SIZE_RANGE_STR, "%d",value);

@@ -172,7 +172,7 @@ static int find_line_break (int last_point,
 
       while ((100 * angle_sum / max_azymuth_diff) < 70) {
          
-         assert (j<(current_point-last_point+1));
+        waze_assert (j<(current_point-last_point+1));
          if (j>=(current_point-last_point+1)) break;
 
          angle_sum += pairs[j].angle;
@@ -251,7 +251,7 @@ static int detect_turn(int point_id,
       return 0;
    }
 
-   assert (point_id > last_straight_line_point);
+  waze_assert (point_id > last_straight_line_point);
 
    /* trivial case */
    if ((last_straight_line_point == (point_id-1)) &&
@@ -307,7 +307,7 @@ static int detect_turn(int point_id,
       last_straight_line_point = point_id - middle2;
       last_straight_azymuth = this_straight_azymuth;
      
-      assert (middle1 > 0);
+     waze_assert (middle1 > 0);
       if (middle1 > 0) {
          new_segment[0].type = road_type;
          new_segment[0].point_id = middle1;

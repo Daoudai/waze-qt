@@ -73,7 +73,7 @@ int editor_shape_add (int ordinal,
 void editor_shape_position (int shape, RoadMapPosition *position) {
 
    editor_db_shape *shape_st = editor_db_get_item (ActiveShapeDB, shape, 0, 0);
-   assert(shape_st != NULL);
+  waze_assert(shape_st != NULL);
 
    position->longitude += shape_st->delta_longitude;
    position->latitude  += shape_st->delta_latitude;
@@ -83,7 +83,7 @@ void editor_shape_position (int shape, RoadMapPosition *position) {
 int editor_shape_altitude (int shape) {
    
    editor_db_shape *shape_st = editor_db_get_item (ActiveShapeDB, shape, 0, 0);
-   assert(shape_st != NULL);
+  waze_assert(shape_st != NULL);
 
    return shape_st->altitude;   
 }
@@ -92,7 +92,7 @@ int editor_shape_altitude (int shape) {
 void editor_shape_time (int shape, time_t *time) {
 
    editor_db_shape *shape_st = editor_db_get_item (ActiveShapeDB, shape, 0, 0);
-   assert(shape_st != NULL);
+  waze_assert(shape_st != NULL);
 
    *time += shape_st->delta_time;
 }
@@ -101,7 +101,7 @@ void editor_shape_time (int shape, time_t *time) {
 int editor_shape_ordinal (int shape) {
 	
    editor_db_shape *shape_st = editor_db_get_item (ActiveShapeDB, shape, 0, 0);
-   assert(shape_st != NULL);
+  waze_assert(shape_st != NULL);
 
 	return shape_st->ordinal;
 }

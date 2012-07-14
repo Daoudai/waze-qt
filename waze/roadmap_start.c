@@ -1554,7 +1554,7 @@ BOOL get_menu_item_names(  const char*          menu_name,
 
    if( !parent)
    {
-      assert(0);
+     waze_assert(0);
       return FALSE;
    }
 
@@ -1585,7 +1585,7 @@ BOOL get_menu_item_names(  const char*          menu_name,
    for( i=0; i<menu->item_count; i++)
    {
       action = (RoadMapAction*)menu->item[i].action;
-      assert( action);
+     waze_assert( action);
       if (!(menu->item[i].flags & CONTEXT_MENU_FLAG_HIDDEN)){
          items[item_count] = action->name;
          item_count++;
@@ -1681,7 +1681,7 @@ static void roadmap_start_quick_menu (void) {
 
       if( !s_main_menu)
       {
-         assert(0);
+        waze_assert(0);
          return;
       }
    }
@@ -1720,7 +1720,7 @@ static void roadmap_start_quick_menu (void) {
 #ifdef SSD
    if( !get_menu_item_names( NULL, s_main_menu, grid_menu_labels, &count))
    {
-      assert(0);
+     waze_assert(0);
       return;
    }
 
@@ -2273,7 +2273,7 @@ void start_mywaze_menu (void) {
 
        if( !s_main_menu)
        {
-          assert(0);
+         waze_assert(0);
           return;
        }
     }
@@ -2289,7 +2289,7 @@ void start_mywaze_menu (void) {
  #ifdef TOUCH_SCREEN
     if( !get_menu_item_names( "mywaze", s_main_menu, grid_menu_labels, &count))
     {
-       assert(0);
+      waze_assert(0);
        return;
     }
 
@@ -2338,7 +2338,7 @@ void start_more_menu (void) {
    ssd_contextmenu_show_item__by_action_name(s_more_menu, "my_coupons", RealtimeExternalPoi_MyCouponsEnabled(), TRUE);
    if( !get_menu_item_names( NULL, s_more_menu, grid_menu_labels, &count))
    {
-      assert(0);
+     waze_assert(0);
       return;
    }
 	if (ssd_dialog_is_currently_active()) {
@@ -2372,14 +2372,14 @@ void roadmap_help_menu(void){
 
       if( !s_main_menu)
       {
-         assert(0);
+        waze_assert(0);
          return;
       }
    }
 
    if( !get_menu_item_names( "help_menu", s_main_menu, grid_menu_labels, &count))
    {
-      assert(0);
+     waze_assert(0);
       return;
    }
 
@@ -2440,7 +2440,7 @@ void start_settings_quick_menu (void) {
 
       if( !s_main_menu)
       {
-         assert(0);
+        waze_assert(0);
          return;
       }
    }
@@ -2451,7 +2451,7 @@ void start_settings_quick_menu (void) {
 
    if( !get_menu_item_names( "settingsmenu", s_main_menu, grid_menu_labels, &count))
    {
-      assert(0);
+     waze_assert(0);
       return;
    }
 
@@ -3534,13 +3534,13 @@ void roadmap_start_context_menu (const RoadMapGuiPoint *point) {
 
    if( !s_main_menu)
    {
-      assert(0);
+     waze_assert(0);
       return;
    }
 
    if( !get_menu_item_names( "Context", s_main_menu, grid_menu_labels, &count))
    {
-      assert(0);
+     waze_assert(0);
       return;
    }
 

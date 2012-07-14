@@ -2567,7 +2567,7 @@ void navigate_get_waypoint (int distance, RoadMapPosition *way_point) {
 	int i = NavigateCurrentSegment;
    NavigateSegment *segment = NULL;
 
-   assert(NavigateTrackEnabled);
+  waze_assert(NavigateTrackEnabled);
 
    if (distance == -1) {
       *way_point = NavigateDestPos;
@@ -3907,7 +3907,7 @@ static BOOL NavList_OnKeyPressed( SsdWidget this, const char* utf8char, uint32_t
    //   Our task?
    if( !(flags & KEYBOARD_VIRTUAL_KEY))
    {
-      assert(utf8char);
+     waze_assert(utf8char);
 
        return FALSE;
    }

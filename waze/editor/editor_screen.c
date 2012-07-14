@@ -742,7 +742,7 @@ static char *editor_screen_get_pen_color (int pen_type, int road_state) {
    case MISSING_ROUTE_STATE:  return "yellow";
 
    default:
-                              assert (0);
+                             waze_assert (0);
                               return "black";
    }
 }

@@ -232,7 +232,7 @@ static int load_prompt_list (void) {
        }
    }
 
-   assert(path);
+  waze_assert(path);
 
    file = roadmap_file_fopen (path, file_name, "sr");
    if (file == NULL) {

@@ -70,7 +70,7 @@ BOOL single_search_init()
 
    if( INVALID_WEBSVC_HANDLE != s_websvc)
    {
-      assert(0);  // Called twice?
+     waze_assert(0);  // Called twice?
       return TRUE;
    }
 

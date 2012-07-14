@@ -146,7 +146,7 @@ BOOL roadmap_border_initialize()
    {
       const char* image_filename = get_img_filename(i);
 
-      assert(NULL != image_filename);
+     waze_assert(NULL != image_filename);
 
       s_images[i].image = (RoadMapImage)roadmap_res_get(
                                     RES_BITMAP,

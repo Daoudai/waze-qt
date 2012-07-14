@@ -89,7 +89,7 @@ static void update_activity (void) {
  */
 void roadmap_net_mon_start (void) {
 
-   assert (CurrentState == NET_MON_DISABLED || CurrentState == NET_MON_OFFLINE);
+  waze_assert (CurrentState == NET_MON_DISABLED || CurrentState == NET_MON_OFFLINE);
    CurrentState = NET_MON_START;
    if(show_net_mon())
    		roadmap_message_set('!', roadmap_lang_get("Accessing network..."));
@@ -118,7 +118,7 @@ void roadmap_net_mon_initialize (void) {
  */
 void roadmap_net_mon_destroy (void) {
    const char* netmon_cfg_value = RoadMapNetMonEnabled ? "yes" : "no";
-   assert (CurrentState != NET_MON_DISABLED);
+  waze_assert (CurrentState != NET_MON_DISABLED);
    CurrentState = NET_MON_DISABLED;
    // Network monitor enabled configuration value
    roadmap_config_set( &RoadMapConfigNetMonitorEnabled, netmon_cfg_value );
@@ -138,7 +138,7 @@ BOOL roadmap_net_mon_get_enabled( void )
 /* Called when a new connection is about to be opened
  */
 void roadmap_net_mon_connect (void) {
-   assert (CurrentState != NET_MON_DISABLED);
+  waze_assert (CurrentState != NET_MON_DISABLED);
    if ( CurrentState == NET_MON_OFFLINE ) { return; } //  connect means nothing in this case
    CurrentState = NET_MON_CONNECT;
    NumConnections++;
@@ -151,9 +151,9 @@ void roadmap_net_mon_connect (void) {
 /* Called after a connection is closed
  */
 void roadmap_net_mon_disconnect (void) {
-//   assert (CurrentState != NET_MON_DISABLED);
+//  waze_assert (CurrentState != NET_MON_DISABLED);
    if ( CurrentState == NET_MON_OFFLINE || CurrentState == NET_MON_DISABLED ) { return; } //  disconnect means nothing in this case
-   assert (NumConnections);
+  waze_assert (NumConnections);
    NumConnections--;
    if (NumConnections == 0) CurrentState = NET_MON_IDLE;
 }
@@ -162,7 +162,7 @@ void roadmap_net_mon_disconnect (void) {
 /* Called after data is sent over the net
  */
 void roadmap_net_mon_send (size_t size) {
-   assert (CurrentState != NET_MON_DISABLED);
+  waze_assert (CurrentState != NET_MON_DISABLED);
    CurrentState = NET_MON_DATA;
    SendBytesCount += size;
    if(show_net_mon())
@@ -176,7 +176,7 @@ void roadmap_net_mon_send (size_t size) {
 void roadmap_net_mon_recv (size_t size) {
 
 #if !defined(_WIN32) || defined(QTMOBILITY)
-   assert (CurrentState != NET_MON_DISABLED);
+  waze_assert (CurrentState != NET_MON_DISABLED);
 #endif
 
    CurrentState = NET_MON_DATA;

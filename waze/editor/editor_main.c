@@ -94,7 +94,7 @@ void editor_main_initialize (void) {
    
    EditorPluginID = editor_plugin_register ();
    /* This is due to the WinCE auto sync */
-   assert(EditorPluginID == 1);
+  waze_assert(EditorPluginID == 1);
 
    roadmap_layer_adjust ();
    editor_bar_initialize();

@@ -255,8 +255,8 @@ static BOOL OnKeyPressed (SsdWidget widget, const char* utf8char, uint32_t flags
    }
    else
    {
-      assert(utf8char);
-      assert(*utf8char);
+     waze_assert(utf8char);
+     waze_assert(*utf8char);
 
       // Other special keys:
       if( KEYBOARD_ASCII & flags)

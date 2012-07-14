@@ -219,7 +219,7 @@ static struct SquareGraphItem *get_square_graph (int square_id) {
       }
    }
 
-   assert(cur_line <= cache->lines_count);
+  waze_assert(cur_line <= cache->lines_count);
 
    return cache;
 }
@@ -295,7 +295,7 @@ int get_connected_segments (int square,
    if (i <= 0) {
    	roadmap_log (ROADMAP_ERROR, "cannot find data for node %d square %d", node_id, square);
    }
-   assert (i > 0);
+  waze_assert (i > 0);
 
    if (use_restrictions) {
       if (is_seg_reversed) {
@@ -367,13 +367,13 @@ int navigate_graph_get_line (int node, int line_no) {
    node &= 0xffff;
 
    i = cache->nodes_index[node];
-   assert (i > 0);
+  waze_assert (i > 0);
    i--;
 
    skip = line_no;
    while (skip) {
       i = cache->lines_index[i];
-	   assert (i > 0);
+	  waze_assert (i > 0);
 	   i--;
       skip--;
    }

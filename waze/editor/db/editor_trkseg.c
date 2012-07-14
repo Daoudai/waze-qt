@@ -63,7 +63,7 @@ void editor_trkseg_get_time (int trkseg,
    track = (editor_db_trkseg *) editor_db_get_item
                               (ActiveTrksegDB, trkseg, 0, NULL);
 
-   assert (track != NULL);
+  waze_assert (track != NULL);
    if (track == NULL) return;
 
    *start_time = track->gps_start_time;
@@ -127,7 +127,7 @@ void editor_trkseg_get_points (int trkseg, int *from_point_id, int *to_point_id,
    track = (editor_db_trkseg *) editor_db_get_item
                                  (ActiveTrksegDB, trkseg, 0, NULL);
 
-   assert (track != NULL);
+  waze_assert (track != NULL);
 
 	*from_point_id = track->from_point_id;
 	*to_point_id = track->to_point_id;

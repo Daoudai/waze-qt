@@ -437,7 +437,7 @@ int roadmap_db_open_mem (int fips, int tile_index, roadmap_db_model *model,
                          void *data, size_t size) {
 
    roadmap_db_database *database = roadmap_db_find (fips, tile_index);
-   assert(!database);
+  waze_assert(!database);
 
    if (database) {
       roadmap_db_close_database (database);
@@ -507,7 +507,7 @@ int	roadmap_db_get_data (const roadmap_db_data_file *file,
 	unsigned int offset = roadmap_db_entry_offset (file, data_id);
 	unsigned int size = roadmap_db_entry_size (file, data_id);
 
-	assert (item_size > 0);
+waze_assert (item_size > 0);
 		
 	if (size % item_size) {
       roadmap_log (ROADMAP_WARNING, "Invalid data size - item size %u data size %u", item_size, size);

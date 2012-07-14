@@ -138,7 +138,7 @@ const char* roadmap_lang_get( const char* tag_name)
 {
    if( !tag_name || !(*tag_name))
    {
-      assert(0);
+     waze_assert(0);
       return NULL;
    }
 
@@ -151,7 +151,7 @@ const char* roadmap_lang_get( const char* tag_name)
    else if( !strcmp( tag_name, "CombinationKeyboardKey_3"))
       return "3אבגdef";
    else if( !strcmp( tag_name, "CombinationKeyboardKey_4"))
-      return "4מםנןghi";
+      return "4מם� ןghi";
    else if( !strcmp( tag_name, "CombinationKeyboardKey_5"))
       return "5יכךלjkl";
    else if( !strcmp( tag_name, "CombinationKeyboardKey_6"))
@@ -167,7 +167,7 @@ const char* roadmap_lang_get( const char* tag_name)
    else if( !strcmp( tag_name, "CombinationKeyboardKey_#"))
       return "#";
 
-   assert(0);
+  waze_assert(0);
    return NULL;
 }
 #endif   // (0)
@@ -186,8 +186,8 @@ void phone_keyboard_load( phone_keyboard_ptr this)
          value++;
       mki->values = utf8_to_char_array( value, &mki->count);
 
-      assert(mki->values);
-      assert(mki->count);
+     waze_assert(mki->values);
+     waze_assert(mki->count);
    }
 }
 

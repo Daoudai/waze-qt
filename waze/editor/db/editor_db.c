@@ -105,7 +105,7 @@ static void editor_db_activate_handler (editor_db_handler *handler) {
 
    editor_db_section *section = editor_db_alloc_section();
 
-   assert(handler->type_id < MAX_TYPES);
+  waze_assert(handler->type_id < MAX_TYPES);
 
    section->type_id = handler->type_id;
    section->item_size = handler->item_size;
@@ -377,7 +377,7 @@ static int editor_db_read (void) {
             if (item_id != -1) {
                /* Update */
                void *data = editor_db_get_record(section, item_id);
-               assert(data);
+              waze_assert(data);
                if (section->flag_committed) {
                	editor_db_update_generation (section, ((editor_record_header *)data)->generation);
                }
@@ -412,7 +412,7 @@ int editor_db_write_item (editor_db_section *section, int item_id, int count) {
 
 
 int editor_db_create (int map_id) {
-   assert(0);
+  waze_assert(0);
    return -1;
 }
 
@@ -489,7 +489,7 @@ int editor_db_open (int map_id) {
 
 
 void editor_db_sync (int map_id) {
-   assert(map_id == EditorActiveMap);
+  waze_assert(map_id == EditorActiveMap);
    //roadmap_file_flush(EditorDataFile);
 }
 
@@ -501,7 +501,7 @@ int editor_db_activate (int map_id) {
        return 0;
    }
 
-   assert(EditorActiveMap == -1);
+  waze_assert(EditorActiveMap == -1);
 
    if (map_id == -1) return -1;
 
@@ -517,7 +517,7 @@ void editor_db_close (int map_id) {
 
    if (EditorActiveMap == -1) return;
 
-   assert(map_id == EditorActiveMap);
+  waze_assert(map_id == EditorActiveMap);
    editor_db_free ();
    roadmap_file_close(EditorDataFile);
    EditorDataFile = ROADMAP_INVALID_FILE;
@@ -648,7 +648,7 @@ int editor_db_update_item (editor_db_section *section, int item_id) {
 
    void *rec = editor_db_get_record(section, item_id);
 
-   assert(rec != NULL);
+  waze_assert(rec != NULL);
 
 	if (section->flag_committed) {
 		editor_db_update_generation (section, section->committed_generation + 1);
@@ -683,11 +683,11 @@ int editor_db_item_committed (editor_db_section *section, int item_id) {
 
 	editor_record_header *rec;
 
-	assert (section->flag_committed);
+waze_assert (section->flag_committed);
 	
    rec = editor_db_get_record (section, item_id);
 
-   assert (section->flag_committed);
+  waze_assert (section->flag_committed);
 	
    return rec->generation <= section->committed_generation;
 }

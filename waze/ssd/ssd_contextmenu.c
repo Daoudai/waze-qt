@@ -218,7 +218,7 @@ void ssd_contextmenu_delete( ssd_contextmenu_ptr this, BOOL delete_labels)
 
       if( delete_labels)
       {
-         assert(0);  // Do we have a use for this?...
+        waze_assert(0);  // Do we have a use for this?...
          free((char*)item->label);
       }
    }
@@ -642,7 +642,7 @@ static BOOL ListItem_OnKeyPressed( SsdWidget this, const char* utf8char, uint32_
    //   Our task?
    if( !(flags & KEYBOARD_VIRTUAL_KEY))
    {
-      assert(utf8char);
+     waze_assert(utf8char);
 
       //   Is this the 'Activate' ('enter' / 'select')
       if( KEY_IS_ENTER)
@@ -716,7 +716,7 @@ static int on_row_selected( SsdWidget this, const char *new_value)
 
    if( -1 == menu->item_selected)
    {
-      assert(0);
+     waze_assert(0);
       return 0;
    }
 
@@ -744,8 +744,8 @@ static void alloc_rows( SsdWidget            menu_cnt,
 {
    int i;
    int style;
-   assert( menu->item_count >= CONTEXT_MENU_MIN_ITEMS_COUNT);
-   assert( menu->item_count <= CONTEXT_MENU_MAX_ITEMS_COUNT);
+  waze_assert( menu->item_count >= CONTEXT_MENU_MIN_ITEMS_COUNT);
+  waze_assert( menu->item_count <= CONTEXT_MENU_MAX_ITEMS_COUNT);
 
 #ifdef TOUCH_SCREEN
    style = SSD_ROUNDED_BLACK;
@@ -896,7 +896,7 @@ static void alloc_rows( SsdWidget            menu_cnt,
          SsdWidget   popup_cnt = NULL;
          int         popup_flg = SSD_START_NEW_ROW|SSD_CONTAINER_BORDER;
 
-         assert( NULL == item->popup->container);
+        waze_assert( NULL == item->popup->container);
 
          if( !(SSD_CONTEXTMENU_SIMPLE_LIST & flags))
             popup_flg |= (SSD_ROUNDED_CORNERS|SSD_POINTER_NONE|style);
@@ -1073,13 +1073,13 @@ static void populate(SsdWidget            menu_cnt,
                      ssd_contextmenu_ptr  menu,
                      unsigned short       flags)
 {
-   assert(menu_cnt);
-   assert(menu);
+  waze_assert(menu_cnt);
+  waze_assert(menu);
 
    if( !verify_items_count( menu))
    {
       roadmap_log(ROADMAP_ERROR, "cm_populate() - Invalid menu count");
-      assert(0);
+     waze_assert(0);
       return;
    }
 
@@ -1213,10 +1213,10 @@ void ssd_context_menu_show(int                  x,
    style = SSD_ROUNDED_WHITE;
 #endif
 
-   assert(x);
-   assert(y);
-   assert(menu);
-   assert(on_menu_closed);
+  waze_assert(x);
+  waze_assert(y);
+  waze_assert(menu);
+  waze_assert(on_menu_closed);
 
    if( cm_context_is_active( &s_ctx))
    {

@@ -1021,7 +1021,7 @@ int roadmap_square_set_current_internal (int square) {
 	if (slot >= 0) {
 		roadmap_square_promote (slot);
 
-		assert (RoadMapSquareActive->Square[slot]->square->square_id == square);
+	waze_assert (RoadMapSquareActive->Square[slot]->square->square_id == square);
 		RoadMapSquareCurrentSlot = slot;
 		RoadMapSquareCurrent = square;
 

@@ -128,7 +128,7 @@ static BOOL is_horizontal_neighbour( neighbour_direction dir)
       default: return FALSE;
    }
 
-   assert(0);
+  waze_assert(0);
    return FALSE;
 }
 
@@ -143,9 +143,9 @@ BOOL relative_position_keep_this( relative_position* this, relative_position* ot
    BOOL this_detached   = (nlt_detached == this->type);
    BOOL other_detached  = (nlt_detached == other->type);
 
-   assert( this->dir   == other->dir);
-   assert( nlt_invalid != this->type);
-   assert( nlt_invalid != other->type);
+  waze_assert( this->dir   == other->dir);
+  waze_assert( nlt_invalid != this->type);
+  waze_assert( nlt_invalid != other->type);
 
    if( this_detached == other_detached)
       return (this->distance < other->distance);
@@ -360,7 +360,7 @@ static int get_widget_width( SsdWidget w)
    if( 0 < w->cached_size.width)
       return w->cached_size.width;
 
-   assert(0);  // Maybe this method was called on a wrong time.
+  waze_assert(0);  // Maybe this method was called on a wrong time.
                // Maybe before widget where assigned with sizes.
                // Consider calling 'ssd_dialog_invalidate_tab_order()'
                // instead of 'ssd_dialog_resort_tab_order();'
@@ -375,7 +375,7 @@ static int get_widget_height( SsdWidget w)
    if( 0 < w->cached_size.height)
       return w->cached_size.height;
 
-   assert(0);  // Maybe this method was called on a wrong time.
+  waze_assert(0);  // Maybe this method was called on a wrong time.
                // Maybe before widget where assigned with sizes.
                // Consider calling 'ssd_dialog_invalidate_tab_order()'
                // instead of 'ssd_dialog_resort_tab_order();'
@@ -478,8 +478,8 @@ neighbour_location_type get_neighbour_location_type( SsdWidget this, SsdWidget o
    get_widget_oposite_range( this, &this_from, &this_to, horizontal);
    get_widget_oposite_range( other,&other_from,&other_to,horizontal);
 
-   assert( this_from < this_to);
-   assert( other_from< other_to);
+  waze_assert( this_from < this_to);
+  waze_assert( other_from< other_to);
 
    if( (this_from==other_from) && (this_to==other_to))
       return nlt_parallel;
@@ -536,14 +536,14 @@ static relative_position get_relative_position(
    int hdistance        = abs(this_h_center-other_h_center);
    int vdistance        = abs(this_v_center-other_v_center);
 
-   assert( 0 <= hdistance);
-   assert( 0 <= vdistance);
+  waze_assert( 0 <= hdistance);
+  waze_assert( 0 <= vdistance);
 
    relative_position_init( &pos);
 
    if( this == other)
    {
-      assert(0);
+     waze_assert(0);
       return pos;
    }
 
@@ -564,7 +564,7 @@ static relative_position get_relative_position(
    }
 
 
-//  assert( (nd_none != hdir) || (nd_none != vdir));
+// waze_assert( (nd_none != hdir) || (nd_none != vdir));
 
    if( nd_none != hdir)
    {
@@ -593,7 +593,7 @@ static SsdWidget* get_dir_pointer( SsdWidget w, neighbour_direction dir)
       case nd_left:  return &(w->tabstop_left);
       case nd_above: return &(w->tabstop_above);
       case nd_below: return &(w->tabstop_below);
-      default: assert(0); return NULL;
+      default:waze_assert(0); return NULL;
    }
 }
 
@@ -605,7 +605,7 @@ static SsdWidget* get_oposite_dir_pointer( SsdWidget w, neighbour_direction dir)
       case nd_left:  return &(w->tabstop_right);
       case nd_above: return &(w->tabstop_below);
       case nd_below: return &(w->tabstop_above);
-      default: assert(0); return NULL;
+      default:waze_assert(0); return NULL;
    }
 }
 
@@ -626,8 +626,8 @@ static BOOL select_nearest_neighbour(
    if( my_dir == new)
       return FALSE;
 
-   assert(this != new);
-   assert(this != my_dir);
+  waze_assert(this != new);
+  waze_assert(this != my_dir);
 
 #ifdef DEBUG_GUI_TAB_ORDER
    sprintf( dbgmsg, "Direction: '%s'\r\n",
@@ -735,7 +735,7 @@ void ssd_widget_sort_gui_tab_order__fix_corners( SsdWidget w, neighbour_directio
       {
          if( !far_widget || (far_widget==w))
          {
-            assert(0);
+           waze_assert(0);
             return;     // Internal closed loop
          }
 
@@ -751,8 +751,8 @@ void ssd_widget_sort_gui_tab_order__fix_corners( SsdWidget w, neighbour_directio
       my_oposite = *get_oposite_dir_pointer( p, dir);
    }
 
-   assert(p);
-   assert(p!=w);
+  waze_assert(p);
+  waze_assert(p!=w);
 
    // Set 'next' pointer:
    (*my_dir_ptr) = p;
@@ -841,7 +841,7 @@ SsdWidget ssd_widget_sort_gui_tab_order( SsdWidget first)
 
    }  while( w && (w != first));
 
-   assert(new_focus);
+  waze_assert(new_focus);
 
    // See remarks above the next method for more info:
    ssd_widget_sort_gui_tab_order__fix_orphan_pointers( first);
@@ -890,7 +890,7 @@ void ssd_widget_sort_tab_order_recursive(
 {
    SsdWidget next;
 
-   assert(parent_dialog);
+  waze_assert(parent_dialog);
    currenlt_position->parent_dialog = parent_dialog;
 
    if( (currenlt_position->tab_stop) && !(SSD_WIDGET_HIDE & currenlt_position->flags))
@@ -913,7 +913,7 @@ void ssd_widget_sort_tab_order_recursive(
 
    if( currenlt_position->default_widget)
    {
-      // assert( NULL == (*default_widget)); // More then one default-widget in a construct?
+      //waze_assert( NULL == (*default_widget)); // More then one default-widget in a construct?
       (*default_widget) = currenlt_position;
    }
 
@@ -981,7 +981,7 @@ void fix_widget_tab_order_sequence(SsdWidget widget)
 
          if( wrong_order)
          {
-            assert(0 && "fix_tab_order_sequence() - unexpected order");
+           waze_assert(0 && "fix_tab_order_sequence() - unexpected order");
             switch_widgets_tab_order( w->next_tabstop, w);
          }
       }
@@ -1023,7 +1023,7 @@ SsdWidget ssd_widget_sort_tab_order(void* parent_dialog, SsdWidget head)
    // Check against bug in the code:
    if( (last_tabstop && !first_tabstop) || (!last_tabstop && first_tabstop))
    {
-      assert( 0);
+     waze_assert( 0);
       return NULL;
    }
 #endif   // _DEBUG

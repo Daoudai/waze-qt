@@ -67,10 +67,10 @@ static int on_list_selection( SsdWidget this, const char* selection, const void*
    ssd_combobox_context_ptr   ctx      = ssd_widget_get_context(main_cont);
    SsdWidget                  edit     = ssd_widget_get( main_cont, SSD_COMBOBOX_EDITBOX_NAME);
    
-   assert( this);
-   assert( main_cont);
-   assert( ssd_combobox_context_verify_pointer( ctx));
-   assert( edit);
+  waze_assert( this);
+  waze_assert( main_cont);
+  waze_assert( ssd_combobox_context_verify_pointer( ctx));
+  waze_assert( edit);
    
    ssd_text_set_text( edit, selection);
 
@@ -89,10 +89,10 @@ static BOOL on_key_pressed__delegate_to_editbox(
    SsdWidget                  main_cont= this->parent;
    ssd_combobox_context_ptr   ctx      = NULL;
    
-   assert( this);
-   assert( main_cont);
-   assert( this->children);
-   assert( this->children->key_pressed);
+  waze_assert( this);
+  waze_assert( main_cont);
+  waze_assert( this->children);
+  waze_assert( this->children->key_pressed);
    
    //   Special case:   move focus to the list
    if( KEY_IS_ENTER)
@@ -122,7 +122,7 @@ static BOOL on_key_pressed__delegate_to_editbox(
    }
    
    ctx = ssd_widget_get_context(main_cont);
-   assert( ssd_combobox_context_verify_pointer( ctx));
+  waze_assert( ssd_combobox_context_verify_pointer( ctx));
    if( ctx->on_text_changed)
    {
       const char* new_text = ssd_text_get_text( editbox);
@@ -143,14 +143,14 @@ static BOOL on_key_pressed__unhandled_event_from_list(
    
    if( !listbox || !listbox->parent || !listbox->parent->parent || !listbox->parent->parent->parent)
    {
-      assert(0);
+     waze_assert(0);
       return FALSE;
    }
    
    current_tab       = listbox->parent->parent->parent;
    editbox_container = ssd_widget_get( current_tab, SSD_COMBOBOX_EDITCNT_NAME);
    
-   assert(editbox_container);
+  waze_assert(editbox_container);
    
    if( on_key_pressed__delegate_to_editbox( editbox_container, utf8char, flags))
    {
@@ -198,7 +198,7 @@ void ssd_combobox_new(  SsdWidget               main_cont,
    
    if( !main_cont)
    {
-      assert(0);
+     waze_assert(0);
       return;
    }
    
@@ -217,7 +217,7 @@ void ssd_combobox_new(  SsdWidget               main_cont,
       else
       {
          // Combobox-parent should not use its context pointer...
-         assert(0);
+        waze_assert(0);
          return;
       }
    }
@@ -306,7 +306,7 @@ void ssd_combobox_update_list(SsdWidget      main_cont,
    
    //   1.   Load new values:
    list = ssd_widget_get( main_cont, SSD_COMBOBOX_LIST_NAME);
-   assert(list);
+  waze_assert(list);
 
    if( NULL == ssd_list_item_has_focus(list))
       focus = ssd_dialog_get_focus();

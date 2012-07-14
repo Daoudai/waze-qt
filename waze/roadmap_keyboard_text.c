@@ -161,7 +161,7 @@ BOOL is_valid_key( const char* utf8char, uint16_t input_type)
    
    if( !utf8char || !(*utf8char))
    {
-      assert(0);
+     waze_assert(0);
       return FALSE;
    }
    

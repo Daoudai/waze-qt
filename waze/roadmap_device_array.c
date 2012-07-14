@@ -117,7 +117,7 @@ void roadmap_device_event_notification( device_event event)
    {
       device_event_info_ptr handler = (device_event_info_ptr)cyclic_array_get_item( &EQC, i);
       
-      assert(handler);
+     waze_assert(handler);
 	  if (!handler)
 		  return;
       handler->handler( event, handler->context);
@@ -147,7 +147,7 @@ const char* get_device_event_name( device_event event)
       case device_event_application_shutdown        : return "application_shutdown";
 
 
-      default: assert(0); return "<unknown>";
+      default:waze_assert(0); return "<unknown>";
    }
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////

@@ -122,7 +122,7 @@ void editor_marker_position(int marker,
 
    editor_db_marker *marker_st =
       editor_db_get_item (ActiveMarkersDB, marker, 0, 0);
-   assert(marker_st != NULL);
+  waze_assert(marker_st != NULL);
 
    position->longitude = marker_st->longitude;
    position->latitude = marker_st->latitude;
@@ -137,7 +137,7 @@ int editor_marker_is_obsolete(int marker) {
       editor_db_get_item (ActiveMarkersDB, marker, 0, 0);
    RoadMapPosition pos;
    
-   assert(marker_st != NULL);
+  waze_assert(marker_st != NULL);
 
 	pos.longitude = marker_st->longitude;
 	pos.latitude = marker_st->latitude;
@@ -149,7 +149,7 @@ const char *edit_marker_icon(int marker){
 
    editor_db_marker *marker_st =
       editor_db_get_item (ActiveMarkersDB, marker, 0, 0);
-   assert(marker_st != NULL);
+  waze_assert(marker_st != NULL);
 
    if (marker_st->icon == ROADMAP_INVALID_STRING) {
       return "";
@@ -163,7 +163,7 @@ const char *editor_marker_type(int marker) {
    
    editor_db_marker *marker_st =
       editor_db_get_item (ActiveMarkersDB, marker, 0, 0);
-   assert(marker_st != NULL);
+  waze_assert(marker_st != NULL);
 
    return MarkerTypes[marker_st->type]->name;
 }
@@ -173,7 +173,7 @@ const char *editor_marker_note(int marker) {
    
    editor_db_marker *marker_st =
       editor_db_get_item (ActiveMarkersDB, marker, 0, 0);
-   assert(marker_st != NULL);
+  waze_assert(marker_st != NULL);
 
    if (marker_st->note == ROADMAP_INVALID_STRING) {
       return "";
@@ -188,7 +188,7 @@ time_t editor_marker_time(int marker) {
    
    editor_db_marker *marker_st =
       editor_db_get_item (ActiveMarkersDB, marker, 0, 0);
-   assert(marker_st != NULL);
+  waze_assert(marker_st != NULL);
 
    return marker_st->time;
 }
@@ -198,7 +198,7 @@ unsigned char editor_marker_flags(int marker) {
    
    editor_db_marker *marker_st =
       editor_db_get_item (ActiveMarkersDB, marker, 0, 0);
-   assert(marker_st != NULL);
+  waze_assert(marker_st != NULL);
 
    return marker_st->flags;
 }
@@ -217,7 +217,7 @@ void editor_marker_update(int marker, unsigned char flags,
       editor_db_get_item (ActiveMarkersDB, marker, 0, 0);
 
    int dirty = 0;
-   assert(marker_st != NULL);
+  waze_assert(marker_st != NULL);
 
    if (note == NULL) {
       if (marker_st->note != ROADMAP_INVALID_STRING) {
@@ -277,7 +277,7 @@ int editor_marker_export(int marker, const char **name, const char **description
    editor_db_marker *marker_st =
       editor_db_get_item (ActiveMarkersDB, marker, 0, 0);
    
-   assert(marker_st != NULL);
+  waze_assert(marker_st != NULL);
    
    return MarkerTypes[marker_st->type]->export_marker (marker,
                                                        name,
@@ -293,7 +293,7 @@ int editor_marker_verify(int marker, unsigned char *flags, const char **note) {
    editor_db_marker *marker_st =
       editor_db_get_item (ActiveMarkersDB, marker, 0, 0);
    
-   assert(marker_st != NULL);
+  waze_assert(marker_st != NULL);
    
    return MarkerTypes[marker_st->type]->update_marker (marker, flags, note);
 }

@@ -1007,7 +1007,7 @@ const char* SystemMessage( /* IN  */   const char*       pNext,
 
       if( !pNext)
       {
-         assert(0);
+        waze_assert(0);
          RTSystemMessage_Free( &Msg);
          roadmap_log( ROADMAP_ERROR, "RTNet::OnGeneralResponse::SystemMessage() - Failed to read message title (case-II)");
          (*rc) = err_parser_unexpected_data;

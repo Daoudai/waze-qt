@@ -696,7 +696,7 @@ char  LowerChar( char ch)
 
 void ToLower( char* szStr)
 {
-   assert(szStr);
+  waze_assert(szStr);
    while( *szStr)
    {
       (*szStr) = LowerChar( *szStr);
@@ -706,7 +706,7 @@ void ToLower( char* szStr)
 
 void ToLowerN( char* szStr, size_t iCount)
 {
-   assert(szStr);
+  waze_assert(szStr);
 
    if( iCount < strlen(szStr))
       while( iCount)

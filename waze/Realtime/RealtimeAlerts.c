@@ -1237,7 +1237,7 @@ int RTAlerts_Get_Type(int record)
 {
 
     RTAlert *pAlert = RTAlerts_Get(record);
-    assert(pAlert != NULL);
+   waze_assert(pAlert != NULL);
     if (pAlert != NULL)
         return pAlert->iType;
     else
@@ -1282,7 +1282,7 @@ const char* RTAlerts_Get_GroupName_By_Id(int iId)
 int RTAlerts_Get_Id(int record)
 {
     RTAlert *pAlert = RTAlerts_Get(record);
-    assert(pAlert != NULL);
+   waze_assert(pAlert != NULL);
 
     if (pAlert != NULL)
         return pAlert->iID;
@@ -1299,7 +1299,7 @@ int RTAlerts_Get_Id(int record)
 char * RTAlerts_Get_LocationStr(int record)
 {
     RTAlert *pAlert = RTAlerts_Get(record);
-    assert(pAlert != NULL);
+   waze_assert(pAlert != NULL);
 
     if (pAlert != NULL)
         return pAlert->sLocationStr;
@@ -1316,7 +1316,7 @@ char * RTAlerts_Get_LocationStr(int record)
 char * RTAlerts_Get_LocationStrByID(int Id)
 {
     RTAlert *pAlert = RTAlerts_Get_By_ID(Id);
-    assert(pAlert != NULL);
+   waze_assert(pAlert != NULL);
 
     if (pAlert != NULL)
         return pAlert->sLocationStr;
@@ -1332,7 +1332,7 @@ char * RTAlerts_Get_LocationStrByID(int Id)
 unsigned int RTAlerts_Get_Speed(int record)
 {
     RTAlert *pAlert = RTAlerts_Get(record);
-    assert(pAlert != NULL);
+   waze_assert(pAlert != NULL);
 
     if (pAlert != NULL)
         if (pAlert->iType == RT_ALERT_TYPE_POLICE)
@@ -1354,7 +1354,7 @@ RoadMapAlert * RTAlerts_Get_Alert(int record)
     RTAlert *pAlert;
 
     pAlert = RTAlerts_Get(record);
-    assert(pAlert != NULL);
+   waze_assert(pAlert != NULL);
 
     pRoadMapAlert = (RoadMapAlert *) malloc(sizeof(pRoadMapAlert));
 

@@ -161,31 +161,31 @@ int track_point_ordinal (int index) {
 
 RoadMapPosition* export_track_point_pos (int index) {
 
-	assert (index + points_start < points_count);
+waze_assert (index + points_start < points_count);
    return (RoadMapPosition*) &TrackPoints[index + points_start].gps_point;
 }
 
 RoadMapGpsPosition* export_track_point_gps (int index) {
 
-	assert (index + points_start < points_count);
+waze_assert (index + points_start < points_count);
    return &TrackPoints[index + points_start].gps_point;
 }
 
 time_t export_track_point_time (int index) {
 
-	assert (index + points_start < points_count);
+waze_assert (index + points_start < points_count);
    return TrackPoints[index + points_start].time;
 }
 
 int *export_track_point_status (int index) {
 
-	assert (index + points_start < points_count);
+waze_assert (index + points_start < points_count);
 	return &TrackPoints[index + points_start].status;
 }
 
 int export_track_point_ordinal (int index) {
 
-	assert (index + points_start < points_count);
+waze_assert (index + points_start < points_count);
 	return TrackPoints[index + points_start].ordinal;
 }
 
@@ -209,7 +209,7 @@ static void track_reset_points (int last_point_id) {
 
    if (last_point_id == 0) return;
 
-	assert (editor_track_known_num_candidates() <= 1);
+waze_assert (editor_track_known_num_candidates() <= 1);
 
    if (last_point_id == -1) {
       points_count = 0;
@@ -219,7 +219,7 @@ static void track_reset_points (int last_point_id) {
 
    points_count -= last_point_id;
 
-   assert(points_count >= 0);
+  waze_assert(points_count >= 0);
 
    if (points_count < 0) {
    	points_count = 0;
@@ -337,7 +337,7 @@ static int add_road_connection (int point_id,
        TrackConfirmedStreet.line_direction,
        &cur_node);
 
-   assert (from_point != -1);
+  waze_assert (from_point != -1);
 
    if (from_point == -1) {
       return -1;
@@ -567,7 +567,7 @@ static int end_known_segment (int point_id,
       return split_point;
    }
 
-	assert(0);
+waze_assert(0);
 	return point_id;
 }
 
@@ -673,7 +673,7 @@ static void track_rec_locate_point(int point_id, int point_type) {
    int count;
    TrackNewSegment new_segments[10];
 
-   assert (!(point_type & POINT_UNKNOWN) || cur_active_line);
+  waze_assert (!(point_type & POINT_UNKNOWN) || cur_active_line);
 
 	//track_verify_square (point_id);
 
@@ -730,7 +730,7 @@ static void track_rec_locate_point(int point_id, int point_type) {
 
                if (!new_street.valid) {
                   /* the current point does not belong to a known street */
-                  assert(!editor_track_known_num_candidates());
+                 waze_assert(!editor_track_known_num_candidates());
                   editor_track_known_reset_resolve();
                   cur_active_line = 1;
 
@@ -749,7 +749,7 @@ static void track_rec_locate_point(int point_id, int point_type) {
                    */
                   track_reset_points(count - consumed);
                } else if (consumed > count) {
-                  assert(!editor_track_known_num_candidates());
+                 waze_assert(!editor_track_known_num_candidates());
                   count = consumed;
                }
 
@@ -808,7 +808,7 @@ static void track_rec_locate_point(int point_id, int point_type) {
             return;
          }
 
-         assert (point_id > 0);
+        waze_assert (point_id > 0);
          end_unknown_segments (new_segments, count);
 
          if (TrackConfirmedStreet.valid) {
@@ -1210,7 +1210,7 @@ void editor_track_reset (void) {
 
 static void editor_track_shape_position (int shape, RoadMapPosition *position) {
 
-   assert (shape < points_count);
+  waze_assert (shape < points_count);
 
    *position = *track_point_pos (shape);
 }

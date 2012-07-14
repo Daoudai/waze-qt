@@ -979,8 +979,8 @@ BOOL Realtime_IsInTransaction()
 
 void  Realtime_NotifyOnIdle( RoadMapCallback pfnOnSystemIsIdle)
 {
-   assert(    pfnOnSystemIsIdle);
-   assert(!gs_pfnOnSystemIsIdle);
+  waze_assert(    pfnOnSystemIsIdle);
+  waze_assert(!gs_pfnOnSystemIsIdle);
 
    gs_pfnOnSystemIsIdle = NULL;
 
@@ -1018,7 +1018,7 @@ RoadMapCallback  Realtime_NotifyOnLogin( RoadMapCallback pfnOnLogin)
 {
 	RoadMapCallback	pPrev	= gs_pfnOnUserLoggedIn;
 
-   assert(    pfnOnLogin);
+  waze_assert(    pfnOnLogin);
 
 	if( gs_pfnOnUserLoggedIn == pfnOnLogin)
 	{
@@ -1054,7 +1054,7 @@ RoadMapCallback  Realtime_NotifyOnLoginChanged( RoadMapCallback pfnOnLoginChange
 {
    RoadMapCallback   pPrev = gs_pfnOnUserLoginChanged;
 
-   assert(pfnOnLoginChanged);
+  waze_assert(pfnOnLoginChanged);
 
    if( gs_pfnOnUserLoginChanged == pfnOnLoginChanged)
    {
@@ -1068,8 +1068,8 @@ RoadMapCallback  Realtime_NotifyOnLoginChanged( RoadMapCallback pfnOnLoginChange
 
 void Realtime_AbortTransaction( RoadMapCallback pfnOnSystemIsIdle)
 {
-   assert(    pfnOnSystemIsIdle);
-   assert(!gs_pfnOnSystemIsIdle);
+  waze_assert(    pfnOnSystemIsIdle);
+  waze_assert(!gs_pfnOnSystemIsIdle);
 
    gs_pfnOnSystemIsIdle = NULL;
 
@@ -1107,8 +1107,8 @@ void ShowSystemMessages()
 
 void PerformVersionUpgrade( int exit_code, void *context)
 {
-//   assert( gs_VU.NewVersion[0]);
-//   assert( gs_VU.URL[0]);
+//  waze_assert( gs_VU.NewVersion[0]);
+//  waze_assert( gs_VU.URL[0]);
 
 #if (defined (_WIN32) || defined (__SYMBIAN32__)) && !defined (QTMOBILITY)
    if( dec_yes == exit_code)
@@ -1161,7 +1161,7 @@ void UpgradeVersion()
 
       default:
       {
-         assert(0);
+        waze_assert(0);
          return;
       }
    }
@@ -2762,7 +2762,7 @@ void OnAsyncOperationCompleted_Register( void* ctx, roadmap_result rc)
 
    gs_pfnOnLoginAfterRegister = NULL;
 
-   // assert( pfnLoginAfterRegister);
+   //waze_assert( pfnLoginAfterRegister);
 
    if( succeeded == rc)
    {
@@ -3051,7 +3051,7 @@ void OnTimer_Realtime(void)
 
    if( !gs_bRunning)
    {
-      assert(0);
+     waze_assert(0);
       return;
    }
 
@@ -3937,7 +3937,7 @@ void OnMapMoved(void)
       if (realtime_prev_after_flow_control) {
          (*realtime_prev_after_flow_control) ();
       }
-      assert(0);
+     waze_assert(0);
       return;
    }
 
@@ -4345,7 +4345,7 @@ BOOL Realtime_ReportOnNavigation( const RoadMapPosition* cordinates, address_inf
 
    if( !gs_bInitialized)
    {
-//      assert(0);
+//     waze_assert(0);
       return FALSE;
    }
 

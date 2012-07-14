@@ -337,7 +337,7 @@ static BOOL house_keyboard_callback(int         exit_code,
                                     void*       context)
 {
    ///[BOOKMARK]:[VERIFY] - Is this ever called?
-   assert(0);
+  waze_assert(0);
 
    return FALSE;
 }

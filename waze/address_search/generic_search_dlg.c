@@ -228,10 +228,10 @@ static BOOL on_key_pressed__delegate_to_editbox(
    SsdWidget editbox  = NULL;
    SsdWidget main_cont= this->parent;
 
-   assert( this);
-   assert( main_cont);
-   assert( this->children);
-   assert( this->children->key_pressed);
+  waze_assert( this);
+  waze_assert( main_cont);
+  waze_assert( this->children);
+  waze_assert( this->children->key_pressed);
 
    //   Special case:   move focus to the list
    if( KEY_IS_ENTER)
@@ -351,8 +351,8 @@ static SsdWidget create_dlg(const char *dlg_name, const char *dlg_title, SsdWidg
    SsdWidget icnt = create_input_container();
    SsdWidget dlg  = NULL;
 
-   assert(icnt);
-   assert(rcnt);
+  waze_assert(icnt);
+  waze_assert(rcnt);
 
    search_context[s_type].c_dlg_name = dlg_name;
    search_context[s_type].c_dlg_title = dlg_title;
@@ -364,8 +364,8 @@ static SsdWidget create_dlg(const char *dlg_name, const char *dlg_title, SsdWidg
                            SSD_DIALOG_GUI_TAB_ORDER|SSD_CONTAINER_TITLE|SSD_PERSISTENT| /* AGA TODO :: Check if persistency is necessary here */
                            SSD_DIALOG_NO_SCROLL);
 
-   assert( dlg);
-   assert(!dlg->context);
+  waze_assert( dlg);
+  waze_assert(!dlg->context);
 
    ssd_widget_add( dlg,  icnt);
    dlg->context = rcnt;
@@ -426,7 +426,7 @@ void generic_search_dlg_show( search_types   type,
 
    if( search_context[type].c_cb || search_context[type].c_ctx)
    {
-      assert(0);  // Dialog is in use now
+     waze_assert(0);  // Dialog is in use now
       return;
    }
 

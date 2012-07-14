@@ -104,7 +104,7 @@ BOOL wimage_info_load(  wimage_info*       this,
 {
    if( !ssd_icon_wimage_is_valid( filenames))
    {
-      assert(0);
+     waze_assert(0);
       return FALSE;
    }
 /*
@@ -140,7 +140,7 @@ RoadMapImage load_image( const char* filenames)
 
    if( !filenames || !filenames[0])
    {
-      assert(0);
+     waze_assert(0);
       return NULL;
    }
 
@@ -153,7 +153,7 @@ RoadMapImage load_image( const char* filenames)
    image = roadmap_res_get( RES_BITMAP, RES_SKIN|RES_NOCACHE, filenames);
    if( !image)
    {
-      assert(0);
+     waze_assert(0);
       return NULL;
    }
 
@@ -163,7 +163,7 @@ RoadMapImage load_image( const char* filenames)
    {
       if( s_width != roadmap_canvas_image_width( image))
       {
-         assert(0);
+        waze_assert(0);
          return NULL;
       }
    }
@@ -173,7 +173,7 @@ RoadMapImage load_image( const char* filenames)
    {
       if( s_height != roadmap_canvas_image_height( image))
       {
-         assert(0);
+        waze_assert(0);
          return NULL;
       }
    }
@@ -186,14 +186,14 @@ BOOL  imageset_info_load(  imageset_info*       this,
 {
    if( !set->normal || !set->normal[0])
    {
-      assert(0);
+     waze_assert(0);
       return FALSE;
    }
 
    this->normal = load_image( set->normal);
    if( !this->normal)
    {
-      assert(0);
+     waze_assert(0);
       return FALSE;
    }
 
@@ -202,7 +202,7 @@ BOOL  imageset_info_load(  imageset_info*       this,
       this->in_focus = load_image( set->in_focus);
       if( !this->in_focus)
       {
-         assert(0);
+        waze_assert(0);
          return FALSE;
       }
    }
@@ -224,12 +224,12 @@ static void draw_wimage(icon_ctx_ptr      ctx,
    int            i;
 
    // Minimum image size is (left + right):
-   assert( (left_bitmap_width+right_bitmap_width) <= ctx->requested_width);
+  waze_assert( (left_bitmap_width+right_bitmap_width) <= ctx->requested_width);
 
    // If middle-bitmap is wider then right-bitmap then during the
    // painting the middle-bitmap can be painted to the right of
    // the right bitmap:
-   assert( middle_bitmap_width < right_bitmap_width);
+  waze_assert( middle_bitmap_width < right_bitmap_width);
 
    // Paint left
    roadmap_canvas_draw_image( ii->left, point, 0, IMAGE_NORMAL);
@@ -253,7 +253,7 @@ static void draw( SsdWidget this, RoadMapGuiRect *rect, int flags)
    icon_ctx_ptr      ctx = (icon_ctx_ptr)this->data;
    RoadMapGuiPoint   point;
 
-   assert( ctx->loaded);
+  waze_assert( ctx->loaded);
 
    if( ctx->width)
       rect->maxx = rect->minx + ctx->width -1;
@@ -273,7 +273,7 @@ static void draw( SsdWidget this, RoadMapGuiRect *rect, int flags)
    {
       RoadMapImage image;
 
-      assert( 0 == ctx->requested_width);
+     waze_assert( 0 == ctx->requested_width);
 
       if( this->in_focus)
          image = ctx->images[ctx->state].in_focus;
@@ -286,7 +286,7 @@ static void draw( SsdWidget this, RoadMapGuiRect *rect, int flags)
    {
       wimage_info* ii;
 
-      assert( 0 != ctx->requested_width);
+     waze_assert( 0 != ctx->requested_width);
 
       if( this->in_focus)
          ii = &(ctx->wimages[ctx->state].in_focus);
@@ -361,7 +361,7 @@ void ssd_icon_set_images(  SsdWidget            this,
    if( ctx->wide_image || ctx->loaded ||
        (count < 0) || (MAX_ICONS_COUNT < count))
    {
-      assert(0);
+     waze_assert(0);
       return;
    }
 
@@ -373,7 +373,7 @@ void ssd_icon_set_images(  SsdWidget            this,
       imageset_info* ii = ctx->images + i;
       if( !imageset_info_load( ii, (images + i)))
       {
-         assert(0);
+        waze_assert(0);
          return;
       }
 
@@ -396,7 +396,7 @@ void ssd_icon_set_wimages( SsdWidget            this,
    if( !ctx->wide_image || ctx->loaded ||
        (count < 0) || (MAX_ICONS_COUNT < count))
    {
-      assert(0);
+     waze_assert(0);
       return;
    }
 
@@ -408,7 +408,7 @@ void ssd_icon_set_wimages( SsdWidget            this,
       wimageset_info* ii = ctx->wimages + i;
       if( !wimageset_info_load( ii, (images + i)))
       {
-         assert(0);
+        waze_assert(0);
          return;
       }
 
@@ -423,7 +423,7 @@ void ssd_icon_set_wimages( SsdWidget            this,
 void ssd_icon_set_width( SsdWidget this, int width)
 {
    icon_ctx_ptr ctx = (icon_ctx_ptr)this->data;
-   assert( ctx->wide_image);
+  waze_assert( ctx->wide_image);
    ctx->requested_width = width;
    ctx->width           = width;
 }

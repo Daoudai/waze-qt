@@ -65,7 +65,7 @@ int editor_point_add (RoadMapPosition *position, int db_id) {
 void editor_point_position (int point, RoadMapPosition *position) {
 
    editor_db_point *point_st = editor_db_get_item (ActivePointsDB, point, 0, 0);
-   assert(point_st != NULL);
+  waze_assert(point_st != NULL);
 
    position->longitude = point_st->longitude;
    position->latitude = point_st->latitude;
@@ -75,7 +75,7 @@ void editor_point_position (int point, RoadMapPosition *position) {
 int editor_point_db_id  (int point) {
 	
    editor_db_point *point_st = editor_db_get_item (ActivePointsDB, point, 0, 0);
-   assert(point_st != NULL);
+  waze_assert(point_st != NULL);
    
    return point_st->db_id;
 }
@@ -84,7 +84,7 @@ int editor_point_db_id  (int point) {
 int editor_point_set_pos (int point, RoadMapPosition *position) {
 
    editor_db_point *point_st = editor_db_get_item (ActivePointsDB, point, 0, 0);
-   assert(point_st != NULL);
+  waze_assert(point_st != NULL);
 
    point_st->longitude = position->longitude;
    point_st->latitude = position->latitude;

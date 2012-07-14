@@ -48,7 +48,7 @@ static int PluginCount = 0;
 
 static RoadMapPluginHooks *get_hooks (int id) {
 
-   assert (id < MAX_PLUGINS);
+  waze_assert (id < MAX_PLUGINS);
 
    return hooks[id];
 }

@@ -49,7 +49,7 @@ static void on_socket_has_data( RoadMapIO* io)
    int            i  = 0;
    sar_info_ptr   pDI= NULL;
    
-   assert(io);
+  waze_assert(io);
    if( !io)
       return;
 
@@ -63,7 +63,7 @@ static void on_socket_has_data( RoadMapIO* io)
    if( !pDI)
    {
       // Socket must be found...
-      assert( 0 && "socket_async_receive::on_socket_has_data() - UNEXPECTED");
+     waze_assert( 0 && "socket_async_receive::on_socket_has_data() - UNEXPECTED");
       return;
    }
   
@@ -123,7 +123,7 @@ BOOL socket_async_receive(  RoadMapSocket     s,
       
       if( !pDI)
       {
-         assert( 0 && "socket_async_receive::socket_async_receive() - QUEUE IS FULL");
+        waze_assert( 0 && "socket_async_receive::socket_async_receive() - QUEUE IS FULL");
          return FALSE;
       }
    }
