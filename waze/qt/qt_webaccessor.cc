@@ -124,24 +124,28 @@ void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QByteArra
     data.replace(QString("\\n"), QString("\n"), Qt::CaseInsensitive)
         .replace(QString("\\r"), QString("\r"), Qt::CaseInsensitive)
         .replace(QString("\\t"), QString("\t"), Qt::CaseInsensitive);
+
+    std::string tempstr = data.toUtf8().constData();
+    next = tempstr.c_str();
     roadmap_log(ROADMAP_INFO, "Response:\n%s\n", qPrintable(data));
-    while(!data.isEmpty())
+    while(next != NULL && next[0] != '\0')
     {
-        int tagEndIndex;
+        int tagEndIndex = 0;
 
        if( have_tags)
        {
           //   Read next tag:
           buffer_size = WST_RESPONSE_TAG_MAXSIZE;
-          tagEndIndex = data.indexOf(QRegExp(QString("[,\r\n]")));
-          tag = data.left(tagEndIndex);
+          while (next[tagEndIndex] != ',' && next[tagEndIndex] != '\r' && next[tagEndIndex] != '\n')
+          {
+              tagEndIndex++;
+          }
 
           //   Find parser:
           parser = NULL;
           for( i=0; i<parsers_count; i++)
           {
-              QString parserTag(parsers[i].tag);
-              if (!tag.compare(parserTag, Qt::CaseInsensitive))
+              if (parsers[i].tag != NULL && !strnicmp(parsers[i].tag, next, tagEndIndex))
               {
                 parser = parsers[i].parser;
                 break;
@@ -151,7 +155,7 @@ void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QByteArra
 
        if (parser)
        {
-           data.remove(0, tagEndIndex + 1);
+           next = next + tagEndIndex + 1;
        }
        else
        {
@@ -168,8 +172,7 @@ void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QByteArra
        }
 
        //   Activate the appropriate server-request handler function:
-       QByteArray ba = data.toUtf8();
-       next = parser(ba.constData(), cd.context, &more_data_needed, &rc);
+       next = parser(next, cd.context, &more_data_needed, &rc);
 //       if (next != NULL && next[0] != '\r' && next[0] != '\0')
 //       {
 //           std::string leftover = next;
@@ -184,8 +187,7 @@ void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QByteArra
 //                       dataStr.substr(0, dataStr.find('\r') - 1).c_str(),
 //                       leftover.substr(0,leftover.find('\r') - 1).c_str());
 //       }
-       data.remove(0, next - ba.constData());
-       data = data.trimmed();
+       while (next != NULL && (next[0] == '\r' || next[0] == '\n')) next++;
      }
 
      cd.callback.callback(cd.context, result);
