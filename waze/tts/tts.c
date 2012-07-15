@@ -389,7 +389,13 @@ BOOL tts_update_provider( const TtsProvider* tts_provider )
          const TtsVoice* voice;
          voice = tts_voices_get( sgTtsVoiceId, NULL );
          // If not valid voice - replace to default
-         if ( !TTS_VOICE_VALID( voice ) )
+
+         if (voice == NULL)
+         {
+            roadmap_log( ROADMAP_WARNING, "Uninitialized voice recognized - ignoring");
+            voice_id = sgTtsDefaultVoiceId;
+         }
+         else if ( !TTS_VOICE_VALID( voice ) )
          {
             roadmap_log( ROADMAP_WARNING, TTS_LOG_STR( "Voice %s is invalidated. Trying to set the default one" ), voice->voice_id );
             voice_id = sgTtsDefaultVoiceId;
