@@ -12,6 +12,7 @@ extern "C" {
 }
 
 enum CallbackType { ParserBased, ProgressBased };
+enum RequestType { Post, Get };
 
 struct WazeWebConnectionData
 {
@@ -55,12 +56,15 @@ public:
     void setSecuredResolvedAddress(QString securedAddress);
 
 private slots:
+    void onIgnoreSSLErrors(QList<QSslError> errorList);
     void oldStyleFinished(bool isError);
     void requestBytesWrittenOld(int bytesSent, int bytesTotal);
     void responseBytesReadOld(int bytesReceived, int bytesTotal);
 
 private:
     explicit WazeWebAccessor(QObject* parent = 0);
+
+    QString buildHeader(RequestType type, QUrl url, QString additional = QString());
 
     void runParsersAndCallback(WazeWebConnectionData& cd, QByteArray &response, roadmap_result result);
 
