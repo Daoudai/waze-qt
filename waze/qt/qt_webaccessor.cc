@@ -156,8 +156,8 @@ void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QByteArra
         .replace(QString("\\r"), QString("\r"), Qt::CaseInsensitive)
         .replace(QString("\\t"), QString("\t"), Qt::CaseInsensitive);
 
-    std::string tempstr = data.toUtf8().constData();
-    next = tempstr.c_str();
+    std::string dataStr = data.toUtf8().constData();
+    next = dataStr.c_str();
     roadmap_log(ROADMAP_INFO, "Response:\n%s\n", qPrintable(data));
     while(next != NULL && next[0] != '\0')
     {
@@ -204,20 +204,20 @@ void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QByteArra
 
        //   Activate the appropriate server-request handler function:
        next = parser(next, cd.context, &more_data_needed, &rc);
-//       if (next != NULL && next[0] != '\r' && next[0] != '\0')
-//       {
-//           std::string leftover = next;
-//           // possible issue where the server return fields that are "new"
-//           roadmap_log(ROADMAP_ERROR,
-//                       "\nDear Waze developers,\n\n"
-//                       "If you read this it means that the server return fields to requests which\n"
-//                       "the latest opensource code (v2.4) is not familiar with,\n"
-//                       "please FIX!!!\n\n"
-//                       "Thanks,\nAssaf Paz (damagedspline@gmail.com)\n\n\n"
-//                       "P.S.\nThe troublesome response line is '%s' where '%s' was not collected by the parser.",
-//                       dataStr.substr(0, dataStr.find('\r') - 1).c_str(),
-//                       leftover.substr(0,leftover.find('\r') - 1).c_str());
-//       }
+       if (next != NULL && next[0] != '\r' && next[0] != '\0')
+       {
+           std::string leftover = next;
+           // possible issue where the server return fields that are "new"
+           roadmap_log(ROADMAP_ERROR,
+                       "\nDear Waze developers,\n\n"
+                       "If you read this it means that the server return fields to requests which\n"
+                       "the latest opensource code (v2.4) is not familiar with,\n"
+                       "please FIX!!!\n\n"
+                       "Thanks,\nAssaf Paz (damagedspline@gmail.com)\n\n\n"
+                       "P.S.\nThe troublesome response line is '%s' where '%s' was not collected by the parser.",
+                       dataStr.substr(0, dataStr.find('\r') - 1).c_str(),
+                       leftover.substr(0,leftover.find('\r') - 1).c_str());
+       }
        while (next != NULL && (next[0] == '\r' || next[0] == '\n')) next++;
      }
 
@@ -349,13 +349,8 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
         else
         {
             roadmap_log(ROADMAP_ERROR, "HTTP error during request (%d)", statusCode);
-            cd.callback.callbacks->error(cd.context, 1, "Error during request (%s)", http->errorString().toLocal8Bit().constData());
+            cd.callback.callbacks->error(cd.context, succeeded, "Error during request (%s)", http->errorString().toLocal8Bit().constData());
         }
-//        else
-//        {
-//            roadmap_log(ROADMAP_ERROR, "HTTP error during request (%d)", statusCode);
-//            cd.callback.callbacks->done(cd.context, getTimeStr(QDateTime::currentDateTime()), NULL);
-//        }
         break;
     }
 
