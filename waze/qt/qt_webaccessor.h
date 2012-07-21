@@ -46,6 +46,17 @@ public:
                      LPRTConnectionInfo pci,
                      const QString &data);
 
+    void postRequestParser(
+                      QString address,
+                      int flags,
+                      const char *action,
+                      wst_parser parsers[],
+                      int parser_count,
+                      CB_OnWSTCompleted callback,
+                      LPRTConnectionInfo pci,
+                      QString contentType,
+                      const QString &data);
+
     void postRequestProgress(QString url, int flags, RoadMapHttpAsyncCallbacks *callbacks, void *context, const char* header, const void* data, int data_length);
     void getRequest(QString url, int flags, RoadMapHttpAsyncCallbacks *callbacks, time_t update_time, void* context);
 

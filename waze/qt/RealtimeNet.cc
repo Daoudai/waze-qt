@@ -185,24 +185,28 @@ void  RTNet_Term()
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 void wst_start_trans_facade(
+                     const char*          address,       // base url
                      int                  flags,         // Session flags
                      const char*          action,        // (/<service_name>/)<ACTION>
                      const wst_parser_ptr parsers,       // Array of 1..n data parsers
                      int                  parsers_count, // Parsers count
                      CB_OnWSTCompleted    cbOnCompleted, // Callback for transaction completion
                      void*                context,       // Caller context
+                     const char*          contentType,   // HTTP content type
                      const char*          query          // Custom data for the HTTP request
                      )
 {
     QString packet = QString::fromUtf8(query);
 
     WazeWebAccessor::getInstance().postRequestParser(
+                (address != NULL)? QString::fromAscii(address) : QString(),
                 flags,         // Session flags
                 action,        // (/<service_name>/)<ACTION>
                 parsers,       // Array of 1..n data parsers
                 parsers_count, // Parsers count
                 cbOnCompleted, // Callback for transaction completion
                 (LPRTConnectionInfo) context,       // Caller context
+                (contentType != NULL)? QString::fromAscii(contentType) : QString(),
                 packet
                 );
 }
@@ -2701,7 +2705,8 @@ BOOL	RTNet_SelectRoute	(LPRTConnectionInfo   	pCI,
 
 BOOL RTNet_GetGeoConfig(
                   LPRTConnectionInfo         pCI,
-                  wst_handle                 websvc,
+                  const char*                url_address,
+                  const char*                content_type,
                   const RoadMapPosition      *pGPSPosition,
                   const char                 *name,
                   CB_OnWSTCompleted          pfnOnCompleted)
@@ -2722,12 +2727,14 @@ BOOL RTNet_GetGeoConfig(
 
    // Perform WebService Transaction:
    WazeWebAccessor::getInstance().postRequestParser(
+                         url_address,
                          0,
                          "login",
                          geo_config_parser,
                          sizeof(geo_config_parser)/sizeof(wst_parser),
                          pfnOnCompleted,
                          pCI,
+                         QString::fromAscii(content_type),
                          packet);
 
     return TRUE;

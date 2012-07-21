@@ -81,7 +81,6 @@ static RoadMapConfigDescriptor   RoadMapConfigForceLocation   =
 static RoadMapConfigDescriptor   RoadMapConfigLastPosition   =
             ROADMAP_CONFIG_ITEM("GPS", "Position");
 
-static wst_handle  s_websvc = INVALID_WEBSVC_HANDLE;
 static BOOL initialized = FALSE;
 
 static void lang_dlg(void);
@@ -150,12 +149,6 @@ static const char* get_force_location(void)
 //
 ///////////////////////////////////////////////////////////////////
 static void clean_up (void) {
-
-   if( INVALID_WEBSVC_HANDLE != s_websvc){
-      wst_term( s_websvc);
-      s_websvc = INVALID_WEBSVC_HANDLE;
-   }
-
    init_context ();
 }
 
@@ -844,7 +837,7 @@ static BOOL request_geo_config (void) {
    }
 
 
-   if(!Realtime_GetGeoConfig(Location,"", s_websvc)){
+   if(!Realtime_GetGeoConfig(Location,"", get_webservice_address(), "application/x-www-form-urlencoded; charset=utf-8")){
       net_retries++;
       if (net_retries == MAX_NET_RETRIES) {
          roadmap_main_remove_periodic(retry);
@@ -926,20 +919,6 @@ static void roadmap_geo_config_init (void) {
 
       initialized = TRUE;
    }
-
-   address = get_webservice_address();
-   if (INVALID_WEBSVC_HANDLE == s_websvc)
-      s_websvc = wst_init(address, NULL, NULL, NULL, "application/x-www-form-urlencoded; charset=utf-8");
-
-   if( INVALID_WEBSVC_HANDLE != s_websvc)
-   {
-      roadmap_log(ROADMAP_DEBUG,
-                  "roadmap_geo_config_init() - Web-Service Address: '%s'",
-                  address);
-      return;
-   }
-
-   roadmap_log(ROADMAP_ERROR, "address_search_init() - 'wst_init()' failed");
 }
 
 #ifdef _WIN32
@@ -1053,7 +1032,7 @@ void roadmap_geo_config_fixed_location(RoadMapPosition *gpsPosition, const char 
    roadmap_geo_config_init ();
    GeoConfigContext.callback = callback;
    roadmap_log (ROADMAP_INFO,"Requesting Geo Configuration name=%s",name );
-   if(!Realtime_GetGeoConfig(gpsPosition,name, s_websvc)){
+   if(!Realtime_GetGeoConfig(gpsPosition,name, get_webservice_address(), "application/x-www-form-urlencoded; charset=utf-8")){
       roadmap_log (ROADMAP_ERROR,"Failed to sent GetGeoConfig request" );
       roadmap_messagebox("Oops","Failed to initialize. No network connection");
       ssd_progress_msg_dialog_hide();
