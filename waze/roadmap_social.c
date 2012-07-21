@@ -357,10 +357,9 @@ void roadmap_facebook_check_login(void) {
       return;
    }
 
-   wst_start_trans( s_websvc,
+   wst_start_trans_facade(
                     0,
                    "external_facebook",
-                   type,
                    data_parser,
                    sizeof(data_parser)/sizeof(wst_parser),
                    on_check_login_completed,
@@ -427,10 +426,9 @@ static void facebook_disconnect_confirmed_cb(int exit_code, void *context){
 
    s_websvc = wst_init( url, NULL, NULL, NULL, "application/x-www-form-urlencoded; charset=utf-8");
 
-   wst_start_trans( s_websvc,
+   wst_start_trans_facade(
                    0,
                    "external_facebook",
-                   type,
                    data_parser,
                    sizeof(data_parser)/sizeof(wst_parser),
                    on_disconnect_completed,

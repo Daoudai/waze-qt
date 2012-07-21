@@ -223,22 +223,15 @@ roadmap_result generic_search_resolve_address(
    s_start_time = roadmap_time_get_millis();
 
    // Perform WebService Transaction:
-   if( wst_start_trans( websvc,
+   wst_start_trans_facade(
                         0,
                         service_name,
-                        type,
                         data_parser,
                         parser_count,
                         on_completed,
                         context,
-                        query))
+                        query);
       return succeeded;
-
-   s_cbOnAddressResolved = NULL;
-   s_context             = NULL;
-
-   roadmap_log( ROADMAP_DEBUG, "address_search_resolve_address() - Transaction failed...");
-   return err_failed;
 }
 
 
