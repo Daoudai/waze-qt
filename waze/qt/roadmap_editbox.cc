@@ -99,7 +99,15 @@ void ShowEditbox(const char* titleUtf8, const char* textUtf8, SsdKeyboardCallbac
        keyboard = new KeyboardDialog(mainWindow);
    }
 
-   keyboard->show(QString::fromLocal8Bit(titleUtf8), boxType, QString::fromLocal8Bit(textUtf8), pCtx);
+#ifdef __WIN32
+    QString title = QString::fromUtf8(titleUtf8);
+    QString text = QString::fromUtf8(textUtf8);
+#else
+    QString title = QString::fromLocal8Bit(titleUtf8);
+    QString text = QString::fromLocal8Bit(textUtf8);
+#endif
+
+   keyboard->show(title, boxType, text, pCtx);
 }
 
 /***********************************************************
