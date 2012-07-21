@@ -176,7 +176,7 @@ void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QByteArra
           parser = NULL;
           for( i=0; i<parsers_count; i++)
           {
-              if (parsers[i].tag != NULL && !strnicmp(parsers[i].tag, next, tagEndIndex))
+              if (parsers[i].tag != NULL && !qstrnicmp(parsers[i].tag, next, tagEndIndex))
               {
                 parser = parsers[i].parser;
                 break;
