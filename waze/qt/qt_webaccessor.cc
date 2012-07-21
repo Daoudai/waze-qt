@@ -43,17 +43,41 @@ QString WazeWebAccessor::buildHeader(RequestType type, QUrl url, QString additio
 }
 
 void WazeWebAccessor::postRequestParser(int flags,
+                                        const char* action,
+                                        wst_parser parsers[],
+                                        int parser_count,
+                                        CB_OnWSTCompleted callback,
+                                        LPRTConnectionInfo pci,
+                                        const QString &data)
+{
+    postRequestParser(
+                QString(),
+                flags,
+                action,
+                parsers,
+                parser_count,
+                callback,
+                pci,
+                QString(),
+                data
+                );
+}
+
+void WazeWebAccessor::postRequestParser(
+                                  QString address,
+                                  int flags,
                                   const char* action,
                                   wst_parser parsers[],
                                   int parser_count,
                                   CB_OnWSTCompleted callback,
                                   LPRTConnectionInfo pci,
+                                  QString contentType,
                                   const QString &data)
 {
     bool isSecured = flags & WEBSVC_FLAG_SECURED;
     QUrl url;
     url.setUrl(QString("%1%2/%3")
-               .arg((isSecured)? _securedAddress : _address)
+               .arg(address.isEmpty()? ((isSecured)? _securedAddress : _address) :  address)
                .arg((flags & WEBSVC_FLAG_V2)? _v2Suffix : QString())
                .arg(QString::fromAscii(action)));
     if (isSecured)
@@ -73,7 +97,7 @@ void WazeWebAccessor::postRequestParser(int flags,
     {
         header.setValue(QString::fromAscii("Accept-Encoding"), QString::fromAscii("gzip, deflate"));
     }
-    header.setContentType(QString::fromAscii("binary/octet-stream"));
+    header.setContentType((contentType.isEmpty())? QString::fromAscii("binary/octet-stream") : contentType);
     header.setContentLength(ba.length());
 
     QHttp* http = new QHttp(this);
