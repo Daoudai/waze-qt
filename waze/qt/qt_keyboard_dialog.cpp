@@ -11,6 +11,25 @@ extern "C" {
 #include "roadmap_skin.h"
 }
 
+const char* getFromQString(QString value, std::string& container)
+{
+#ifdef __WIN32
+    container = value.toUtf8().constData();
+    return container.c_str();
+#else
+    return value.toLocal8Bit().constData();
+#endif
+}
+
+QString getFromCharArray(const char* value)
+{
+#ifdef __WIN32
+    return QString::fromUtf8(value);
+#else
+    return QString::fromLocal8Bit(value);
+#endif
+}
+
 KeyboardDialog::KeyboardDialog(RMapMainWindow *parent) :
     QDeclarativeView(parent), mainWindow(parent)
 {
@@ -47,13 +66,13 @@ void KeyboardDialog::show(QString title, TEditBoxType boxType, QString text, Edi
         actionButtonText = QString("'->");
         break;
     case EEditBoxActionDone:
-        actionButtonText = QString::fromLocal8Bit(roadmap_lang_get("Done"));
+        actionButtonText = getFromCharArray(roadmap_lang_get("Done"));
         break;
     case EEditBoxActionSearch:
-        actionButtonText = QString::fromLocal8Bit(roadmap_lang_get("Search"));
+        actionButtonText = getFromCharArray(roadmap_lang_get("Search"));
         break;
     case EEditBoxActionNext:
-        actionButtonText = QString::fromLocal8Bit(roadmap_lang_get("Next"));
+        actionButtonText = getFromCharArray(roadmap_lang_get("Next"));
         break;
     }
 
@@ -68,7 +87,7 @@ void KeyboardDialog::show(QString title, TEditBoxType boxType, QString text, Edi
     }
     item->setProperty("title", title);
     item->setProperty("actionButtonText", actionButtonText);
-    item->setProperty("cancelButtonText", QString::fromLocal8Bit(roadmap_lang_get("Back_key")));
+    item->setProperty("cancelButtonText", getFromCharArray(roadmap_lang_get("Back_key")));
     item->setProperty("text", text);
     item->setProperty("isPassword", isPassword);
 
@@ -79,9 +98,9 @@ void KeyboardDialog::show(QString title, TEditBoxType boxType, QString text, Edi
 void KeyboardDialog::textEditActionPressed(QString text) {
 
     int exit_code = dec_ok;
-    const char *value = text.toLocal8Bit().data();
+    std::string value = text.toUtf8().constData();
 
-    context.callback(exit_code, value, context.cb_context);
+    context.callback(exit_code, value.c_str(), context.cb_context);
 
     mainWindow->setFocusToCanvas();
 
