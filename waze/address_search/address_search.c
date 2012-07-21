@@ -31,7 +31,6 @@
 #include "generic_search.h"
 #include "../roadmap_lang.h"
 
-
 extern void convert_int_coordinate_to_float_string(char* buffer, int value);
 
 extern const char* VerifyStatus( /* IN  */   const char*       pNext,
@@ -430,18 +429,15 @@ roadmap_result address_search_report_wrong_address(const char* user_input)
    }
    report = address_search_prepare_report(user_input);
    // Perform WebService Transaction:
-   if( wst_start_trans( s_websvc,
+   wst_start_trans_facade(
                         0,
                         "mozi_stat",
-                        type,
                         data_parser,
                         sizeof(data_parser)/sizeof(wst_parser),
                         on_completed_reporting_bad_address,
                         NULL,
-                        report))
-   		return succeeded;
-   roadmap_log( ROADMAP_ERROR, "address_search_resolve_address() - Transaction failed... %s",report);
-   return err_failed;
+                        report);
+   return succeeded;
 }
 
 static const char* address_search_prepare_report(const char* user_input)

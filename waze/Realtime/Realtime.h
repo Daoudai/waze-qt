@@ -33,6 +33,16 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+void wst_start_trans_facade(
+                     int                  flags,         // Session flags
+                     const char*          action,        // (/<service_name>/)<ACTION>
+                     const wst_parser_ptr parsers,       // Array of 1..n data parsers
+                     int                  parsers_count, // Parsers count
+                     CB_OnWSTCompleted    cbOnCompleted, // Callback for transaction completion
+                     void*                context,       // Caller context
+                     const char*          query          // Custom data for the HTTP request
+                     );
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 typedef void(*PFN_LOGINTESTRES)( BOOL bDetailsVerified, roadmap_result rc);
 

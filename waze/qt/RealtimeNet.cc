@@ -184,6 +184,30 @@ void  RTNet_Term()
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+void wst_start_trans_facade(
+                     int                  flags,         // Session flags
+                     const char*          action,        // (/<service_name>/)<ACTION>
+                     const wst_parser_ptr parsers,       // Array of 1..n data parsers
+                     int                  parsers_count, // Parsers count
+                     CB_OnWSTCompleted    cbOnCompleted, // Callback for transaction completion
+                     void*                context,       // Caller context
+                     const char*          query          // Custom data for the HTTP request
+                     )
+{
+    QString packet = QString::fromUtf8(query);
+
+    WazeWebAccessor::getInstance().postRequestParser(
+                flags,         // Session flags
+                action,        // (/<service_name>/)<ACTION>
+                parsers,       // Array of 1..n data parsers
+                parsers_count, // Parsers count
+                cbOnCompleted, // Callback for transaction completion
+                (LPRTConnectionInfo) context,       // Caller context
+                packet
+                );
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
 static int wst_flags_for_commnand (const char* command) {
    //return WEBSVC_FLAG_V2;
    if (RT_IsWebServiceSSLEnabled() && RT_IsWebServiceSecuredCommand(command))
@@ -2684,33 +2708,29 @@ BOOL RTNet_GetGeoConfig(
 {
 
    char  GPSPosString[RoadMapGpsPosition_STRING_MAXSIZE+1];
-   static int type = WEBSVC_NO_TYPE;
-
-   if (type == WEBSVC_NO_TYPE)
-      type = wst_get_unique_type();
 
    format_RoadMapPosition_string( GPSPosString, pGPSPosition);
 
+   QString packet;
+   packet.sprintf(RTNET_FORMAT_NETPACKET_6GetGeoConfig,// Custom data for the HTTP request
+                  RTNET_PROTOCOL_VERSION,
+                  GPSPosString,
+                  RT_DEVICE_ID,
+                  roadmap_start_version(),
+                  name,
+                  roadmap_start_is_first_use() ? "T" : "F");
+
    // Perform WebService Transaction:
-    if( wst_start_trans( websvc,
+   WazeWebAccessor::getInstance().postRequestParser(
                          0,
                          "login",
-                         type,
                          geo_config_parser,
                          sizeof(geo_config_parser)/sizeof(wst_parser),
                          pfnOnCompleted,
                          pCI,
-                         RTNET_FORMAT_NETPACKET_6GetGeoConfig,// Custom data for the HTTP request
-                         RTNET_PROTOCOL_VERSION,
-                         GPSPosString,
-                         RT_DEVICE_ID,
-                         roadmap_start_version(),
-                         name,
-                         roadmap_start_is_first_use() ? "T" : "F"))
+                         packet);
 
-       return TRUE;
-    else
-       return FALSE;
+    return TRUE;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
