@@ -3,7 +3,8 @@
 
 #include <QHash>
 #include <QSslError>
-#include <QHttp>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 extern "C" {
 #include "Realtime/RealtimeNetDefs.h"
@@ -32,7 +33,7 @@ struct WazeWebConnectionData
     } callback;
 };
 
-class WazeWebAccessor : public QObject
+class WazeWebAccessor : public QNetworkAccessManager
 {
 Q_OBJECT
 public:
@@ -67,10 +68,10 @@ public:
     void setSecuredResolvedAddress(QString securedAddress);
 
 private slots:
-    void onIgnoreSSLErrors(QList<QSslError> errorList);
-    void oldStyleFinished(bool isError);
-    void requestBytesWrittenOld(int bytesSent, int bytesTotal);
-    void responseBytesReadOld(int bytesReceived, int bytesTotal);
+    void onIgnoreSSLErrors(QNetworkReply *reply, QList<QSslError> errorList);
+    void replyDone(QNetworkReply* reply);
+    void requestBytesWrittenOld(qint64 bytesSent, qint64 bytesTotal);
+    void responseBytesReadOld(qint64 bytesReceived, qint64 bytesTotal);
 
 private:
     explicit WazeWebAccessor(QObject* parent = 0);
@@ -81,7 +82,7 @@ private:
 
     char* getTimeStr(QDateTime time);
 
-    QHash<QHttp*, WazeWebConnectionData> _oldStyleConnectionDataHash;
+    QHash<QNetworkReply*, WazeWebConnectionData> _oldStyleConnectionDataHash;
     QString _address;
     QString _securedAddress;
     QString _v2Suffix;
