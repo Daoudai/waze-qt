@@ -702,7 +702,7 @@ static BOOL wst_start_session_trans( const wst_parser_ptr parsers,       // Arra
                             parsers_count,
                             cbOnCompleted,
                             pCI,
-                            QString::fromLocal8Bit(Data));
+                            QString::fromUtf8(Data));
 
    ebuffer_free( &Packet);
 
@@ -2670,7 +2670,7 @@ BOOL RTNet_RequestRoute(LPRTConnectionInfo   pCI,
                             sizeof(general_parser)/sizeof(wst_parser),
                             pfnOnCompleted,
                             pCI,
-                            QString::fromLocal8Bit(szPacket));
+                            QString::fromUtf8(szPacket));
 
    rc = TRUE;
 
