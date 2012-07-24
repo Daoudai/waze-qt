@@ -47,41 +47,17 @@ QString WazeWebAccessor::buildHeader(RequestType type, QUrl url, QString additio
 }
 
 void WazeWebAccessor::postRequestParser(int flags,
-                                        const char* action,
-                                        wst_parser parsers[],
-                                        int parser_count,
-                                        CB_OnWSTCompleted callback,
-                                        LPRTConnectionInfo pci,
-                                        const QString &data)
-{
-    postRequestParser(
-                QString(),
-                flags,
-                action,
-                parsers,
-                parser_count,
-                callback,
-                pci,
-                QString(),
-                data
-                );
-}
-
-void WazeWebAccessor::postRequestParser(
-                                  QString address,
-                                  int flags,
                                   const char* action,
                                   wst_parser parsers[],
                                   int parser_count,
                                   CB_OnWSTCompleted callback,
                                   LPRTConnectionInfo pci,
-                                  QString contentType,
                                   const QString &data)
 {
     bool isSecured = flags & WEBSVC_FLAG_SECURED;
     QUrl url;
     url.setUrl(QString("%1%2/%3")
-               .arg(address.isEmpty()? ((isSecured)? _securedAddress : _address) :  address)
+               .arg((isSecured)? _securedAddress : _address)
                .arg((flags & WEBSVC_FLAG_V2)? _v2Suffix : QString())
                .arg(QString::fromAscii(action)));
     if (isSecured)
@@ -104,9 +80,14 @@ void WazeWebAccessor::postRequestParser(
     {
         request.setRawHeader(QByteArray("Accept-Encoding"), QByteArray("gzip, deflate"));
     }
+<<<<<<< local
+    header.setContentType(QString::fromAscii("binary/octet-stream"));
+    header.setContentLength(ba.length());
+=======
     request.setRawHeader(QByteArray("User-Agent"), QString::fromAscii("FreeMap/%1").arg(roadmap_start_version()).toAscii());
     request.setHeader(QNetworkRequest::ContentTypeHeader, contentType);
     request.setHeader(QNetworkRequest::ContentLengthHeader, data.length());
+>>>>>>> other
 
     QNetworkReply* reply = post(request, data.toUtf8());
     connect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(responseBytesReadOld(qint64,qint64)));

@@ -170,8 +170,7 @@ static void on_completed( void* ctx, roadmap_result res)
 
 // q=beit a&mobile=true&max_results=10&longtitude=10.943983489&latitude=23.984398
 roadmap_result generic_search_resolve_address(
-                  const char*          url_address,
-                  const char*          content_type,
+                  wst_handle           websvc,
                   wst_parser           *data_parser,
                   int                  parser_count,
                   const char           *service_name,
@@ -179,7 +178,21 @@ roadmap_result generic_search_resolve_address(
                   CB_OnAddressResolved cbOnAddressResolved,
                   const char*          address, const char* custom_query )
 {
+   transaction_state tstate;
    const char*       query = NULL;
+   static int type = WEBSVC_NO_TYPE;
+   
+   if (type == WEBSVC_NO_TYPE)
+      type = wst_get_unique_type();
+
+//  waze_assert( address && (*address));
+
+   if( INVALID_WEBSVC_HANDLE == websvc)
+   {
+      roadmap_log( ROADMAP_ERROR, "address_search_resolve_address() - MODULE NOT INITIALIZED");
+     waze_assert(0);  // 'address_search_init()' was not called
+      return err_internal_error;
+   }
 
    if( !address || (utf8_strlen(address)<ADSR_ADDRESS_MIN_SIZE) || (ADSR_ADDRESS_MAX_SIZE<utf8_strlen(address)))
    {
@@ -187,6 +200,15 @@ roadmap_result generic_search_resolve_address(
                   "address_search_resolve_address() - Size of 'Address to resolve' is wrong (%d)",
                   utf8_strlen(address));
       return err_as_wrong_input_string_size;
+   }
+
+   tstate = wst_get_trans_state( websvc);
+
+   if( trans_idle != tstate)
+   {
+      roadmap_log( ROADMAP_DEBUG, "address_search_resolve_address() - Cannot start transaction: Transaction is not idle yet");
+      wst_watchdog( websvc);
+      return err_as_already_in_transaction;
    }
 
    s_cbOnAddressResolved = cbOnAddressResolved;
@@ -202,14 +224,12 @@ roadmap_result generic_search_resolve_address(
 
    // Perform WebService Transaction:
    wst_start_trans_facade(
-                        url_address,
                         0,
                         service_name,
                         data_parser,
                         parser_count,
                         on_completed,
                         context,
-                        content_type,
                         query);
       return succeeded;
 }

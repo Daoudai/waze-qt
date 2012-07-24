@@ -35,6 +35,7 @@
 
 #include "../roadmap_lang.h"
 
+static wst_handle                s_websvc             = INVALID_WEBSVC_HANDLE;
 static BOOL                      s_initialized_once   = FALSE;
 static RoadMapConfigDescriptor   s_web_service_name   =
             ROADMAP_CONFIG_ITEM(
@@ -65,6 +66,14 @@ static const char* get_webservice_address()
 /////////////////////////////////////////////////////////////////////////////////
 BOOL single_search_init()
 {
+   const char* address;
+
+   if( INVALID_WEBSVC_HANDLE != s_websvc)
+   {
+     waze_assert(0);  // Called twice?
+      return TRUE;
+   }
+
    if( !s_initialized_once)
    {
       //   Web-service address
@@ -75,7 +84,21 @@ BOOL single_search_init()
       s_initialized_once = TRUE;
    }
 
-   return TRUE;
+   address  = get_webservice_address();
+   s_websvc = wst_init( address, NULL, NULL, NULL, "application/x-www-form-urlencoded; charset=utf-8");
+
+   if( INVALID_WEBSVC_HANDLE != s_websvc)
+   {
+      roadmap_log(ROADMAP_DEBUG,
+                  "single_search_init() - Web-Service Address: '%s'",
+                  address);
+      address_search_init();
+      local_search_init();
+      return TRUE;
+   }
+
+   roadmap_log(ROADMAP_ERROR, "single_search_init() - 'wst_init()' failed");
+   return FALSE;
 }
 
 static const char* on_single_search_address_candidate(   /* IN  */   const char*       data,
@@ -121,7 +144,15 @@ static const char* on_single_search_address_candidate(   /* IN  */   const char*
 /////////////////////////////////////////////////////////////////////////////////
 void single_search_term()
 {
+   if( INVALID_WEBSVC_HANDLE == s_websvc)
+      return;
 
+   roadmap_log( ROADMAP_DEBUG, "single_search_term() - TERM");
+
+   wst_term( s_websvc);
+   s_websvc = INVALID_WEBSVC_HANDLE;
+   address_search_term();
+   local_search_term();
 }
 
 roadmap_result single_search_resolve_address(
@@ -134,6 +165,6 @@ roadmap_result single_search_resolve_address(
 
    snprintf( custom_query, GS_CUSTOM_QUERY_MAX_SIZE, "provider=%s&old_mobile_format=false", local_search_get_provider() );
 
-   return generic_search_resolve_address(get_webservice_address(), "application/x-www-form-urlencoded; charset=utf-8", data_parser,sizeof(data_parser)/sizeof(wst_parser),
+   return generic_search_resolve_address(s_websvc, data_parser,sizeof(data_parser)/sizeof(wst_parser),
          "mozi_combo",context, cbOnAddressResolved, address, custom_query );
 }

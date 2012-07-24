@@ -42,6 +42,7 @@ const char* on_address_option(   /* IN  */   const char*       data,
                                  /* OUT */   BOOL*             more_data_needed,
                                  /* OUT */   roadmap_result*   rc);
 
+static wst_handle                s_websvc             = INVALID_WEBSVC_HANDLE;
 static BOOL                      s_initialized_once   = FALSE;
 static RoadMapConfigDescriptor   s_web_service_name   =
             ROADMAP_CONFIG_ITEM(
@@ -145,6 +146,14 @@ BOOL address_candidate_build_address_string( address_candidate* this)
 //   Module initialization/termination - Called once, when the process starts/terminates
 BOOL address_search_init()
 {
+   const char* address;
+
+   if( INVALID_WEBSVC_HANDLE != s_websvc)
+   {
+     waze_assert(0);  // Called twice?
+      return TRUE;
+   }
+
    if( !s_initialized_once)
    {
       //   Web-service address
@@ -155,12 +164,30 @@ BOOL address_search_init()
       s_initialized_once = TRUE;
    }
 
-   return TRUE;
+   address  = get_webservice_address();
+   s_websvc = wst_init( get_webservice_address(), NULL, NULL, NULL, "application/x-www-form-urlencoded; charset=utf-8");
+
+   if( INVALID_WEBSVC_HANDLE != s_websvc)
+   {
+      roadmap_log(ROADMAP_DEBUG,
+                  "address_search_init() - Web-Service Address: '%s'",
+                  address);
+      return TRUE;
+   }
+
+   roadmap_log(ROADMAP_ERROR, "address_search_init() - 'wst_init()' failed");
+   return FALSE;
 }
 
 void address_search_term()
 {
+   if( INVALID_WEBSVC_HANDLE == s_websvc)
+      return;
 
+   roadmap_log( ROADMAP_DEBUG, "address_search_term() - TERM");
+
+   wst_term( s_websvc);
+   s_websvc = INVALID_WEBSVC_HANDLE;
 }
 
 
@@ -367,8 +394,8 @@ roadmap_result address_search_resolve_address(
                   const char*          address)
 
 {
-   return generic_search_resolve_address(get_webservice_address(), "application/x-www-form-urlencoded; charset=utf-8", data_parser,sizeof(data_parser)/sizeof(wst_parser),
-           "mozi",context, cbOnAddressResolved, address, NULL );
+   return generic_search_resolve_address(s_websvc, data_parser,sizeof(data_parser)/sizeof(wst_parser),
+		   "mozi",context, cbOnAddressResolved, address, NULL );
 }
 
 static void on_completed_reporting_bad_address( void* ctx, roadmap_result res){
@@ -379,19 +406,36 @@ static void on_completed_reporting_bad_address( void* ctx, roadmap_result res){
 // user_input=tel aviv &server_cookie=HADFWER
 roadmap_result address_search_report_wrong_address(const char* user_input)
 {
+   transaction_state tstate;
    const char* report = NULL;
+   static int type = WEBSVC_NO_TYPE;
+   
+   if (type == WEBSVC_NO_TYPE)
+      type = wst_get_unique_type();
+   
+   if( INVALID_WEBSVC_HANDLE == s_websvc)
+   {
+      roadmap_log( ROADMAP_ERROR, "address_search_report_wrong_address() - MODULE NOT INITIALIZED");
+     waze_assert(0);  // 'address_search_init()' was not called
+      return err_internal_error;
 
+   }
+   tstate = wst_get_trans_state( s_websvc);
+   if( trans_idle != tstate)
+   {
+      roadmap_log( ROADMAP_DEBUG, "address_search_report_wrong_address() - Cannot start transaction: Transaction is not idle yet");
+      wst_watchdog( s_websvc);
+      return err_as_already_in_transaction;
+   }
    report = address_search_prepare_report(user_input);
    // Perform WebService Transaction:
    wst_start_trans_facade(
-                        get_webservice_address(),
                         0,
                         "mozi_stat",
                         data_parser,
                         sizeof(data_parser)/sizeof(wst_parser),
                         on_completed_reporting_bad_address,
                         NULL,
-                        "application/x-www-form-urlencoded; charset=utf-8",
                         report);
    return succeeded;
 }
