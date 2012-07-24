@@ -34,14 +34,13 @@
 
 
 void wst_start_trans_facade(
-                     const char* address,           // base url
-                     int flags,        // (/<service_name>/)<ACTION>
-                     const char *action,       // Array of 1..n data parsers
-                     const wst_parser_ptr parsers, // Parsers count
-                     int parsers_count, // Callback for transaction completion
-                     CB_OnWSTCompleted cbOnCompleted,       // Caller context
-                     void *context,   // HTTP Content type
-                     const char*          contentType, const char *query          // Custom data for the HTTP request
+                     int                  flags,         // Session flags
+                     const char*          action,        // (/<service_name>/)<ACTION>
+                     const wst_parser_ptr parsers,       // Array of 1..n data parsers
+                     int                  parsers_count, // Parsers count
+                     CB_OnWSTCompleted    cbOnCompleted, // Callback for transaction completion
+                     void*                context,       // Caller context
+                     const char*          query          // Custom data for the HTTP request
                      );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -169,7 +168,7 @@ int RealTime_GetMyRanking();
 BOOL Realtime_IsNewbie();
 void RealTime_SetMapDisplayed(BOOL should_send);
 
-BOOL Realtime_GetGeoConfig(const RoadMapPosition *pGPSPosition, const char *name, const char* url_address, const char* content_type);
+BOOL Realtime_GetGeoConfig(const RoadMapPosition *pGPSPosition, const char *name, wst_handle websvc);
 
 char* Realtime_GetServerCookie(void);
 BOOL Realtime_PinqWazer(const RoadMapGpsPosition *pPosition, int from_node, int to_node, int iUserId, int iAlertType, const char * szDescription, const char* szImageId, const char* szVoiceId, BOOL bForwardToTwitter );

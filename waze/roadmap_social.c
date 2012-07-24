@@ -55,6 +55,8 @@ static const char *privacy_values[3] = {"0", "1", "2"};
 static SsdWidget CheckboxDestinationTwitter[ROADMAP_SOCIAL_DESTINATION_MODES_COUNT];
 static SsdWidget CheckboxDestinationFacebook[ROADMAP_SOCIAL_DESTINATION_MODES_COUNT];
 
+static wst_handle                s_websvc             = INVALID_WEBSVC_HANDLE;
+
 extern const char* VerifyStatus( /* IN  */   const char*       pNext,
                                 /* IN  */   void*             pContext,
                                 /* OUT */   BOOL*             more_data_needed,
@@ -345,15 +347,23 @@ void roadmap_facebook_check_login(void) {
             Realtime_GetServerCookie(),
             RT_DEVICE_ID);
 
+   if (INVALID_WEBSVC_HANDLE != s_websvc)
+      wst_term (s_websvc);
+
+   s_websvc = wst_init( url, NULL, NULL, NULL, "application/x-www-form-urlencoded; charset=utf-8");
+
+   if (INVALID_WEBSVC_HANDLE == s_websvc) {
+      roadmap_log (ROADMAP_ERROR, "roadmap_facebook_check_login() - invalid websvc handle");
+      return;
+   }
+
    wst_start_trans_facade(
-                   url,
-                   0,
+                    0,
                    "external_facebook",
                    data_parser,
                    sizeof(data_parser)/sizeof(wst_parser),
                    on_check_login_completed,
-                   NULL,
-                   "application/x-www-form-urlencoded; charset=utf-8",
+                   (void *)s_websvc, //TODO: consider non global
                    query);
 }
 
@@ -411,15 +421,18 @@ static void facebook_disconnect_confirmed_cb(int exit_code, void *context){
             Realtime_GetServerCookie(),
             RT_DEVICE_ID );
 
+   if (INVALID_WEBSVC_HANDLE != s_websvc)
+      wst_term (s_websvc);
+
+   s_websvc = wst_init( url, NULL, NULL, NULL, "application/x-www-form-urlencoded; charset=utf-8");
+
    wst_start_trans_facade(
-                   url,
                    0,
                    "external_facebook",
                    data_parser,
                    sizeof(data_parser)/sizeof(wst_parser),
                    on_disconnect_completed,
-                   NULL, //TODO: consider non global
-                   "application/x-www-form-urlencoded; charset=utf-8",
+                   (void *)s_websvc, //TODO: consider non global
                    query);
 }
 

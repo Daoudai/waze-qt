@@ -44,6 +44,7 @@ const char* on_local_option(   /* IN  */   const char*       data,
                                  /* OUT */   BOOL*             more_data_needed,
                                  /* OUT */   roadmap_result*   rc);
 
+static wst_handle                s_websvc             = INVALID_WEBSVC_HANDLE;
 static BOOL                      s_initialized_once   = FALSE;
 static RoadMapConfigDescriptor   s_web_service_name   =
             ROADMAP_CONFIG_ITEM(
@@ -217,6 +218,14 @@ BOOL local_candidate_build_address_string( address_candidate* this)
 //   Module initialization/termination - Called once, when the process starts/terminates
 BOOL local_search_init()
 {
+   const char* address;
+
+   if( INVALID_WEBSVC_HANDLE != s_websvc)
+   {
+     waze_assert(0);  // Called twice?
+      return TRUE;
+   }
+
    if( !s_initialized_once)
    {
       //   Web-service address
@@ -250,12 +259,30 @@ BOOL local_search_init()
       s_initialized_once = TRUE;
    }
 
-   return TRUE;
+   address  = get_webservice_address();
+   s_websvc = wst_init( get_webservice_address(), NULL, NULL, NULL, "application/x-www-form-urlencoded; charset=utf-8");
+
+   if( INVALID_WEBSVC_HANDLE != s_websvc)
+   {
+      roadmap_log(ROADMAP_DEBUG,
+                  "local_search_init() - Web-Service Address: '%s'",
+                  address);
+      return TRUE;
+   }
+
+   roadmap_log(ROADMAP_ERROR, "local_search_init() - 'wst_init()' failed");
+   return FALSE;
 }
 
 void local_search_term()
 {
+   if( INVALID_WEBSVC_HANDLE == s_websvc)
+      return;
 
+   roadmap_log( ROADMAP_DEBUG, "local_search_term() - TERM");
+
+   wst_term( s_websvc);
+   s_websvc = INVALID_WEBSVC_HANDLE;
 }
 
 
@@ -337,7 +364,7 @@ roadmap_result local_search_resolve_address(
 
    snprintf( custom_query, GS_CUSTOM_QUERY_MAX_SIZE, "provider=%s", local_search_get_provider() );
 
-   return generic_search_resolve_address( get_webservice_address(), "application/x-www-form-urlencoded; charset=utf-8", data_parser,sizeof(data_parser)/sizeof(wst_parser), "external_search",
+   return generic_search_resolve_address( s_websvc, data_parser,sizeof(data_parser)/sizeof(wst_parser), "external_search",
 		   context, cbOnAddressResolved, address, custom_query );
 }
 
