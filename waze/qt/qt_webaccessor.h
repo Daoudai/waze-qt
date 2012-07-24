@@ -3,8 +3,7 @@
 
 #include <QHash>
 #include <QSslError>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
+#include <QHttp>
 
 extern "C" {
 #include "Realtime/RealtimeNetDefs.h"
@@ -33,7 +32,7 @@ struct WazeWebConnectionData
     } callback;
 };
 
-class WazeWebAccessor : public QNetworkAccessManager
+class WazeWebAccessor : public QObject
 {
 Q_OBJECT
 public:
@@ -47,6 +46,17 @@ public:
                      LPRTConnectionInfo pci,
                      const QString &data);
 
+    void postRequestParser(
+                      QString address,
+                      int flags,
+                      const char *action,
+                      wst_parser parsers[],
+                      int parser_count,
+                      CB_OnWSTCompleted callback,
+                      LPRTConnectionInfo pci,
+                      QString contentType,
+                      const QString &data);
+
     void postRequestProgress(QString url, int flags, RoadMapHttpAsyncCallbacks *callbacks, void *context, const char* header, const void* data, int data_length);
     void getRequest(QString url, int flags, RoadMapHttpAsyncCallbacks *callbacks, time_t update_time, void* context);
 
@@ -57,10 +67,10 @@ public:
     void setSecuredResolvedAddress(QString securedAddress);
 
 private slots:
-    void onIgnoreSSLErrors(QNetworkReply *reply, QList<QSslError> errorList);
-    void replyDone(QNetworkReply* reply);
-    void requestBytesWrittenOld(qint64 bytesSent, qint64 bytesTotal);
-    void responseBytesReadOld(qint64 bytesReceived, qint64 bytesTotal);
+    void onIgnoreSSLErrors(QList<QSslError> errorList);
+    void oldStyleFinished(bool isError);
+    void requestBytesWrittenOld(int bytesSent, int bytesTotal);
+    void responseBytesReadOld(int bytesReceived, int bytesTotal);
 
 private:
     explicit WazeWebAccessor(QObject* parent = 0);
@@ -71,7 +81,7 @@ private:
 
     char* getTimeStr(QDateTime time);
 
-    QHash<QNetworkReply*, WazeWebConnectionData> _oldStyleConnectionDataHash;
+    QHash<QHttp*, WazeWebConnectionData> _oldStyleConnectionDataHash;
     QString _address;
     QString _securedAddress;
     QString _v2Suffix;
