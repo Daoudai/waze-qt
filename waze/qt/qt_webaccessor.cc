@@ -114,6 +114,8 @@ void WazeWebAccessor::postRequestParser(
     connect(http, SIGNAL(done(bool)), this, SLOT(oldStyleFinished(bool)));
     connect(http, SIGNAL(dataSendProgress(int,int)), this, SLOT(requestBytesWrittenOld(int,int)));
     connect(http, SIGNAL(dataReadProgress(int,int)), this, SLOT(responseBytesReadOld(int,int)));
+    connect(http, SIGNAL(responseHeaderReceived(QHttpResponseHeader)), this, SLOT(responseHeaderReceived(QHttpResponseHeader)));
+
 
     if (isSecured)
     {
@@ -131,12 +133,17 @@ void WazeWebAccessor::postRequestParser(
     cd.receivedBytes = 0;
     cd.sentBytes = 0;
     cd.ignoreContentLength = false;
+    cd.statusCode = 0;
+    cd.bytes = new QByteArray();
+    cd.buffer = new QBuffer(cd.bytes);
+    cd.buffer->open(QIODevice::WriteOnly);
+    cd.url = url.toString();
     _oldStyleConnectionDataHash[http] = cd;
 
     http->setHost(url.host(), (isSecured)? QHttp::ConnectionModeHttps : QHttp::ConnectionModeHttp, url.port());
 
     roadmap_net_mon_connect();
-    http->request(header, ba);
+    http->request(header, ba, cd.buffer);
 }
 
 void WazeWebAccessor::setV2Suffix(QString suffix)
@@ -280,6 +287,8 @@ void WazeWebAccessor::getRequest(QString url, int flags, RoadMapHttpAsyncCallbac
     connect(http, SIGNAL(dataSendProgress(int,int)), this, SLOT(requestBytesWrittenOld(int,int)));
     connect(http, SIGNAL(dataReadProgress(int,int)), this, SLOT(responseBytesReadOld(int,int)));
     connect(http, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onIgnoreSSLErrors(QList<QSslError>)));
+    connect(http, SIGNAL(responseHeaderReceived(QHttpResponseHeader)), this, SLOT(responseHeaderReceived(QHttpResponseHeader)));
+
 
     WazeWebConnectionData cd;
     cd.type = ProgressBased;
@@ -288,6 +297,11 @@ void WazeWebAccessor::getRequest(QString url, int flags, RoadMapHttpAsyncCallbac
     cd.receivedBytes = 0;
     cd.sentBytes = 0;
     cd.ignoreContentLength = flags & HTTPCOPY_FLAG_IGNORE_CONTENT_LEN;
+    cd.statusCode = 0;
+    cd.bytes = new QByteArray();
+    cd.buffer = new QBuffer(cd.bytes);
+    cd.buffer->open(QIODevice::WriteOnly);
+    cd.url = encodedUrl.toString();
     _oldStyleConnectionDataHash[http] = cd;
 
     callbacks->progress(context, NULL, 0);
@@ -295,7 +309,7 @@ void WazeWebAccessor::getRequest(QString url, int flags, RoadMapHttpAsyncCallbac
     http->setHost(encodedUrl.host());
 
     roadmap_net_mon_connect();
-    http->request(header);
+    http->request(header, NULL, cd.buffer);
 }
 
 
@@ -331,6 +345,8 @@ void WazeWebAccessor::postRequestProgress(QString url, int flags, RoadMapHttpAsy
     connect(http, SIGNAL(dataSendProgress(int,int)), this, SLOT(requestBytesWrittenOld(int,int)));
     connect(http, SIGNAL(dataReadProgress(int,int)), this, SLOT(responseBytesReadOld(int,int)));
     connect(http, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onIgnoreSSLErrors(QList<QSslError>)));
+    connect(http, SIGNAL(responseHeaderReceived(QHttpResponseHeader)), this, SLOT(responseHeaderReceived(QHttpResponseHeader)));
+
 
     WazeWebConnectionData cd;
     cd.type = ProgressBased;
@@ -339,6 +355,11 @@ void WazeWebAccessor::postRequestProgress(QString url, int flags, RoadMapHttpAsy
     cd.receivedBytes = 0;
     cd.sentBytes = 0;
     cd.ignoreContentLength = flags & HTTPCOPY_FLAG_IGNORE_CONTENT_LEN;
+    cd.statusCode = 0;
+    cd.bytes = new QByteArray();
+    cd.buffer = new QBuffer(cd.bytes);
+    cd.buffer->open(QIODevice::WriteOnly);
+    cd.url = encodedUrl.toString();
     _oldStyleConnectionDataHash[http] = cd;
 
     callbacks->progress(context, NULL, 0);
@@ -346,22 +367,25 @@ void WazeWebAccessor::postRequestProgress(QString url, int flags, RoadMapHttpAsy
     http->setHost(encodedUrl.host());
 
     roadmap_net_mon_connect();
-    http->request(header, ba);
+    http->request(header, ba, cd.buffer);
 }
 
-void WazeWebAccessor::oldStyleFinished(bool isError)
+void WazeWebAccessor::oldStyleFinished(bool)
 {
-    QHttp* http = dynamic_cast<QHttp*>(sender());
+    QHttp* http = static_cast<QHttp*>(sender());
     disconnect(http, SIGNAL(done(bool)), this, SLOT(oldStyleFinished(bool)));
     disconnect(http, SIGNAL(dataSendProgress(int,int)), this, SLOT(requestBytesWrittenOld(int,int)));
     disconnect(http, SIGNAL(dataReadProgress(int,int)), this, SLOT(responseBytesReadOld(int,int)));
     disconnect(http, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onIgnoreSSLErrors(QList<QSslError>)));
+    disconnect(http, SIGNAL(responseHeaderReceived(QHttpResponseHeader)), this, SLOT(responseHeaderReceived(QHttpResponseHeader)));
 
-    WazeWebConnectionData cd = _oldStyleConnectionDataHash[http];
+    if (!_oldStyleConnectionDataHash.contains(http)) roadmap_log(ROADMAP_FATAL, "Bad qhttp index");
+    WazeWebConnectionData& cd = _oldStyleConnectionDataHash[http];
 
-    int statusCode = http->lastResponse().statusCode();
+    int statusCode = cd.statusCode;
+    bool isError = (statusCode == 0);
 
-    QByteArray response = http->readAll();
+    roadmap_log(ROADMAP_INFO, "Response receive finished for (%s)", cd.url.toAscii().constData());
 
     switch (cd.type)
     {
@@ -371,13 +395,13 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
             roadmap_log(ROADMAP_ERROR ,"Error during request (HTTP StatusCode: %d, Qt Error String: %s)", statusCode, http->errorString().toAscii().constData());
         }
 
-        runParsersAndCallback(cd, response, (isError)? err_net_failed : succeeded);
+        runParsersAndCallback(cd, *cd.bytes, (isError)? err_net_failed : succeeded);
         break;
     case ProgressBased:
         if (!isError && statusCode == 200)
         {
-            cd.callback.callbacks->size(cd.context, response.length());
-            cd.callback.callbacks->progress(cd.context, response.constData(), response.length() );
+            cd.callback.callbacks->size(cd.context, cd.bytes->length());
+            cd.callback.callbacks->progress(cd.context, cd.bytes->constData(), cd.bytes->length() );
             cd.callback.callbacks->done(cd.context, getTimeStr(QDateTime::currentDateTime()), NULL);
         }
         else
@@ -388,6 +412,8 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
         break;
     }
 
+    delete cd.bytes;
+    cd.buffer->deleteLater();
     _oldStyleConnectionDataHash.remove(http);
     http->close();
     http->deleteLater();
@@ -397,7 +423,7 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
 
 void WazeWebAccessor::requestBytesWrittenOld(int bytesSent, int bytesTotal)
 {
-    QHttp* http = dynamic_cast<QHttp*>(sender());
+    QHttp* http = static_cast<QHttp*>(sender());
 
     if (!_oldStyleConnectionDataHash.contains(http)) return;
 
@@ -411,7 +437,7 @@ void WazeWebAccessor::requestBytesWrittenOld(int bytesSent, int bytesTotal)
 
 void WazeWebAccessor::responseBytesReadOld(int bytesReceived, int bytesTotal)
 {
-    QHttp* http = dynamic_cast<QHttp*>(sender());
+    QHttp* http = static_cast<QHttp*>(sender());
 
     if (!_oldStyleConnectionDataHash.contains(http)) return;
 
@@ -434,4 +460,15 @@ void WazeWebAccessor::onIgnoreSSLErrors(QList<QSslError> errorList)
 char* WazeWebAccessor::getTimeStr(QDateTime time)
 {
     return strdup(QLocale::c().toString(time, QLatin1String("ddd, dd MMM yyyy hh:mm:ss 'GMT'")).toAscii().data());
+}
+
+void WazeWebAccessor::responseHeaderReceived(const QHttpResponseHeader &resp)
+{
+    QHttp* http = static_cast<QHttp*>(sender());
+
+    if (!_oldStyleConnectionDataHash.contains(http)) return;
+
+    WazeWebConnectionData& cd = _oldStyleConnectionDataHash[http];
+    cd.statusCode = resp.statusCode();
+    roadmap_log(ROADMAP_INFO, "Received status code %d for (%s)", cd.statusCode, cd.url.toAscii().constData());
 }
