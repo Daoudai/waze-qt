@@ -4,6 +4,7 @@
 #include <QHash>
 #include <QSslError>
 #include <QHttp>
+#include <QBuffer>
 
 extern "C" {
 #include "Realtime/RealtimeNetDefs.h"
@@ -21,6 +22,10 @@ struct WazeWebConnectionData
     bool ignoreContentLength;
     qint64 sentBytes;
     qint64 receivedBytes;
+    QBuffer* buffer;
+    int statusCode;
+    QByteArray* bytes;
+    QString url;
 
     union {
         struct {
@@ -67,6 +72,7 @@ public:
     void setSecuredResolvedAddress(QString securedAddress);
 
 private slots:
+    void responseHeaderReceived(const QHttpResponseHeader &resp);
     void onIgnoreSSLErrors(QList<QSslError> errorList);
     void oldStyleFinished(bool isError);
     void requestBytesWrittenOld(int bytesSent, int bytesTotal);
