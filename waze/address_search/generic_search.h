@@ -37,14 +37,14 @@ typedef void(*CB_OnAddressResolved)(   void*                context,
                                        roadmap_result       rc);
 
 roadmap_result generic_search_resolve_address(
-                  wst_handle           websvc,
-                  wst_parser           *data_parser,
-                  int                  parser_count,
-                  const char           *service_name,
-                  void*                context,
+                  const char*          url_address,
+                  const char *content_type,
+                  wst_parser *data_parser,
+                  int parser_count,
+                  const char *service_name,
+                  void *context,
                   CB_OnAddressResolved cbOnAddressResolved,
-                  const char*          address,
-				  const char*          custom_query );
+                  const char*          address, const char *custom_query );
 
 void generic_address_add(address_candidate ac);
 const address_candidate* generic_search_results();
