@@ -215,7 +215,7 @@ void WazeWebAccessor::runParsersAndCallback(WazeWebConnectionData& cd, QByteArra
           parser = NULL;
           for( i=0; i<parsers_count; i++)
           {
-              if (parsers[i].tag != NULL && !qstrnicmp(parsers[i].tag, next, tagEndIndex))
+              if (parsers[i].tag != NULL && qstrlen(parsers[i].tag) == tagEndIndex && !qstrnicmp(parsers[i].tag, next, tagEndIndex))
               {
                 parser = parsers[i].parser;
                 break;
@@ -368,7 +368,7 @@ void WazeWebAccessor::postRequestProgress(QString url, int flags, RoadMapHttpAsy
     http->request(header, ba, cd.buffer);
 }
 
-void WazeWebAccessor::oldStyleFinished(bool)
+void WazeWebAccessor::oldStyleFinished(bool isError)
 {
     QHttp* http = static_cast<QHttp*>(sender());
     disconnect(http, SIGNAL(done(bool)), this, SLOT(oldStyleFinished(bool)));
@@ -381,7 +381,6 @@ void WazeWebAccessor::oldStyleFinished(bool)
     WazeWebConnectionData& cd = _oldStyleConnectionDataHash[http];
 
     int statusCode = cd.statusCode;
-    bool isError = (statusCode == 0);
 
     roadmap_log(ROADMAP_INFO, "Response receive finished for (%s)", cd.url.toAscii().constData());
 
