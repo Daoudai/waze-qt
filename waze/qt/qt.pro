@@ -55,7 +55,8 @@ SOURCES += \
     qt/qt_device.cpp \
     qt/RealtimeNet.cc \
     qt/qt_webaccessor.cc \
-    qt/roadmap_httpcopy_async.cc
+    qt/roadmap_httpcopy_async.cc \
+    qt/qt_wazesocket.cpp
 
 HEADERS += \
     qt_progress.h \
@@ -75,7 +76,8 @@ HEADERS += \
     qt/qt_config.h \
     qt/qt_contacts.h \
     qt/qt_device.h \
-    qt/qt_webaccessor.h
+    qt/qt_webaccessor.h \
+    qt/qt_wazesocket.h
 
 
 
