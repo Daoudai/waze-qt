@@ -25,13 +25,7 @@
  *
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
 #include "qt_webaccessor.h"
-#include <QNetworkReply>
 #include <QFile>
 
 extern "C" {
@@ -44,38 +38,13 @@ extern "C" {
 #include "roadmap_base64.h"
 
 #include "editor/editor_main.h"
-#include "roadmap_httpcopy_async.h"
+#include "../roadmap_httpcopy_async.h"
 }
 
-#if !defined (__SYMBIAN32__)
-#define ROADMAP_HTTP_MAX_CHUNK 32768
-#else
-#define ROADMAP_HTTP_MAX_CHUNK 4096
-#endif
-
-#define ROADMAP_HTTP_MAX_UPLOAD_CHUNK 4096
 #define ROADMAP_HTTP_MP_BOUNDARY   "---------------------------10424402741337131014341297293"
 
 struct HttpAsyncContext_st {
-    RoadMapHttpAsyncCallbacks *callbacks;
-    void *cb_context;
-    int download_size_current;
-    int received_status;
-    int content_length;
-    int is_parsing_headers;
-    char header_buffer[512];
-    char error_buffer[512];
-    char last_modified_buffer[256];
-    RoadMapIO io;
-    char* header;
-    const void *data;
-    int data_len;
-   RoadMapFile file;
-   char write_buf[ROADMAP_HTTP_MAX_UPLOAD_CHUNK];
-   int write_buf_read;
-   int write_buf_sent;
-   int flags;
-   QNetworkReply* reply;
+
 };
 
 HttpAsyncContext * roadmap_http_async_post_file( RoadMapHttpAsyncCallbacks *callbacks, void *context,
@@ -185,7 +154,6 @@ HttpAsyncContext * roadmap_http_async_copy (RoadMapHttpAsyncCallbacks *callbacks
 }
 
 void roadmap_http_async_copy_abort (HttpAsyncContext *context) {
-    // TODO
-    roadmap_log(ROADMAP_FATAL, "roadmap_http_async_copy_abort called and it is not implemented yet");
+    // Let it be...
 }
 

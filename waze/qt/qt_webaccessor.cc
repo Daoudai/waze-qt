@@ -377,7 +377,14 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
     disconnect(http, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onIgnoreSSLErrors(QList<QSslError>)));
     disconnect(http, SIGNAL(responseHeaderReceived(QHttpResponseHeader)), this, SLOT(responseHeaderReceived(QHttpResponseHeader)));
 
-    if (!_oldStyleConnectionDataHash.contains(http)) roadmap_log(ROADMAP_FATAL, "Bad qhttp index");
+    if (!_oldStyleConnectionDataHash.contains(http))
+    {
+        roadmap_log(ROADMAP_ERROR, "Bad http request index in the queue, ignoring this request");
+        http->close();
+        http->deleteLater();
+        roadmap_net_mon_disconnect();
+    }
+
     WazeWebConnectionData& cd = _oldStyleConnectionDataHash[http];
 
     int statusCode = cd.statusCode;
