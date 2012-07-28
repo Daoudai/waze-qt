@@ -4448,8 +4448,8 @@ BOOL Realtime_RequestRoute(int						iRoute,
 }
 
 
-BOOL Realtime_GetGeoConfig(const RoadMapPosition   *pGPSPosition, const char *name,wst_handle websvc){
-   return RTNet_GetGeoConfig(&gs_CI,websvc,pGPSPosition, name, OnAsyncOperationCompleted_GetGeoConfig);
+BOOL Realtime_GetGeoConfig(const RoadMapPosition   *pGPSPosition, const char *name, const char* url_address, const char* content_type){
+   return RTNet_GetGeoConfig(&gs_CI,url_address, content_type, pGPSPosition, name, OnAsyncOperationCompleted_GetGeoConfig);
 }
 
 static void OnAsyncOperationCompleted_SelectRoute (void* ctx, roadmap_result rc)

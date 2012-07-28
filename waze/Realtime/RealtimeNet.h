@@ -366,7 +366,8 @@ BOOL RTNet_ReportMapProblem(
 
 BOOL RTNet_GetGeoConfig(
                   LPRTConnectionInfo         pCI,
-                  wst_handle                 websvc,
+                  const char*                url_address,
+                  const char*                content_type,
                   const RoadMapPosition      *Location,
                   const char                 *name,
                   CB_OnWSTCompleted          pfnOnCompleted);
