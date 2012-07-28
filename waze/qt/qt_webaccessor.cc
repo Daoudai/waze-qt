@@ -7,6 +7,7 @@
 #include <QSslSocket>
 #include <QHttpRequestHeader>
 #include <QHostInfo>
+#include "qt_wazesocket.h"
 
 extern "C" {
 #include "roadmap.h"
@@ -116,14 +117,11 @@ void WazeWebAccessor::postRequestParser(
     connect(http, SIGNAL(dataReadProgress(int,int)), this, SLOT(responseBytesReadOld(int,int)));
     connect(http, SIGNAL(responseHeaderReceived(QHttpResponseHeader)), this, SLOT(responseHeaderReceived(QHttpResponseHeader)));
 
+    QSslSocket* socket = new WazeSocket();
+    connect(http, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onIgnoreSSLErrors(QList<QSslError>)));
+    socket->setPeerVerifyMode(QSslSocket::VerifyNone);
+    http->setSocket(socket);
 
-    if (isSecured)
-    {
-        QSslSocket* socket = new QSslSocket();
-        connect(http, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onIgnoreSSLErrors(QList<QSslError>)));
-        socket->setPeerVerifyMode(QSslSocket::VerifyNone);
-        http->setSocket(socket);
-    }
     WazeWebConnectionData cd;
     cd.type = ParserBased;
     cd.callback.callback = callback;
