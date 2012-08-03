@@ -41,9 +41,6 @@ static const char deflate_magic[2] = {'\037', '\213' };
 static const int FLAG_COMPRESSED = 0x1;
 static const int FLAG_ERROR      = 0x10;
 
-/* Buffer must be big enough to fit a complete http header */
-#define READ_BUFFER_SIZE 1024
-
 struct roadmap_http_comp_t {
    int state;
    int flags;

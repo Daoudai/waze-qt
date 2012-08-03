@@ -26,6 +26,8 @@ struct WazeWebConnectionData
     int statusCode;
     QByteArray* bytes;
     QString url;
+    bool decompress;
+    QByteArray* header;
 
     union {
         struct {
