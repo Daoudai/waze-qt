@@ -23,6 +23,10 @@
 
 #include "roadmap.h"
 
+
+/* Buffer must be big enough to fit a complete http header */
+#define READ_BUFFER_SIZE 1024
+
 struct roadmap_http_comp_t;
 typedef struct roadmap_http_comp_t *RoadMapHttpCompCtx;
 

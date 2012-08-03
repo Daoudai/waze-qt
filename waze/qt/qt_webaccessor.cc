@@ -11,11 +11,14 @@
 
 extern "C" {
 #include "roadmap.h"
+#include "roadmap_http_comp.h"
 #include "roadmap_start.h"
 #include "websvc_trans/string_parser.h"
 #include "websvc_trans/web_date_format.h"
 #include "roadmap_net_mon.h"
 }
+
+#define UNCOMPRESSED_BLOCK_LENGTH 4096
 
 WazeWebAccessor& WazeWebAccessor::getInstance()
 {
@@ -136,6 +139,8 @@ void WazeWebAccessor::postRequestParser(
     cd.buffer = new QBuffer(cd.bytes);
     cd.buffer->open(QIODevice::WriteOnly);
     cd.url = url.toString();
+    cd.decompress = false;
+    cd.header = NULL;
     _oldStyleConnectionDataHash[http] = cd;
 
     http->setHost(url.host(), (isSecured)? QHttp::ConnectionModeHttps : QHttp::ConnectionModeHttp, url.port());
@@ -300,6 +305,8 @@ void WazeWebAccessor::getRequest(QString url, int flags, RoadMapHttpAsyncCallbac
     cd.buffer = new QBuffer(cd.bytes);
     cd.buffer->open(QIODevice::WriteOnly);
     cd.url = encodedUrl.toString();
+    cd.decompress = false;
+    cd.header = NULL;
     _oldStyleConnectionDataHash[http] = cd;
 
     callbacks->progress(context, NULL, 0);
@@ -358,6 +365,8 @@ void WazeWebAccessor::postRequestProgress(QString url, int flags, RoadMapHttpAsy
     cd.buffer = new QBuffer(cd.bytes);
     cd.buffer->open(QIODevice::WriteOnly);
     cd.url = encodedUrl.toString();
+    cd.decompress = false;
+    cd.header = NULL;
     _oldStyleConnectionDataHash[http] = cd;
 
     callbacks->progress(context, NULL, 0);
@@ -383,6 +392,7 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
         http->close();
         http->deleteLater();
         roadmap_net_mon_disconnect();
+        return;
     }
 
     WazeWebConnectionData& cd = _oldStyleConnectionDataHash[http];
@@ -390,6 +400,52 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
     int statusCode = cd.statusCode;
 
     roadmap_log(ROADMAP_INFO, "Response receive finished for (%s)", cd.url.toAscii().constData());
+
+    QByteArray response;
+
+    if (cd.decompress)
+    {
+        char uncompressedBlock[UNCOMPRESSED_BLOCK_LENGTH];
+        QByteArray compressedResponse = *cd.bytes;
+        compressedResponse.prepend(*cd.header);
+        RoadMapHttpCompCtx compressContext = roadmap_http_comp_init();
+        int length = compressedResponse.length();
+        int blockRead = 0;
+        do
+        {
+            int compressedDataSize;
+            void* compressedData = NULL;
+            roadmap_http_comp_get_buffer(compressContext, &compressedData, &compressedDataSize);
+            qMemCopy(compressedData, compressedResponse.constData() + blockRead, compressedDataSize);
+            roadmap_http_comp_add_data(compressContext, compressedDataSize);
+            blockRead += compressedDataSize;
+
+            int received = 0;
+            while ((received = roadmap_http_comp_read(compressContext, uncompressedBlock, UNCOMPRESSED_BLOCK_LENGTH))
+                   != 0) {
+                if (received < 0) {
+                    roadmap_log (ROADMAP_DEBUG, "Error in recv. - comp returned %d", received);
+                    break;
+                }
+                else
+                {
+                    response.append(uncompressedBlock, received);
+                }
+            }
+        } while (blockRead < length);
+
+        roadmap_http_comp_close(compressContext);
+
+        if (response.startsWith(HTTP.toAscii()))
+        {
+            int index = response.indexOf(DATA_DELIMITER);
+            response.remove(0, index + DATA_DELIMITER_LENGTH);
+        }
+    }
+    else
+    {
+        response = *cd.bytes;
+    }
 
     switch (cd.type)
     {
@@ -399,13 +455,13 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
             roadmap_log(ROADMAP_ERROR ,"Error during request (HTTP StatusCode: %d, Qt Error String: %s)", statusCode, http->errorString().toAscii().constData());
         }
 
-        runParsersAndCallback(cd, *cd.bytes, (isError)? err_net_failed : succeeded);
+        runParsersAndCallback(cd, response, (isError)? err_net_failed : succeeded);
         break;
     case ProgressBased:
         if (!isError && statusCode == 200)
         {
-            cd.callback.callbacks->size(cd.context, cd.bytes->length());
-            cd.callback.callbacks->progress(cd.context, cd.bytes->constData(), cd.bytes->length() );
+            cd.callback.callbacks->size(cd.context, response.length());
+            cd.callback.callbacks->progress(cd.context, response.constData(), response.length() );
             cd.callback.callbacks->done(cd.context, getTimeStr(QDateTime::currentDateTime()), NULL);
         }
         else
@@ -416,6 +472,7 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
         break;
     }
 
+    delete cd.header;
     delete cd.bytes;
     cd.buffer->deleteLater();
     _oldStyleConnectionDataHash.remove(http);
@@ -474,5 +531,7 @@ void WazeWebAccessor::responseHeaderReceived(const QHttpResponseHeader &resp)
 
     WazeWebConnectionData& cd = _oldStyleConnectionDataHash[http];
     cd.statusCode = resp.statusCode();
+    cd.decompress = resp.value("Content-Encoding").compare("gzip") == 0;
+    cd.header = new QByteArray(resp.toString().toAscii());
     roadmap_log(ROADMAP_INFO, "Received status code %d for (%s)", cd.statusCode, cd.url.toAscii().constData());
 }
