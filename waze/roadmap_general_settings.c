@@ -61,6 +61,10 @@ static const char*   title = "General settings";
 static int DialogShowsShown = 0;
 static const char *yesno_label[2];
 static const char *yesno[2];
+
+static const char* loglevel_labels[2];
+static const char* loglevels[2];
+
 static RoadMapConfigDescriptor RoadMapConfigConnectionAuto =
                         ROADMAP_CONFIG_ITEM("Connection", "AutoConnect");
 static RoadMapConfigDescriptor RoadMapConfigBackLight =
@@ -72,6 +76,8 @@ static RoadMapConfigDescriptor RoadMapConfigGeneralUnit =
 
 static RoadMapConfigDescriptor RoadMapConfigGeneralUserUnit =
                         ROADMAP_CONFIG_ITEM("General", "Unit");
+
+extern RoadMapConfigDescriptor RoadMapConfigGeneralLogLevel;
 
 static RoadMapConfigDescriptor RoadMapConfigShowTicker =
                         ROADMAP_CONFIG_ITEM("User", "Show points ticker");
@@ -116,6 +122,7 @@ static int on_ok( SsdWidget this, const char *new_value) {
    const char *new_lang = ssd_dialog_get_data("lang");
    const char *prompts = ssd_dialog_get_data("Prompts");
    const char* voice_id = ssd_dialog_get_data("TTS Voices");
+   const char* log_level = ssd_dialog_get_data("Logging");
 
    if (prompts)
       roadmap_prompts_set_name(prompts);
@@ -173,6 +180,10 @@ static int on_ok( SsdWidget this, const char *new_value) {
    update_events_radius();
 
    tts_set_voice( voice_id );
+
+   roadmap_config_set (&RoadMapConfigGeneralLogLevel,
+                              log_level);
+   roadmap_option_set_verbosity((!strcmp(log_level, loglevels[0]))? 3 : 1);
 
    roadmap_config_save(TRUE);
    DialogShowsShown = 0;
@@ -445,6 +456,10 @@ void roadmap_general_settings_show(void) {
 	 yesno_label[1] = roadmap_lang_get ("No");
 	 yesno[0] = "Yes";
 	 yesno[1] = "No";
+     loglevel_labels[0] = roadmap_lang_get ("Minimal");
+      loglevel_labels[1] = roadmap_lang_get ("Full");
+      loglevels[0] = "3";
+      loglevels[1] = "1";
     autozoom_value[0] = "speed";
 	 autozoom_value[1] = "yes";
 	 autozoom_value[2] = "no";
@@ -776,6 +791,31 @@ void roadmap_general_settings_show(void) {
       ssd_widget_add(container, box);
       ssd_widget_add(dialog, container);
 
+      //-----------------------------------------------------------------------
+      container = ssd_container_new ("Logging Conatiner Group", NULL, width, SSD_MIN_SIZE,
+                                     SSD_WIDGET_SPACE|SSD_END_ROW|SSD_CONTAINER_FLAGS|SSD_POINTER_NONE|SSD_CONTAINER_BORDER|SSD_ALIGN_CENTER);
+
+      box = ssd_container_new ("LoggingGroup", NULL, SSD_MAX_SIZE, height,
+                               SSD_WIDGET_SPACE|SSD_END_ROW|tab_flag);
+
+      ssd_widget_set_color (box, "#000000", NULL);
+      ssd_widget_set_color (box, "#000000", "#ffffff");
+
+      ssd_widget_add (box,
+                      ssd_text_new ( "LoggingLabel",
+                                    roadmap_lang_get("Logging"),
+                                    SSD_MAIN_TEXT_SIZE, SSD_TEXT_NORMAL_FONT|SSD_TEXT_LABEL|SSD_ALIGN_VCENTER|SSD_WIDGET_SPACE ) );
+
+      ssd_widget_add (box,
+                      ssd_choice_new ( "Logging", roadmap_lang_get("Logging"), 2,
+                                       loglevel_labels,
+                                       loglevels,
+                                      SSD_ALIGN_RIGHT|SSD_ALIGN_VCENTER, NULL) );
+      ssd_widget_add(box, space(1));
+      ssd_widget_add(box, ssd_separator_new("separator", SSD_ALIGN_BOTTOM));
+      ssd_widget_add (container, box);
+      ssd_widget_add(dialog, container);
+
 #ifndef TOUCH_SCREEN
       ssd_widget_set_left_softkey_text       ( dialog, roadmap_lang_get("Ok"));
       ssd_widget_set_left_softkey_callback   ( dialog, on_ok_softkey);
@@ -887,6 +927,12 @@ void roadmap_general_settings_show(void) {
    }
    ssd_dialog_set_data("event_radius", distance_values[i] );
 
+   if (!strcmp(roadmap_config_get(&RoadMapConfigGeneralLogLevel), loglevels[0])) {
+      ssd_dialog_set_data ("Logging", (void *) loglevels[0]);
+   } else {
+      ssd_dialog_set_data ("Logging", (void *) loglevels[1]);
+   }
+
    DialogShowsShown = 1;
    ssd_dialog_draw ();
 }
@@ -900,6 +946,9 @@ int roadmap_general_settings_events_radius(void){
 }
 
 void roadmap_general_settings_init(void){
+   roadmap_config_declare_enumeration
+           ("preferences", &RoadMapConfigGeneralLogLevel, NULL, loglevels[0], loglevels[3], NULL);
+
    roadmap_config_declare
       ("user", &RoadMapConfigConnectionAuto, "yes", NULL);
    roadmap_config_declare
