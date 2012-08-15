@@ -467,7 +467,7 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
         else
         {
             roadmap_log(ROADMAP_ERROR, "HTTP error during request (%d)", statusCode);
-            cd.callback.callbacks->error(cd.context, succeeded, "Error during request (%s)", http->errorString().toLocal8Bit().constData());
+            cd.callback.callbacks->error(cd.context, (http->error() == QHttp::NoError)? 0 : 1, "Error during request (%s)", http->errorString().toLocal8Bit().constData());
         }
         break;
     }
