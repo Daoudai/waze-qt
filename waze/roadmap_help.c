@@ -385,7 +385,7 @@ void roadmap_help_about (void) {
 #endif //IPHONE_NATIVE
    char about[700];
 
-   sprintf (about, "Waze Qt port\nDone by damagedspline@gmail.com\nhttp://code.google.com/p/waze-qt/\nBased on Waze(c) release %s\n%s\n%s",
+   sprintf (about, "Waze Qt port " PORT_RELEASE "\nDone by damagedspline@gmail.com\nhttp://code.google.com/p/waze-qt/\nBased on Waze(c) release %s\n%s\n%s",
             roadmap_start_version(),
             roadmap_lang_get("www.waze.com"),
             roadmap_lang_get("Licensed under the terms of the\nGPL v2"));
