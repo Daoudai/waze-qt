@@ -15,8 +15,9 @@ extern "C" {
 enum CallbackType { ParserBased, ProgressBased };
 enum RequestType { Post, Get };
 
-struct WazeWebConnectionData
+struct HttpAsyncContext_st
 {
+    QHttp* http;
     void* context;
     CallbackType type;
     bool ignoreContentLength;
@@ -45,7 +46,7 @@ Q_OBJECT
 public:
     static WazeWebAccessor& getInstance();
 
-    void postRequestParser(int flags,
+    HttpAsyncContext *postRequestParser(int flags,
                      const char* action,
                      wst_parser parsers[],
                      int parser_count,
@@ -53,7 +54,7 @@ public:
                      LPRTConnectionInfo pci,
                      const QString &data);
 
-    void postRequestParser(
+    HttpAsyncContext * postRequestParser(
                       QString address,
                       int flags,
                       const char *action,
@@ -64,8 +65,8 @@ public:
                       QString contentType,
                       const QString &data);
 
-    void postRequestProgress(QString url, int flags, RoadMapHttpAsyncCallbacks *callbacks, void *context, const char* header, const void* data, int data_length);
-    void getRequest(QString url, int flags, RoadMapHttpAsyncCallbacks *callbacks, time_t update_time, void* context);
+    HttpAsyncContext * postRequestProgress(QString url, int flags, RoadMapHttpAsyncCallbacks *callbacks, void *context, const char* header, const void* data, int data_length);
+    HttpAsyncContext * getRequest(QString url, int flags, RoadMapHttpAsyncCallbacks *callbacks, time_t update_time, void* context);
 
     void setV2Suffix(QString suffix);
 
@@ -85,11 +86,11 @@ private:
 
     QString buildHeader(RequestType type, QUrl url, QString additional = QString());
 
-    void runParsersAndCallback(WazeWebConnectionData& cd, QByteArray &response, roadmap_result result);
+    void runParsersAndCallback(HttpAsyncContext& cd, QByteArray &response, roadmap_result result);
 
     char* getTimeStr(QDateTime time);
 
-    QHash<QHttp*, WazeWebConnectionData> _oldStyleConnectionDataHash;
+    QHash<QHttp*, HttpAsyncContext> _oldStyleConnectionDataHash;
     QString _address;
     QString _securedAddress;
     QString _v2Suffix;
