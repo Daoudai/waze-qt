@@ -43,22 +43,14 @@ extern "C" {
 
 #define ROADMAP_HTTP_MP_BOUNDARY   "---------------------------10424402741337131014341297293"
 
-struct HttpAsyncContext_st {
-
-};
-
 HttpAsyncContext * roadmap_http_async_post_file( RoadMapHttpAsyncCallbacks *callbacks, void *context,
                                            const char *source, const char* header, const char *full_name, int size )
 {
-    static HttpAsyncContext hcontext;
-
     QFile file(QString::fromAscii(full_name));
     QByteArray data = file.readAll();
     int data_length = data.length();
 
-    WazeWebAccessor::getInstance().postRequestProgress(QString::fromAscii(source), HTTPCOPY_FLAG_NONE, callbacks, context, header, data, data_length);
-
-    return &hcontext;
+    return WazeWebAccessor::getInstance().postRequestProgress(QString::fromAscii(source), HTTPCOPY_FLAG_NONE, callbacks, context, header, data, data_length);
 }
 
 static char* get_encoded_auth (const char *user, const char *pw) {
@@ -122,10 +114,7 @@ const char* roadmap_http_async_get_upload_header( const char* content_type, cons
 HttpAsyncContext * roadmap_http_async_post( RoadMapHttpAsyncCallbacks *callbacks, void *context,
                                             const char *source, const char* header, const void* data, int data_length, int flags )
 {
-    static HttpAsyncContext hcontext;
-
-    WazeWebAccessor::getInstance().postRequestProgress(QString::fromAscii(source), flags, callbacks, context, header, data, data_length);
-    return &hcontext;
+    return WazeWebAccessor::getInstance().postRequestProgress(QString::fromAscii(source), flags, callbacks, context, header, data, data_length);
 }
 
 const char* roadmap_http_async_get_simple_header( const char* content_type, int content_len )
@@ -145,15 +134,11 @@ HttpAsyncContext * roadmap_http_async_copy (RoadMapHttpAsyncCallbacks *callbacks
                                       void *context,
                              const char *source,
                              time_t update_time) {
-
-    static HttpAsyncContext hcontext;
-
-    WazeWebAccessor::getInstance().getRequest(QString::fromAscii(source), 0, callbacks, update_time, context);
-
-    return &hcontext;
+    return WazeWebAccessor::getInstance().getRequest(QString::fromAscii(source), 0, callbacks, update_time, context);
 }
 
 void roadmap_http_async_copy_abort (HttpAsyncContext *context) {
-    // Let it be...
+    roadmap_log(ROADMAP_INFO, "Aborting url request: %s", context->url.toAscii().constData());
+    context->http->abort();
 }
 
