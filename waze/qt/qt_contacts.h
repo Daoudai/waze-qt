@@ -9,7 +9,7 @@ class RContactsView : public QDeclarativeView
 {
     Q_OBJECT
 public:
-    explicit RContactsView(RMapMainWindow *parent = 0);
+    explicit RContactsView(QDeclarativeView *parent = 0);
     virtual ~RContactsView();
     
     void initialize();

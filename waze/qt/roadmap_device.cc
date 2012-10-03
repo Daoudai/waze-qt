@@ -46,7 +46,7 @@ const char* DEFAULT_BACKLIGHT_LIT_OPTION = "IfPlugged";
 RoadMapConfigDescriptor RoadMapConfigBackLight =
                         ROADMAP_CONFIG_ITEM("Display", "BackLight");
 
-extern RMapMainWindow* mainWindow;
+extern QDeclarativeView* mainWindow;
 
 static RPowerInfo* devInfo = NULL;
 

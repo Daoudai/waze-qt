@@ -43,7 +43,6 @@ extern "C" {
 #include "ssd/ssd_dialog.h"
 }
 
-
 RMapCanvas *roadMapCanvas = 0;
 RoadMapCanvasMouseHandler phandler = 0;
 RoadMapCanvasMouseHandler rhandler = 0;
@@ -52,27 +51,27 @@ RoadMapCanvasMouseHandler whandler = 0;
 RoadMapCanvasConfigureHandler chandler = 0;
 
 // Implementation of RMapCanvas class
-RMapCanvas::RMapCanvas(QWidget* parent):QWidget(parent) {
-   pixmap = 0;
-   ignoreClicks = false;
-   currentPen = 0;
-   roadMapCanvas = this;
-   basePen = createPen("stubPen");
-   setPenThickness(2);
+RMapCanvas::RMapCanvas( QDeclarativeItem* parent ) {
+    setFlag(QGraphicsItem::ItemHasNoContents, false);
+    pixmap = new QPixmap(width(), height());
+    ignoreClicks = false;
+    currentPen = 0;
+    roadMapCanvas = this;
+    basePen = createPen("stubPen");
+    setPenThickness(2);
 
-   /* turn off the default double-buffering */
-   this->setAttribute(Qt::WA_PaintOnScreen);
+    initColors();
 
-   initColors();
+    registerButtonPressedHandler(phandler);
+    registerButtonReleasedHandler(rhandler);
+    registerMouseMoveHandler(mhandler);
+    registerMouseWheelHandler(whandler);
 
-   registerButtonPressedHandler(phandler);
-   registerButtonReleasedHandler(rhandler);
-   registerMouseMoveHandler(mhandler);
-   registerMouseWheelHandler(whandler);
+    registerConfigureHandler(chandler);
+    grabGesture(Qt::PinchGesture);
 
-   registerConfigureHandler(chandler);
-   grabGesture(Qt::PinchGesture);
-   setAttribute(Qt::WA_NoBackground);
+    connect( this, SIGNAL( widthChanged() ), SLOT( configure() ) );
+    connect( this, SIGNAL( heightChanged() ), SLOT( configure() ) );
 }
 
 RMapCanvas::~RMapCanvas() {
@@ -88,7 +87,7 @@ bool RMapCanvas::event(QEvent *event)
 {
    if (event->type() == QEvent::Gesture)
        return gestureEvent(static_cast<QGestureEvent*>(event));
-   return QWidget::event(event);
+   return QDeclarativeItem::event(event);
 }
 
 bool RMapCanvas::gestureEvent(QGestureEvent *event)
@@ -529,12 +528,11 @@ void RMapCanvas::resizeEvent(QResizeEvent* ev) {
    configure();
 }
 
-void RMapCanvas::paintEvent(QPaintEvent* ev) {
+void RMapCanvas::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget) {
   
-   QRect target(0, 0, pixmap->width(), pixmap->height());
-   QRect source(0, 0, pixmap->width(), pixmap->height()); 
-   QPainter painter(this);
-   painter.drawPixmap( target, *pixmap, source);
+    QRect target(0, 0, pixmap->width(), pixmap->height());
+    QRect source(0, 0, pixmap->width(), pixmap->height());
+    painter->drawPixmap( target, *pixmap, source);
 		
    //bitBlt(this, QPoint(0,0), pixmap, QRect(0, 0, pixmap->width(), pixmap->height()));
 }

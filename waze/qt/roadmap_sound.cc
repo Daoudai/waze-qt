@@ -51,7 +51,7 @@ typedef struct roadmap_sound_st {
     QMediaResource *media;
 } roadmap_sound_st;
 
-extern RMapMainWindow* mainWindow;
+extern QDeclarativeView* mainWindow;
 
 Playlist *mediaPlayer = NULL;
 Recorder *recorder = NULL;

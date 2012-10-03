@@ -32,7 +32,7 @@ extern "C" {
 #include "ssd/ssd_dialog.h"
 }
 
-extern RMapMainWindow* mainWindow;
+extern QDeclarativeView* mainWindow;
 
 static WazeWebView *webview = NULL;
 

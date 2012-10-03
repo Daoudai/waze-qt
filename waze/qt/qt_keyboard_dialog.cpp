@@ -30,7 +30,7 @@ QString getFromCharArray(const char* value)
 #endif
 }
 
-KeyboardDialog::KeyboardDialog(RMapMainWindow *parent) :
+KeyboardDialog::KeyboardDialog(QDeclarativeView *parent) :
     QDeclarativeView(parent), mainWindow(parent)
 {
     setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../qml/TextBox.qml")));
@@ -102,7 +102,7 @@ void KeyboardDialog::textEditActionPressed(QString text) {
 
     context.callback(exit_code, value.c_str(), context.cb_context);
 
-    mainWindow->setFocusToCanvas();
+    //mainWindow->setFocusToCanvas();
 
     hide();
 
@@ -113,7 +113,7 @@ void KeyboardDialog::textEditCancelPressed() {
 
     int exit_code = dec_cancel;
 
-    mainWindow->setFocusToCanvas();
+    //mainWindow->setFocusToCanvas();
 
     hide();
 
