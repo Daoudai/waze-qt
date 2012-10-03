@@ -24,8 +24,7 @@
 #ifndef INCLUDE__ROADMAP_QT_MAIN__H
 #define INCLUDE__ROADMAP_QT_MAIN__H
 
-#include <QGraphicsView>
-#include <QGraphicsScene>
+#include <QDeclarativeView>
 #include <QMap>
 #include <QSocketNotifier>
 #include <QPushButton>
@@ -144,8 +143,10 @@ public:
     static RCommonApp* instance();
 
 public slots:
+    void invokeAction(QString actionName);
     void quit();
     void handleSignal(int sig);
+    void mouseAreaPressed();
 
 private:
    RCommonApp();
@@ -154,28 +155,6 @@ private:
 
 };
 
-class RMapMainWindow : public QGraphicsView {
+extern QDeclarativeView* mainWindow;
 
-Q_OBJECT
-
-public:
-   RMapMainWindow( QGraphicsScene *scene);
-   virtual ~RMapMainWindow();
-
-   void addCanvas(void);
-
-   void toggleFullScreen();
-
-   void setFocusToCanvas();
-
-public slots:
-   void mouseAreaPressed();
-
-protected:
-   RMapCanvas* canvas;
-
-   virtual void resizeEvent(QResizeEvent *event);
-};
-
-extern RMapMainWindow* mainWindow;
 #endif

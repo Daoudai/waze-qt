@@ -16,7 +16,7 @@ extern "C" {
 
 extern "C" BOOL single_search_auto_search( const char* address);
 
-RContactsView::RContactsView(RMapMainWindow *parent) :
+RContactsView::RContactsView(QDeclarativeView *parent) :
     QDeclarativeView(parent),
     _contactListModel(NULL)
 {

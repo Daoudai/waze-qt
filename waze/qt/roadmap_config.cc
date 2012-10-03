@@ -40,7 +40,7 @@ extern "C" {
 #include "roadmap_config.h"
 }
 
-extern RMapMainWindow *mainWindow;
+extern QDeclarativeView *mainWindow;
 static RMapConfig *config;
 
 static QString roadmap_config_property_name(RoadMapConfigDescriptor *descriptor)

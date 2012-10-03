@@ -13,7 +13,7 @@ class KeyboardDialog : public QDeclarativeView
 {
     Q_OBJECT
 public:
-    explicit KeyboardDialog(RMapMainWindow *parent = 0);
+    explicit KeyboardDialog(QDeclarativeView *parent = 0);
     void show(QString title, TEditBoxType boxType, QString text, EditBoxContextType pCtx);
 signals:
 
@@ -23,7 +23,7 @@ public slots:
 
 private:
     EditBoxContextType context;
-    RMapMainWindow *mainWindow;
+    QDeclarativeView *mainWindow;
 };
 
 #endif // QT_KEYBOARD_DIALOG_H

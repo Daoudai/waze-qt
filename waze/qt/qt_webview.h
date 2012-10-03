@@ -10,7 +10,7 @@ class WazeWebView : public QDeclarativeView
     Q_OBJECT
 
     public:
-        explicit WazeWebView(RMapMainWindow *parent = 0);
+        explicit WazeWebView(QDeclarativeView *parent = 0);
         void show(QUrl url, int flags);
         void hide();
 
@@ -19,7 +19,7 @@ class WazeWebView : public QDeclarativeView
     public slots:
 
     private:
-        RMapMainWindow *mainWindow;
+        QDeclarativeView *mainWindow;
     };
 
 #endif // QT_WEBVIEW_H

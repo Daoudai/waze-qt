@@ -34,6 +34,7 @@ extern "C" {
 }
 
 #include <QImage>
+#include <QGraphicsScene>
 #include <QFile>
 #include "qt_canvas.h"
 
@@ -226,7 +227,8 @@ void roadmap_canvas_save_screenshot (const char* filename) {
    QPixmap pixmap;
    QString name (filename);
 
-   pixmap = QPixmap::grabWidget (roadMapCanvas);
+   QPainter painter(&pixmap);
+   roadMapCanvas->scene()->render(&painter);
    pixmap.save (name, "PNG");
 }
 

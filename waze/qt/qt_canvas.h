@@ -24,7 +24,7 @@
 #ifndef INCLUDE__ROADMAP_QT_CANVAS__H
 #define INCLUDE__ROADMAP_QT_CANVAS__H
 
-#include <QWidget>
+#include <QDeclarativeItem>
 #include <QPen>
 #include <QMap>
 #include <QPixmap>
@@ -54,13 +54,15 @@ extern "C" {
    };
 };
 
-class RMapCanvas : public QWidget {
+class RMapCanvas : public QDeclarativeItem {
 
 Q_OBJECT
 
 public:
-   RMapCanvas(QWidget* parent);
+   explicit RMapCanvas( QDeclarativeItem* parent = 0 );
    virtual ~RMapCanvas();
+
+   void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
    RoadMapPen createPen(const char* name);
    void selectPen(RoadMapPen);
@@ -103,6 +105,7 @@ public:
    int getWidth();
    void refresh(void);
 
+public slots:
    void configure();
 
 protected:
@@ -129,7 +132,6 @@ protected:
    virtual void mouseMoveEvent(QMouseEvent*);
    virtual void wheelEvent(QWheelEvent*);
    virtual void resizeEvent(QResizeEvent*);
-   virtual void paintEvent(QPaintEvent*);
 private:
     bool gestureEvent(QGestureEvent *event);
     void pinchTriggered(QPinchGesture*);

@@ -38,7 +38,7 @@ extern "C" {
 #include "roadmap_lang.h"
 }
 
-extern RMapMainWindow* mainWindow;
+extern QDeclarativeView* mainWindow;
 
 KeyboardDialog *keyboard = NULL;
 

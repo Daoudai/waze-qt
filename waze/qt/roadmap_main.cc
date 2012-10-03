@@ -37,7 +37,7 @@
 
 #include <sstream>
 #include <QApplication>
-#include <QGraphicsScene>
+#include <QtDeclarative>
 #include <QList>
 #include "qt_main.h"
 #include "roadmap_qtbrowser.h"
@@ -72,7 +72,7 @@ static void roadmap_start_event (int event);
 static QApplication* app;
 
 QGraphicsScene* scene = NULL;
-RMapMainWindow* mainWindow;
+QDeclarativeView* mainWindow;
 RContactsView* contactsView;
 RMapTimers* timers;
 QList<RoadMapIO*> ioList;
@@ -145,11 +145,6 @@ RoadMapIO *roadmap_main_output_timedout(time_t timeout)
 }
 
 void roadmap_main_new(const char* title, int width, int height) {
-
-    scene = new QGraphicsScene;
-
-    mainWindow = new RMapMainWindow(scene);
-    mainWindow->showFullScreen();
 
     editor_main_set(1);
 }
@@ -233,7 +228,11 @@ void roadmap_main_add_status(void) {
 
 void roadmap_main_show(void) {
    if (mainWindow) {
-      mainWindow->showFullScreen();
+       if (mainWindow->isFullScreen()) {
+          mainWindow->showNormal();
+       } else {
+         mainWindow->showFullScreen();
+       }
    }
 }
 
@@ -273,7 +272,7 @@ void roadmap_main_remove_idle_function (void) {
 }
 
 void roadmap_main_toggle_full_screen (void) {
-  mainWindow->toggleFullScreen();
+  mainWindow->showFullScreen();
 }
 
 
@@ -443,7 +442,12 @@ void roadmap_main_show_contacts() {
     }
 
     contactsView->show();
-    mainWindow->mouseAreaPressed();
+    RCommonApp::instance()->mouseAreaPressed();
+}
+
+void roadmap_main_start()
+{
+
 }
 
 int main(int argc, char* argv[]) {
@@ -456,9 +460,19 @@ int main(int argc, char* argv[]) {
    QCoreApplication::setOrganizationName("Waze");
    QCoreApplication::setApplicationName("Waze");
 
+   qmlRegisterType<RMapCanvas>("org.waze", 1, 0, "WazeMap");
+
+   mainWindow = new QDeclarativeView(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../qml/MainView.qml")));
+   mainWindow->setAttribute(Qt::WA_TranslucentBackground);
+   mainWindow->setResizeMode(QDeclarativeView::SizeRootObjectToView);
+   mainWindow->showFullScreen();
+
+   QObject *item = dynamic_cast<QObject*>(mainWindow->rootObject());
+   QObject::connect(item, SIGNAL(invokeAction(QString)), appUtil, SLOT(invokeAction(QString)));
+
    contactsView = NULL;
 
-   roadmap_option (argc, argv, NULL);
+   roadmap_option (app->argc(), app->argv(), NULL);
 
    roadmap_start_subscribe ( roadmap_start_event );
 
@@ -466,7 +480,7 @@ int main(int argc, char* argv[]) {
 
    roadmap_main_signals_init();
 
-   roadmap_start(argc, argv);
+   roadmap_start(app->argc(), app->argv());
 
    return app->exec();
 }

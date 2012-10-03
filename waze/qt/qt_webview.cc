@@ -6,7 +6,7 @@
 #include <QObject>
 #include <QApplication>
 
-WazeWebView::WazeWebView(RMapMainWindow *parent) :
+WazeWebView::WazeWebView(QDeclarativeView *parent) :
     QDeclarativeView(parent), mainWindow(parent)
 {
     setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../qml/WazeBrowser.qml")));

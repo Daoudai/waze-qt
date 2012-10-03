@@ -37,6 +37,7 @@
 #include <QTcpSocket>
 #include <errno.h>
 #include <QApplication>
+#include <QVariant>
 #include "qt_main.h"
 #include "qt_contactslistmodel.h"
 
@@ -48,6 +49,8 @@ extern "C" {
 #ifdef __WIN32
 #include <windows.h>
 #endif
+
+#include "roadmap_qtmain.h"
 }
 
 
@@ -85,51 +88,6 @@ void RMapTimerCallback::fire() {
 
 int  RMapTimerCallback::same(RoadMapCallback cb) {
    return (callback == cb);
-}
-
-// Implementation of RMapMainWindow class
-RMapMainWindow::RMapMainWindow( QGraphicsScene *scene) :
-    QGraphicsView(scene)
-{
-   canvas = new RMapCanvas(this);
-   canvas->setFocus();
-   scene->addWidget(canvas, Qt::Widget);
-   //setToolBarsMovable(FALSE);
-
-   roadmap_log(ROADMAP_INFO, "main thread id: %d ", this->thread()->currentThreadId());
-}
-
-RMapMainWindow::~RMapMainWindow() {
-
-}
-
-
-void RMapMainWindow::addCanvas(void) {
-   canvas->configure();
-   adjustSize();
-}
-
-void RMapMainWindow::mouseAreaPressed() {
-#ifdef PLAY_CLICK
-    static RoadMapSoundList list;
-
-    if (!list) {
-        list = roadmap_sound_list_create (SOUND_LIST_NO_FREE);
-        roadmap_sound_list_add (list, "click");
-    }
-
-    roadmap_sound_play_list (list);
-#endif
-}
-
-void RMapMainWindow::setFocusToCanvas() {
-    canvas->setFocus();
-}
-
-void RMapMainWindow::resizeEvent(QResizeEvent *event)
-{
-    canvas->setGeometry(0,0, width(), height());
-    event->accept();
 }
 
 // Implementation of the RMapTimers class
@@ -195,14 +153,6 @@ void RMapTimers::removeTimer(RoadMapCallback callback) {
    tcb[found] = 0;
 }
 
-void RMapMainWindow::toggleFullScreen() {
-  if (mainWindow->isFullScreen()) {
-     mainWindow->showNormal();
-  } else {
-    mainWindow->showFullScreen();
-   }
-}
-
 RCommonApp::RCommonApp() : QObject(NULL)
 {
     connect(&signalFd, SIGNAL(valueChanged(int)), this, SLOT(handleSignal(int)));
@@ -218,11 +168,38 @@ void RCommonApp::quit()
    roadmap_main_exit();
 }
 
+void RCommonApp::mouseAreaPressed() {
+#ifdef PLAY_CLICK
+    static RoadMapSoundList list;
+
+    if (!list) {
+        list = roadmap_sound_list_create (SOUND_LIST_NO_FREE);
+        roadmap_sound_list_add (list, "click");
+    }
+
+    roadmap_sound_play_list (list);
+#endif
+}
+
 RCommonApp* RCommonApp::instance()
 {
     static RCommonApp singleton;
 
     return &singleton;
+}
+
+void RCommonApp::invokeAction(QString actionName)
+{
+    const char* actionNameStr = actionName.toLatin1().constData();
+    const RoadMapAction* action = roadmap_start_find_action(actionNameStr);
+    if (action != NULL)
+    {
+        action->callback();
+    }
+    else
+    {
+        roadmap_log(ROADMAP_ERROR, "Action not found <%s>", actionNameStr);
+    }
 }
 
 void RCommonApp::signalHandler(int sig)
