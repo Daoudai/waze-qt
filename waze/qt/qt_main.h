@@ -24,11 +24,9 @@
 #ifndef INCLUDE__ROADMAP_QT_MAIN__H
 #define INCLUDE__ROADMAP_QT_MAIN__H
 
-#include <QMainWindow>
+#include <QGraphicsView>
+#include <QGraphicsScene>
 #include <QMap>
-#include <QToolBar>
-#include <QMenuBar>
-#include <QStatusBar>
 #include <QSocketNotifier>
 #include <QPushButton>
 #include <QTimer>
@@ -138,37 +136,15 @@ private:
 
 };
 
-class RMapMainWindow : public QMainWindow {
+class RMapMainWindow : public QGraphicsView {
 
 Q_OBJECT
 
 public:
-   RMapMainWindow( QWidget *parent, Qt::WFlags f);
+   RMapMainWindow( QGraphicsScene *scene);
    virtual ~RMapMainWindow();
 
-   void setKeyboardCallback(RoadMapKeyInput c);
-
-   QMenu *newMenu();
-   void freeMenu(QMenu *menu);
-
-   void addMenu(QMenu *menu, const char* label);
-   void popupMenu(QMenu *menu, int x, int y);
-
-   void addMenuItem(QMenu *menu,
-                    const char* label,
-                    const char* tip, 
-                    RoadMapCallback callback);
-
-   void addMenuSeparator(QMenu *menu);
-
-   void addToolbar(const char* orientation);
-
-   void addTool(const char* label, const char *icon, const char* tip,
-      RoadMapCallback callback);
-
-   void addToolSpace(void);
    void addCanvas(void);
-   void setStatus(const char* text);
 
    void toggleFullScreen();
 
@@ -189,14 +165,11 @@ private:
    QObservableInt signalFd;
 
 protected:
-   RoadMapKeyInput keyCallback;
-   QToolBar* toolBar;
    RMapCanvas* canvas;
 
    bool spacePressed;
 
-   virtual void keyPressEvent(QKeyEvent* event);
-   virtual void keyReleaseEvent(QKeyEvent* event);
+   virtual void resizeEvent(QResizeEvent *event);
    virtual void closeEvent(QCloseEvent* ev);
 
    QList<void*> leakingItems;

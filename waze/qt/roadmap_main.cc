@@ -37,6 +37,7 @@
 
 #include <sstream>
 #include <QApplication>
+#include <QGraphicsScene>
 #include <QList>
 #include "qt_main.h"
 #include "roadmap_qtbrowser.h"
@@ -70,6 +71,7 @@ static void roadmap_start_event (int event);
 
 static QApplication* app;
 
+QGraphicsScene* scene = NULL;
 RMapMainWindow* mainWindow;
 RContactsView* contactsView;
 RMapTimers* timers;
@@ -143,7 +145,10 @@ RoadMapIO *roadmap_main_output_timedout(time_t timeout)
 }
 
 void roadmap_main_new(const char* title, int width, int height) {
-    mainWindow = new RMapMainWindow(0,0);
+
+    scene = new QGraphicsScene;
+
+    mainWindow = new RMapMainWindow(scene);
     mainWindow->showFullScreen();
 
     editor_main_set(1);
@@ -152,38 +157,23 @@ void roadmap_main_new(const char* title, int width, int height) {
 
 void roadmap_main_set_keyboard(struct RoadMapFactoryKeyMap *bindings, RoadMapKeyInput callback) {
     /* TODO */
-   if (mainWindow) {
-          mainWindow->setKeyboardCallback(callback);
-   }
 }
 
 RoadMapMenu roadmap_main_new_menu () {
 
-   if (mainWindow) {
-       return (RoadMapMenu) mainWindow->newMenu();
-   } else {
-      return (RoadMapMenu) NULL;
-   }
 }
 
 void roadmap_main_free_menu (RoadMapMenu menu) {
 
-   if (mainWindow) {
-      mainWindow->freeMenu((QMenu *)menu);
-   }
 }
 
 void roadmap_main_popup_menu (RoadMapMenu menu,
                               int x, int y) {
-   if (mainWindow) {
-      mainWindow->popupMenu((QMenu *)menu, x, y);
-   }
+
 }
 
 void roadmap_main_add_menu(RoadMapMenu menu, const char* label) {
-   if (mainWindow) {
-      mainWindow->addMenu((QMenu *)menu, label);
-   }
+
 }
 
 void roadmap_main_add_menu_item(RoadMapMenu menu,
@@ -191,22 +181,14 @@ void roadmap_main_add_menu_item(RoadMapMenu menu,
                                 const char* tip,
                                 RoadMapCallback callback) {
 
-   if (mainWindow) {
-      mainWindow->addMenuItem((QMenu *)menu, label, tip, callback);
-   }
 }
 
 void roadmap_main_add_separator(RoadMapMenu menu) {
-   if (mainWindow) {
-      mainWindow->addMenuSeparator((QMenu *)menu);
-   }
+
 }
 
 void roadmap_main_add_toolbar (const char *orientation) {
 
-    if (mainWindow) {
-       mainWindow->addToolbar(orientation);
-    }
 }
 
 void roadmap_main_add_tool(const char* label,
@@ -214,15 +196,10 @@ void roadmap_main_add_tool(const char* label,
                            const char* tip,
                            RoadMapCallback callback) {
 
-    if (mainWindow) {
-       mainWindow->addTool(label, icon, tip, callback);
-    }
 }
 
 void roadmap_main_add_tool_space(void) {
-   if (mainWindow) {
-      mainWindow->addToolSpace();
-   }
+
 }
 
 void roadmap_main_set_cursor (int newcursor) {
@@ -294,14 +271,6 @@ void roadmap_main_remove_idle_function (void) {
       timers->removeTimer(idle_callback);
    }
 }
-
-
-void roadmap_main_set_status(const char *text) {
-   if (RoadMapMainStatus && mainWindow) {
-      mainWindow->setStatus(text);
-   }
-}
-
 
 void roadmap_main_toggle_full_screen (void) {
   mainWindow->toggleFullScreen();

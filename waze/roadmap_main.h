@@ -66,7 +66,6 @@ void roadmap_main_add_tool       (const char *label,
 void roadmap_main_add_tool_space (void);
 
 void roadmap_main_add_canvas     (void);
-void roadmap_main_add_status     (void);
 
 void roadmap_main_show (void);
 
