@@ -335,7 +335,7 @@ static int roadmap_main_signals_init()
 
   memset(&signala, 0, sizeof (struct sigaction));
 
-  signala.sa_handler = RMapMainWindow::signalHandler;
+  signala.sa_handler = RCommonApp::signalHandler;
   sigemptyset(&signala.sa_mask);
   signala.sa_flags |= SA_RESTART;
 
@@ -449,6 +449,9 @@ void roadmap_main_show_contacts() {
 int main(int argc, char* argv[]) {
 
    app = new QApplication(argc, argv);
+   RCommonApp* appUtil = RCommonApp::instance();
+
+   QObject::connect(app, SIGNAL(aboutToQuit()), appUtil, SLOT(quit()));
 
    QCoreApplication::setOrganizationName("Waze");
    QCoreApplication::setApplicationName("Waze");

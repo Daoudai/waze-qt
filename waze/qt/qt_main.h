@@ -136,6 +136,24 @@ private:
 
 };
 
+class RCommonApp : public QObject {
+    Q_OBJECT
+
+public:
+    static void signalHandler(int sig);
+    static RCommonApp* instance();
+
+public slots:
+    void quit();
+    void handleSignal(int sig);
+
+private:
+   RCommonApp();
+   ~RCommonApp();
+   QObservableInt signalFd;
+
+};
+
 class RMapMainWindow : public QGraphicsView {
 
 Q_OBJECT
@@ -148,31 +166,15 @@ public:
 
    void toggleFullScreen();
 
-   static void signalHandler(int sig);
-
    void setFocusToCanvas();
 
-   inline void addLeakingItem(void* item)
-   {
-       leakingItems.append(item);
-   }
-
 public slots:
-   void handleSignal(int sig);
    void mouseAreaPressed();
-
-private:
-   QObservableInt signalFd;
 
 protected:
    RMapCanvas* canvas;
 
-   bool spacePressed;
-
    virtual void resizeEvent(QResizeEvent *event);
-   virtual void closeEvent(QCloseEvent* ev);
-
-   QList<void*> leakingItems;
 };
 
 extern RMapMainWindow* mainWindow;
