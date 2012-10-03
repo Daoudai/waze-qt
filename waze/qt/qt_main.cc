@@ -91,23 +91,16 @@ int  RMapTimerCallback::same(RoadMapCallback cb) {
 RMapMainWindow::RMapMainWindow( QGraphicsScene *scene) :
     QGraphicsView(scene)
 {
-   spacePressed = false;
    canvas = new RMapCanvas(this);
    canvas->setFocus();
    scene->addWidget(canvas, Qt::Widget);
    //setToolBarsMovable(FALSE);
 
-   connect(&signalFd, SIGNAL(valueChanged(int)), this, SLOT(handleSignal(int)));
-
    roadmap_log(ROADMAP_INFO, "main thread id: %d ", this->thread()->currentThreadId());
 }
 
 RMapMainWindow::~RMapMainWindow() {
-    QList<void*>::iterator it = leakingItems.begin();
-    for (; it != leakingItems.end(); it++)
-    {
-        delete *it;
-    }
+
 }
 
 
@@ -137,31 +130,6 @@ void RMapMainWindow::resizeEvent(QResizeEvent *event)
 {
     canvas->setGeometry(0,0, width(), height());
     event->accept();
-}
-
-void RMapMainWindow::closeEvent(QCloseEvent* ev) {
-   roadmap_main_exit();
-   ev->accept();
-}
-
-void RMapMainWindow::signalHandler(int sig)
-{
-    mainWindow->signalFd.setValue(sig);
-}
-
-void RMapMainWindow::handleSignal(int sig)
-{
-  QString action;
-  switch (sig) {
-    case SIGTERM: action="SIGTERM"; break;
-    case SIGINT : action="SIGINT"; break;
-#ifndef __WIN32
-    case SIGHUP : action="SIGHUP"; break;
-    case SIGQUIT: action="SIGQUIT"; break;
-#endif
-  }
-  roadmap_log(ROADMAP_WARNING,"received signal %s",action.toUtf8().constData());
-  roadmap_main_exit();
 }
 
 // Implementation of the RMapTimers class
@@ -233,4 +201,46 @@ void RMapMainWindow::toggleFullScreen() {
   } else {
     mainWindow->showFullScreen();
    }
+}
+
+RCommonApp::RCommonApp() : QObject(NULL)
+{
+    connect(&signalFd, SIGNAL(valueChanged(int)), this, SLOT(handleSignal(int)));
+}
+
+RCommonApp::~RCommonApp()
+{
+    disconnect(&signalFd, SIGNAL(valueChanged(int)), this, SLOT(handleSignal(int)));
+}
+
+void RCommonApp::quit()
+{
+   roadmap_main_exit();
+}
+
+RCommonApp* RCommonApp::instance()
+{
+    static RCommonApp singleton;
+
+    return &singleton;
+}
+
+void RCommonApp::signalHandler(int sig)
+{
+    instance()->signalFd.setValue(sig);
+}
+
+void RCommonApp::handleSignal(int sig)
+{
+  QString action;
+  switch (sig) {
+    case SIGTERM: action="SIGTERM"; break;
+    case SIGINT : action="SIGINT"; break;
+#ifndef __WIN32
+    case SIGHUP : action="SIGHUP"; break;
+    case SIGQUIT: action="SIGQUIT"; break;
+#endif
+  }
+  roadmap_log(ROADMAP_WARNING,"received signal %s",action.toUtf8().constData());
+  roadmap_main_exit();
 }
