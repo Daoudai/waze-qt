@@ -61,11 +61,15 @@ class RMapCanvas : public QDeclarativeItem {
 
 Q_OBJECT
 
+    Q_PROPERTY(bool isDialogActive READ isDialogActive NOTIFY isDialogActiveChanged)
+
 public:
    explicit RMapCanvas( QDeclarativeItem* parent = 0 );
    virtual ~RMapCanvas();
 
    void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+
+   bool isDialogActive();
 
    RoadMapPen createPen(const char* name);
    void selectPen(RoadMapPen);
@@ -111,8 +115,13 @@ public:
 public slots:
    void configure();
 
+signals:
+   void clicked();
+   void isDialogActiveChanged(bool isActiveDialog);
+
 protected:
    QColor translateColor(const char* color);
+   void verifyActiveDialog();
    bool event(QEvent *event);
 
    QMap<QString, QColor*> colors;
@@ -125,6 +134,8 @@ protected:
    RoadMapCanvasMouseHandler buttonReleasedHandler;
    RoadMapCanvasMouseHandler mouseMoveHandler;
    RoadMapCanvasMouseHandler mouseWheelHandler;
+
+   bool _isDialogActive;
 
 
    void initColors();
