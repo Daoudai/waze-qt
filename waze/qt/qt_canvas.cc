@@ -28,8 +28,8 @@
 
 #include <QPolygon>
 #include <QPainter>
-#include <QMouseEvent>
-#include <QWheelEvent>
+#include <QGraphicsSceneMouseEvent>
+#include <QGraphicsSceneWheelEvent>
 #include "qt_canvas.h"
 #include <QDebug>
 #include <QGestureEvent>
@@ -53,6 +53,7 @@ RoadMapCanvasConfigureHandler chandler = 0;
 // Implementation of RMapCanvas class
 RMapCanvas::RMapCanvas( QDeclarativeItem* parent ) {
     setFlag(QGraphicsItem::ItemHasNoContents, false);
+    setAcceptedMouseButtons(Qt::LeftButton);
     pixmap = new QPixmap(width(), height());
     ignoreClicks = false;
     currentPen = 0;
@@ -231,7 +232,8 @@ void RMapCanvas::setFontBold(int italic) {
 }
 
 void RMapCanvas::clearArea(const RoadMapGuiRect *rect) {
-    if (pixmap) {
+/*
+    if (false) {
         QRect visualRectangle(rect->minx, rect->miny, rect->maxx - rect->minx, rect->maxy - rect->miny);
         QPainter p(pixmap);
         p.setBackgroundMode(Qt::OpaqueMode);
@@ -239,6 +241,7 @@ void RMapCanvas::clearArea(const RoadMapGuiRect *rect) {
         p.setBrush(QBrush(currentPen->pen->color()));
         p.drawRect(visualRectangle);
     }
+*/
 }
 
 void RMapCanvas::erase() {
@@ -457,7 +460,7 @@ void RMapCanvas::refresh(void) {
    update();
 }
 
-void RMapCanvas::mousePressEvent(QMouseEvent* ev) {
+void RMapCanvas::mousePressEvent(QGraphicsSceneMouseEvent* ev) {
 
    int button;
    RoadMapGuiPoint pt;
@@ -468,15 +471,15 @@ void RMapCanvas::mousePressEvent(QMouseEvent* ev) {
       case Qt::RightButton: button = 3; break;
       default:          button = 0; break;
    }
-   pt.x = ev->x();
-   pt.y = ev->y();
+   pt.x = ev->pos().x();
+   pt.y = ev->pos().y();
 
    if (buttonPressedHandler != 0 && !ignoreClicks) {
       buttonPressedHandler(&pt);
    }
 }
 
-void RMapCanvas::mouseReleaseEvent(QMouseEvent* ev) {
+void RMapCanvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* ev) {
 
    int button;
    RoadMapGuiPoint pt;
@@ -487,34 +490,34 @@ void RMapCanvas::mouseReleaseEvent(QMouseEvent* ev) {
       case Qt::RightButton: button = 3; break;
       default:          button = 0; break;
    }
-   pt.x = ev->x();
-   pt.y = ev->y();
+   pt.x = ev->pos().x();
+   pt.y = ev->pos().y();
 
    if (buttonReleasedHandler != 0) {
       buttonReleasedHandler(&pt);
    }
 }
 
-void RMapCanvas::mouseMoveEvent(QMouseEvent* ev) {
+void RMapCanvas::mouseMoveEvent(QGraphicsSceneMouseEvent* ev) {
 
    RoadMapGuiPoint pt;
 
-   pt.x = ev->x();
-   pt.y = ev->y();
+   pt.x = ev->pos().x();
+   pt.y = ev->pos().y();
 
    if (mouseMoveHandler != 0) {
       mouseMoveHandler(&pt);
    }
 }
 
-void RMapCanvas::wheelEvent (QWheelEvent* ev) {
+void RMapCanvas::wheelEvent (QGraphicsSceneWheelEvent *ev) {
 
    int direction;
 
    RoadMapGuiPoint pt;
 
-   pt.x = ev->x();
-   pt.y = ev->y();
+   pt.x = ev->pos().x();
+   pt.y = ev->pos().y();
 
    direction = ev->delta();
    direction = (direction > 0) ? 1 : ((direction < 0) ? -1 : 0);
@@ -524,7 +527,7 @@ void RMapCanvas::wheelEvent (QWheelEvent* ev) {
    }
 }
 
-void RMapCanvas::resizeEvent(QResizeEvent* ev) {
+void RMapCanvas::resizeEvent(QGraphicsSceneResizeEvent *ev) {
    configure();
 }
 

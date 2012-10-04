@@ -25,6 +25,9 @@
 #define INCLUDE__ROADMAP_QT_CANVAS__H
 
 #include <QDeclarativeItem>
+#include <QGraphicsSceneMouseEvent>
+#include <QGraphicsSceneWheelEvent>
+#include <QGraphicsSceneResizeEvent>
 #include <QPen>
 #include <QMap>
 #include <QPixmap>
@@ -127,11 +130,11 @@ protected:
    void initColors();
 
    QColor getColor(const char* color);
-   virtual void mousePressEvent(QMouseEvent*);
-   virtual void mouseReleaseEvent(QMouseEvent*);
-   virtual void mouseMoveEvent(QMouseEvent*);
-   virtual void wheelEvent(QWheelEvent*);
-   virtual void resizeEvent(QResizeEvent*);
+   virtual void mousePressEvent(QGraphicsSceneMouseEvent*);
+   virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent*);
+   virtual void mouseMoveEvent(QGraphicsSceneMouseEvent*);
+   virtual void wheelEvent(QGraphicsSceneWheelEvent*);
+   virtual void resizeEvent(QGraphicsSceneResizeEvent*);
 private:
     bool gestureEvent(QGestureEvent *event);
     void pinchTriggered(QPinchGesture*);
