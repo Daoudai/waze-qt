@@ -51,7 +51,9 @@ RoadMapCanvasMouseHandler whandler = 0;
 RoadMapCanvasConfigureHandler chandler = 0;
 
 // Implementation of RMapCanvas class
-RMapCanvas::RMapCanvas( QDeclarativeItem* parent ) {
+RMapCanvas::RMapCanvas( QDeclarativeItem* parent )
+    : QDeclarativeItem(parent), _isDialogActive(false) {
+
     setFlag(QGraphicsItem::ItemHasNoContents, false);
     setAcceptedMouseButtons(Qt::LeftButton);
     pixmap = new QPixmap(width(), height());
@@ -82,6 +84,11 @@ RMapCanvas::~RMapCanvas() {
    }
 
    // TODO: delete pens
+}
+
+bool RMapCanvas::isDialogActive()
+{
+    return _isDialogActive;
 }
 
 bool RMapCanvas::event(QEvent *event)
@@ -231,9 +238,20 @@ void RMapCanvas::setFontBold(int italic) {
   }
 }
 
+void RMapCanvas::verifyActiveDialog()
+{
+    bool isCurrentActiveDialog = roadmap_screen_is_any_dlg_active();
+    if (_isDialogActive != isCurrentActiveDialog)
+    {
+        _isDialogActive = isCurrentActiveDialog;
+        emit isDialogActiveChanged(_isDialogActive);
+    }
+}
+
 void RMapCanvas::clearArea(const RoadMapGuiRect *rect) {
-/*
-    if (false) {
+    if (pixmap) {
+        verifyActiveDialog();
+
         QRect visualRectangle(rect->minx, rect->miny, rect->maxx - rect->minx, rect->maxy - rect->miny);
         QPainter p(pixmap);
         p.setBackgroundMode(Qt::OpaqueMode);
@@ -241,11 +259,12 @@ void RMapCanvas::clearArea(const RoadMapGuiRect *rect) {
         p.setBrush(QBrush(currentPen->pen->color()));
         p.drawRect(visualRectangle);
     }
-*/
 }
 
 void RMapCanvas::erase() {
    if (pixmap) {
+      verifyActiveDialog();
+
       pixmap->fill(QColor(currentPen->pen->color().rgb()));
    }
 }
@@ -477,6 +496,8 @@ void RMapCanvas::mousePressEvent(QGraphicsSceneMouseEvent* ev) {
    if (buttonPressedHandler != 0 && !ignoreClicks) {
       buttonPressedHandler(&pt);
    }
+
+   emit clicked();
 }
 
 void RMapCanvas::mouseReleaseEvent(QGraphicsSceneMouseEvent* ev) {
