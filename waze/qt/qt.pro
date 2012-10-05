@@ -12,7 +12,7 @@ CONFIG += staticlib mobility
 
 MOBILITY = location systeminfo multimedia contacts
 
-DEFINES += TOUCH_SCREEN SSD QTMOBILITY FREEMAP_IL PLAY_CLICK LOCALE_SAFE PORT_RELEASE=\'\"v0.0.9-29\"\'
+DEFINES += TOUCH_SCREEN SSD QTMOBILITY FREEMAP_IL PLAY_CLICK LOCALE_SAFE PORT_RELEASE=\'\"v0.0.9-30\"\'
 
 INCLUDEPATH += \
     .. \
@@ -56,7 +56,9 @@ SOURCES += \
     qt/RealtimeNet.cc \
     qt/qt_webaccessor.cc \
     qt/roadmap_httpcopy_async.cc \
-    qt/qt_wazesocket.cpp
+    qt/qt_wazesocket.cpp \
+    qt/roadmap_speedometer.cc \
+    qt/qt_datamodels.cc
 
 HEADERS += \
     qt_progress.h \
@@ -77,7 +79,8 @@ HEADERS += \
     qt/qt_contacts.h \
     qt/qt_device.h \
     qt/qt_webaccessor.h \
-    qt/qt_wazesocket.h
+    qt/qt_wazesocket.h \
+    qt/qt_datamodels.h
 
 
 

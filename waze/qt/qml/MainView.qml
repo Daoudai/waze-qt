@@ -159,4 +159,16 @@ Item {
         onButtonPressed: mainView.invokeAction("search_menu")
     }
 
+    Button {
+        id: speedometer
+        width: 220
+        height: 70
+        visible: speedometerData.isVisible && !wazeCanvas.isDialogActive
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 10
+        text: speedometerData.text
+    }
+
 }

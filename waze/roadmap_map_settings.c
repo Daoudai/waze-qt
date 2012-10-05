@@ -39,6 +39,7 @@
 #include "roadmap_map_download.h"
 #include "Realtime/RealtimeAlerts.h"
 #include "Realtime/RealtimeBonus.h"
+#include "roadmap_speedometer.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -53,6 +54,7 @@ static const char *yesno[2];
 static void on_close_dialog (int exit_code, void* context);
 static int on_ok( SsdWidget this, const char *new_value);
 static void addShowAlertsToMenu(SsdWidget container);
+static void speedometerVisibilityChanged();
 #ifndef TOUCH_SCREEN
    static int on_ok_softkey(SsdWidget this, const char *new_value, void *context);
 #endif
@@ -140,7 +142,7 @@ void roadmap_map_settings_init(void){
          ("user", &RoadMapConfigShowSpeedCams, NULL, "yes", "no", NULL);
 
       roadmap_config_declare_enumeration
-         ("user", &RoadMapConfigShowSpeedometer, NULL, "yes", "no", NULL);
+         ("user", &RoadMapConfigShowSpeedometer, speedometerVisibilityChanged, "yes", "no", NULL);
 
       roadmap_config_declare_enumeration
          ("preferences", &RoadMapConfigEnableToggleConstruction, NULL, "yes", "no", NULL);
@@ -697,3 +699,14 @@ void roadmap_map_settings_alert_string(char *outAlertString[]){
    }
 }
 
+void speedometerVisibilityChanged()
+{
+    if (roadmap_map_settings_isShowSpeedometer())
+    {
+        roadmap_speedometer_show();
+    }
+    else
+    {
+        roadmap_speedometer_hide();
+    }
+}
