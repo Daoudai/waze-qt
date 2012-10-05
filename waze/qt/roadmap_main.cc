@@ -43,6 +43,7 @@
 #include "roadmap_qtbrowser.h"
 #include "qt_network.h"
 #include "qt_contacts.h"
+#include "qt_datamodels.h"
 
 extern "C" {
 #include "roadmap.h"
@@ -461,6 +462,8 @@ int main(int argc, char* argv[]) {
    QCoreApplication::setApplicationName("Waze");
 
    qmlRegisterType<RMapCanvas>("org.waze", 1, 0, "WazeMap");
+   qmlRegisterType<Translator>("org.waze", 1, 0, "Translator");
+   qmlRegisterType<WazeImageProvider>("org.waze", 1, 0, "WazeImageProvider");
 
    mainWindow = new QDeclarativeView(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../qml/MainView.qml")));
    mainWindow->setAttribute(Qt::WA_TranslucentBackground);

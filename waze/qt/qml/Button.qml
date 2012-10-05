@@ -3,7 +3,8 @@ import QtQuick 1.0
 Rectangle {
     id: button
     height: buttonText.height
-    property string text: "text"
+    property string text: ""
+    property bool needTranslation: true
 
     signal buttonPressed
 
@@ -31,7 +32,7 @@ Rectangle {
     Text {
         id: buttonText
         color: "#ffffff"
-        text: button.text
+        text: needTranslation? translator.translate(button.text) : button.text
         font.bold: true
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
