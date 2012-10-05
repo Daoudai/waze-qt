@@ -445,9 +445,9 @@ void roadmap_main_show_contacts() {
     RCommonApp::instance()->mouseAreaPressed();
 }
 
-void roadmap_main_start()
+void roadmap_main_set_qml_context_property(const char* name, QObject* value)
 {
-
+    mainWindow->rootContext()->setContextProperty(QString::fromAscii(name), value);
 }
 
 int main(int argc, char* argv[]) {

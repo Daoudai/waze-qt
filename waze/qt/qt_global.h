@@ -2,6 +2,9 @@
 #define QT_GLOBAL_H
 
 #include <QByteArray>
+#include <QVariant>
+
+void roadmap_main_set_qml_context_property(const char* name, QObject* value);
 
 class WazeString {
 public:

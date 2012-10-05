@@ -74,7 +74,6 @@ SOURCES += \
     roadmap_square.c \
     roadmap_sprite.c \
     roadmap_splash.c \
-    roadmap_speedometer.c \
     roadmap_softkeys.c \
     roadmap_social.c \
     roadmap_skin.c \
