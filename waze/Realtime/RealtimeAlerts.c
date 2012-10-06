@@ -99,6 +99,10 @@
 #include "iphone/roadmap_list_menu.h"
 #endif //IPHONE
 
+#ifdef QTMOBILITY
+#include "roadmap_alert.h"
+#endif
+
 static RTAlerts gAlertsTable;
 static int gIterator;
 static int gIdleScrolling;
@@ -903,6 +907,10 @@ BOOL RTAlerts_Add(RTAlert *pAlert)
       gAlertsTable.iArchiveCount++;
 
     gAlertsTable.iCount++;
+
+#ifdef QTMOBILITY
+    RTAlerts_count_changed();
+#endif
 
     OnAlertAdd(gAlertsTable.alert[gAlertsTable.iCount-1]);
 
