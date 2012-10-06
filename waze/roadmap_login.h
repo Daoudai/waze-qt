@@ -70,7 +70,7 @@ enum {
    login_referrer_media,
    login_referrer_adv,
    login_referrer_count
-} login_referrer_types;
+};
 
 void roadmap_login_initialize();
 

@@ -267,6 +267,9 @@ void roadmap_mood_set(const char *value){
    roadmap_config_set (&MoodCfg, value);
    roadmap_config_save(1);
    gState = roadmap_mood_from_string(value);
+#ifdef QTMOBILITY
+    roadmap_mood_changed(gState);
+#endif
    OnMoodChanged();
 }
 

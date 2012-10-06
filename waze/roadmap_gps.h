@@ -148,6 +148,9 @@ void roadmap_gps_raw (time_t tm, int longitude, int latitude,
 
 void roadmap_gps_shutdown (void);
 int roadmap_gps_reception_state (void);
+#ifdef QTMOBILITY
+void roadmap_gps_state_changed(int state);
+#endif
 void roadmap_gps_detect_receiver (void);
 void roadmap_gps_csv_tracker_initialize(void);
 void roadmap_gps_csv_tracker_set_enable( BOOL value );

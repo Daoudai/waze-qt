@@ -88,5 +88,49 @@ private:
     QString _count;
 };
 
+class WazeMoods : public QObject
+{
+    Q_OBJECT
+
+    Q_PROPERTY(int mood READ mood NOTIFY moodChanged)
+public:
+    static WazeMoods* instance();
+    int mood();
+    void setMood(int mood);
+
+signals:
+    void moodChanged();
+
+private:
+    explicit WazeMoods(QObject *parent = 0);
+    WazeMoods& operator =(WazeMoods&);
+
+    int _mood;
+};
+
+class WazeMonitor : public QObject
+{
+    Q_OBJECT
+
+    Q_PROPERTY(int gpsState READ gpsState NOTIFY gpsStateChanged)
+    Q_PROPERTY(int netState READ netState NOTIFY netStateChanged)
+public:
+    static WazeMonitor* instance();
+    int gpsState();
+    void setGpsState(int gpsState);
+    int netState();
+    void setNetState(int netState);
+
+signals:
+    void gpsStateChanged();
+    void netStateChanged();
+
+private:
+    explicit WazeMonitor(QObject *parent = 0);
+    WazeMonitor& operator =(WazeMonitor&);
+
+    int _gpsState;
+    int _netState;
+};
 
 #endif // QT_DATAMODELS_H

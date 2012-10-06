@@ -4065,15 +4065,26 @@ void OnDeviceEvent( device_event event, void* context)
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+static int gNetworkState;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 int RealTimeLoginState(void){
-   if (gs_CI.bLoggedIn && (!is_network_error(gs_CI.LastError)) && (!is_realtime_error(gs_CI.LastError))&&
-      (websvc_trans_getLastNetConnectRes()==LastNetConnect_Success))
-      return 1;
-   else
-      return 0;
+    int new_state = 0;
+    if (gs_CI.bLoggedIn && (!is_network_error(gs_CI.LastError)) && (!is_realtime_error(gs_CI.LastError))&&
+        (websvc_trans_getLastNetConnectRes()==LastNetConnect_Success))
+    {
+        new_state = 1;
+    }
 
+    if (gNetworkState != new_state)
+    {
+        gNetworkState = new_state;
+#ifdef QTMOBILITY
+        Realtime_login_state_changed(gNetworkState);
+#endif
+    }
+
+    return gNetworkState;
 }
 
 BOOL Realtime_IsLoggedIn( void )
