@@ -294,6 +294,10 @@ static void roadmap_gps_update_reception (void) {
 
     	 roadmap_state_refresh ();
       }
+
+#ifdef QTMOBILITY
+      roadmap_gps_state_changed(new_state);
+#endif
    }
 }
 

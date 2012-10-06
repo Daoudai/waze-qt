@@ -7,7 +7,9 @@
 extern "C" {
 #include "roadmap_lang.h"
 #include "roadmap_path.h"
+#include "Realtime/Realtime.h"
 #include "Realtime/RealtimeAlerts.h"
+#include "roadmap_mood.h"
 }
 
 void qt_datamodels_register()
@@ -16,6 +18,8 @@ void qt_datamodels_register()
     roadmap_main_set_qml_context_property("__translator", Translator::instance());
     roadmap_main_set_qml_context_property("__imageProvider", WazeImageProvider::instance());
     roadmap_main_set_qml_context_property("__alerts", WazeAlerts::instance());
+    roadmap_main_set_qml_context_property("__moods", WazeMoods::instance());
+    roadmap_main_set_qml_context_property("__monitor", WazeMonitor::instance());
 }
 
 SpeedometerData::SpeedometerData(QObject* parent) : QObject(parent) {}
@@ -139,3 +143,74 @@ void WazeAlerts::setAlertsCount(QString count)
     _count = count;
     emit alertsCountChanged();
 }
+
+void roadmap_mood_changed(int state)
+{
+    WazeMoods::instance()->setMood(state);
+}
+
+WazeMoods::WazeMoods(QObject *parent) : QObject(parent)
+{
+
+}
+
+WazeMoods* WazeMoods::instance()
+{
+    static WazeMoods moods;
+    return &moods;
+}
+
+int WazeMoods::mood()
+{
+    return _mood;
+}
+
+void WazeMoods::setMood(int mood)
+{
+    _mood = mood;
+    emit moodChanged();
+}
+
+void roadmap_gps_state_changed(int state)
+{
+    WazeMonitor::instance()->setGpsState(state);
+}
+
+void Realtime_login_state_changed(int state)
+{
+    WazeMonitor::instance()->setNetState(state);
+}
+
+WazeMonitor::WazeMonitor(QObject *parent) : QObject(parent)
+{
+
+}
+
+WazeMonitor* WazeMonitor::instance()
+{
+    static WazeMonitor monitor;
+    return &monitor;
+}
+
+int WazeMonitor::gpsState()
+{
+    return _gpsState;
+}
+
+void WazeMonitor::setGpsState(int gpsState)
+{
+    _gpsState = gpsState;
+    emit gpsStateChanged();
+}
+
+int WazeMonitor::netState()
+{
+    return _netState;
+}
+
+void WazeMonitor::setNetState(int netState)
+{
+    _netState = netState;
+    emit netStateChanged();
+}
+
