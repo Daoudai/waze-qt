@@ -29,7 +29,7 @@ Rectangle {
     Text {
         id: descriptionText
         color: "#ffffff"
-        text: needTranslation? translator.translate(description) : description
+        text: needTranslation? t+wTr(description) : description
         font.bold: false
         wrapMode: Text.WordWrap
         anchors.right: parent.right
@@ -46,7 +46,7 @@ Rectangle {
     Text {
         id: valueText
         color: "#ffffff"
-        text: needTranslation? translator.translate(value) : value
+        text: needTranslation? t+wTr(value) : value
         font.bold: true
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter

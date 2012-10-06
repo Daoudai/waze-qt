@@ -43,8 +43,12 @@ public:
     Q_INVOKABLE QString translate(QString text);
 
     bool isRTL();
+    void reloadInvoked();
 
     static Translator* instance();
+
+signals:
+    void translationsReloaded();
 
 private:
     explicit Translator(QObject* parent = 0);

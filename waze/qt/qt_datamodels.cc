@@ -12,10 +12,10 @@ extern "C" {
 
 void qt_datamodels_register()
 {
-    roadmap_main_set_qml_context_property("speedometerData", SpeedometerData::instance());
-    roadmap_main_set_qml_context_property("translator", Translator::instance());
-    roadmap_main_set_qml_context_property("imageProvider", WazeImageProvider::instance());
-    roadmap_main_set_qml_context_property("alerts", WazeAlerts::instance());
+    roadmap_main_set_qml_context_property("__speedometerData", SpeedometerData::instance());
+    roadmap_main_set_qml_context_property("__translator", Translator::instance());
+    roadmap_main_set_qml_context_property("__imageProvider", WazeImageProvider::instance());
+    roadmap_main_set_qml_context_property("__alerts", WazeAlerts::instance());
 }
 
 SpeedometerData::SpeedometerData(QObject* parent) : QObject(parent) {}
@@ -44,6 +44,11 @@ void SpeedometerData::setText(QString text) {
     emit textChanged();
 }
 
+void roadmap_lang_loaded()
+{
+    Translator::instance()->reloadInvoked();
+}
+
 Translator::Translator(QObject *parent) :
     QObject(parent)
 {
@@ -55,6 +60,12 @@ Translator* Translator::instance()
     static Translator translator;
     return &translator;
 }
+
+void Translator::reloadInvoked()
+{
+    emit translationsReloaded();
+}
+
 
 QString Translator::translate(QString text)
 {

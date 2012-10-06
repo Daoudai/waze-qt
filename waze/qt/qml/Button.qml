@@ -32,7 +32,7 @@ Rectangle {
     Text {
         id: buttonText
         color: "#ffffff"
-        text: needTranslation? translator.translate(button.text) : button.text
+        text: needTranslation? t+wTr(button.text) : button.text
         font.bold: true
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
