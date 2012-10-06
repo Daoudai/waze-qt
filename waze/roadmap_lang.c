@@ -43,7 +43,6 @@
 #include "websvc_trans/web_date_format.h"
 #include "roadmap_canvas.h"
 
-
 #define INITIAL_ITEMS_SIZE 50
 #define MAX_LANGUAGES 100
 const char *lang_labels[MAX_LANGUAGES];
@@ -288,6 +287,10 @@ void roadmap_lang_reload(void){
    }
 
    RoadMapLangRTL = (strcasecmp(roadmap_lang_get ("RTL"), "Yes") == 0);
+
+#ifdef QTMOBILITY
+   roadmap_lang_loaded();
+#endif
 }
 
 
@@ -454,6 +457,11 @@ void roadmap_lang_initialize (void) {
       RoadMapLangLoaded = roadmap_lang_load (p);
    }
    RoadMapLangRTL = (strcasecmp(roadmap_lang_get ("RTL"), "Yes") == 0);
+
+#ifdef QTMOBILITY
+   roadmap_lang_loaded();
+#endif
+
 }
 
 

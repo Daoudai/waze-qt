@@ -8,6 +8,22 @@ Item {
 
     signal invokeAction(string action)
 
+    ///////////////// Translations related ///////////////
+    property bool isRTL: typeof(__translator) === 'undefined'? false : __translator.isRTL
+    property string t: ""
+    function wTr(text) {
+        if (typeof(__translator) === 'undefined') return text;
+
+        return __translator.translate(text);
+    }
+    Connections {
+        target: __translator
+        onTranslationsReloaded: {
+            mainView.tChanged();
+        }
+    }
+    ////////////// End Of Translations related ///////////
+
     Component.onCompleted: {
         sidebar_visibility_timer.start();
     }
@@ -22,6 +38,32 @@ Item {
             sidebar_visibility_timer.start();
         }
     }
+
+    ////////////// Context data binding wrappers ////////////
+    Item {
+        id: imageProvider
+
+        function getImage(imageName)
+        {
+            if (typeof(__imageProvider) === 'undefined') return "";
+
+            return __imageProvider.getImage(imageName);
+        }
+    }
+
+    Item {
+        id: speedometerData
+
+        property bool isVisible : (typeof(__speedometerData) === 'undefined')? false : __speedometerData.isVisible
+        property string text : (typeof(__speedometerData) === 'undefined')? "" : __speedometerData.text
+    }
+
+    Item {
+        id: alerts
+
+        property string alertsCount : (typeof(__alerts) === 'undefined')? "" : __alerts.alertsCount
+    }
+    ////////////// End of Context data binding wrappers //////////////
 
     Timer {
         id: sidebar_visibility_timer
@@ -164,6 +206,7 @@ Item {
             height: 70
             icon: "me_on_map_wide"
             pressedIcon: "me_on_map2_wide"
+            text: "Me_on_map"
             fitImage: false
 
             visible: !wazeCanvas.isDialogActive
@@ -177,6 +220,7 @@ Item {
             height: 70
             icon: "Search_wide"
             pressedIcon: "Search2_wide"
+            text: "Drive_to"
             fitImage: false
 
             visible: !wazeCanvas.isDialogActive
@@ -189,7 +233,8 @@ Item {
             width: 140
             height: 70
             icon: "Live_event_wide"
-            pressedIcon: " Live_event2_wide"
+            pressedIcon: "Live_event2_wide"
+            text: "Events"
             fitImage: false
 
             visible: !wazeCanvas.isDialogActive
@@ -203,8 +248,8 @@ Item {
                 height: parent.height / 2 - 5
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 5
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.horizontalCenterOffset: 30
+                anchors.right: parent.right
+                anchors.rightMargin: 10
                 radius: height / 2
                 visible: typeof(alertsCountText.text) !== 'undefined' && alertsCountText.text !== ""
 
@@ -227,6 +272,7 @@ Item {
             height: 70
             icon: "Report_wide"
             pressedIcon: "Report2_wide"
+            text: "Report"
             fitImage: false
 
             visible: !wazeCanvas.isDialogActive
