@@ -294,6 +294,9 @@ void RTAlerts_Init(void);
 void RTAlerts_Term(void);
 BOOL RTAlerts_Add(RTAlert *alert);
 BOOL RTAlerts_Remove(int iID);
+#ifdef QTMOBILITY
+void RTAlerts_count_changed();
+#endif
 void RTAlerts_RefreshOnMap(void);
 int RTAlerts_Count(void);
 int RTAlerts_GroupCount(void);

@@ -39,9 +39,6 @@ extern "C" {
 #include "roadmap_math.h"
 }
 
-extern QDeclarativeView* mainWindow;
-static SpeedometerData* speedometerData;
-
 /////////////////////////////////////////////////////////////////////
 void roadmap_speedometer_set_offset(int offset_y){
 
@@ -60,12 +57,12 @@ static void roadmap_speedometer_after_refresh (void){
 
 /////////////////////////////////////////////////////////////////////
 void roadmap_speedometer_hide(void) {
-    speedometerData->setIsVisible(false);
+    SpeedometerData::instance()->setIsVisible(false);
 }
 
 /////////////////////////////////////////////////////////////////////
 void roadmap_speedometer_show(void) {
-   speedometerData->setIsVisible(true);
+   SpeedometerData::instance()->setIsVisible(true);
 }
 
 static void roadmap_speedometer_gps_updated
@@ -88,14 +85,12 @@ static void roadmap_speedometer_gps_updated
         speedStr.sprintf("%3d ac", position->accuracy);
     }
 
-    speedometerData->setText(speedStr);
+    SpeedometerData::instance()->setText(speedStr);
 
 }
 
 /////////////////////////////////////////////////////////////////////
 void roadmap_speedometer_initialize(void){
-    speedometerData = new SpeedometerData(mainWindow);
-    roadmap_main_set_qml_context_property("speedometerData", speedometerData);
     roadmap_gps_register_listener(roadmap_speedometer_gps_updated);
 
     if (roadmap_map_settings_isShowSpeedometer())

@@ -462,10 +462,11 @@ int main(int argc, char* argv[]) {
    QCoreApplication::setApplicationName("Waze");
 
    qmlRegisterType<RMapCanvas>("org.waze", 1, 0, "WazeMap");
-   qmlRegisterType<Translator>("org.waze", 1, 0, "Translator");
-   qmlRegisterType<WazeImageProvider>("org.waze", 1, 0, "WazeImageProvider");
 
    mainWindow = new QDeclarativeView(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../qml/MainView.qml")));
+
+   qt_datamodels_register();
+
    mainWindow->setAttribute(Qt::WA_TranslucentBackground);
    mainWindow->setResizeMode(QDeclarativeView::SizeRootObjectToView);
    mainWindow->showFullScreen();
