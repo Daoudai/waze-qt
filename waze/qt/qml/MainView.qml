@@ -84,6 +84,14 @@ Item {
         property int compassState : (typeof(__compass) === 'undefined')? 0 : __compass.compassState
     }
 
+    Item {
+        id: editor
+
+        property int editState : (typeof(__editor) === 'undefined')? 0 : __editor.editState
+        property int editType : (typeof(__editor) === 'undefined')? 0 : __editor.editType
+        onEditTypeChanged: console.log("Edit type changed: " + editType)
+    }
+
     ////////////// End of Context data binding wrappers //////////////
 
     Timer {
@@ -174,14 +182,28 @@ Item {
         spacing: 10
 
         IconButton {
-            id: mapEditButton
+            id: mapEditButton1
             width: 70
             height: 70
-            icon: "update_map_button"
+            icon: editor.editState === 0? "update_map_button" : "update_map_button_recording"
+            visible: editor.editType === 0
 
             onClicked: {
                 showSideToolbars();
                 mainView.invokeAction("map_updates_menu")
+            }
+        }
+
+        IconButton {
+            id: mapEditButton2
+            width: 70
+            height: 70
+            icon: editor.editState === 0? "record_new_roads" : "update_map_button_recording"
+            visible: editor.editType === 1
+
+            onClicked: {
+                showSideToolbars();
+                mainView.invokeAction("togglenewroads")
             }
         }
 

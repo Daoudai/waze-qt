@@ -158,4 +158,29 @@ private:
     int _orientation;
 };
 
+class WazeMapEditor : public QObject
+{
+    Q_OBJECT
+
+    Q_PROPERTY(int editType READ editType NOTIFY editTypeChanged)
+    Q_PROPERTY(int editState READ editState NOTIFY editStateChanged)
+public:
+    static WazeMapEditor* instance();
+    int editType();
+    void setEditType(int editType);
+    int editState();
+    void setEditState(int editState);
+
+signals:
+    void editTypeChanged();
+    void editStateChanged();
+
+private:
+    explicit WazeMapEditor(QObject *parent = 0);
+    WazeMapEditor& operator =(WazeMapEditor&);
+
+    int _editType;
+    int _editState;
+};
+
 #endif // QT_DATAMODELS_H
