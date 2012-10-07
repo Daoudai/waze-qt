@@ -68,6 +68,10 @@ void roadmap_screen_restore_view(void);
 void roadmap_screen_toggle_orientation_mode (void);
 void roadmap_screen_set_orientation_fixed (void);
 void roadmap_screen_set_orientation_dynamic (void);
+#ifdef QTMOBILITY
+void roadmap_screen_compass_state_changed (int state);
+void roadmap_screen_orientation_delta_changed(int orientationDelta);
+#endif
 void roadmap_screen_increase_horizon (void);
 void roadmap_screen_decrease_horizon (void);
 void roadmap_screen_set_horizon (int horizon);

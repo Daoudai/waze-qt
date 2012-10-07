@@ -38,7 +38,7 @@ private:
 class Translator : public QObject {
     Q_OBJECT
 
-    Q_PROPERTY(bool isRTL READ isRTL)
+    Q_PROPERTY(bool isRTL READ isRTL NOTIFY translationsReloaded)
 public:
     Q_INVOKABLE QString translate(QString text);
 
@@ -131,6 +131,31 @@ private:
 
     int _gpsState;
     int _netState;
+};
+
+class WazeCompass : public QObject
+{
+    Q_OBJECT
+
+    Q_PROPERTY(int orientation READ orientation NOTIFY orientationChanged)
+    Q_PROPERTY(int compassState READ compassState NOTIFY compassStateChanged)
+public:
+    static WazeCompass* instance();
+    int orientation();
+    void setOrientationDelta(int delta);
+    int compassState();
+    void setCompassState(int compassState);
+
+signals:
+    void orientationChanged();
+    void compassStateChanged();
+
+private:
+    explicit WazeCompass(QObject *parent = 0);
+    WazeCompass& operator =(WazeCompass&);
+
+    int _compassState;
+    int _orientation;
 };
 
 #endif // QT_DATAMODELS_H
