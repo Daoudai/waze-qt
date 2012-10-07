@@ -91,6 +91,11 @@ int editor_ignore_new_roads (void);
 int editor_track_is_new_direction_roads ();
 
 int editor_track_shortcut(void);
+int editor_new_roads_state(void);
+#ifdef QTMOBILTY
+void editor_track_shortcut_changed(void);
+void editor_track_state_changed(void);
+#endif
 
 int editor_track_draw_new_direction_roads ();
 int editor_track_is_new_road();

@@ -11,6 +11,7 @@ extern "C" {
 #include "Realtime/RealtimeAlerts.h"
 #include "roadmap_mood.h"
 #include "roadmap_math.h"
+#include "editor/track/editor_track_main.h"
 }
 
 void qt_datamodels_register()
@@ -22,6 +23,7 @@ void qt_datamodels_register()
     roadmap_main_set_qml_context_property("__moods", WazeMoods::instance());
     roadmap_main_set_qml_context_property("__monitor", WazeMonitor::instance());
     roadmap_main_set_qml_context_property("__compass", WazeCompass::instance());
+    roadmap_main_set_qml_context_property("__editor", WazeMapEditor::instance());
 }
 
 SpeedometerData::SpeedometerData(QObject* parent) : QObject(parent) {}
@@ -273,4 +275,53 @@ void WazeCompass::setOrientationDelta(int delta)
     _orientation %= 360;
     emit orientationChanged();
 }
+
+void editor_track_changed(void)
+{
+    WazeMapEditor::instance()->setEditType(editor_track_shortcut());
+}
+
+void editor_track_state_changed(void)
+{
+    WazeMapEditor::instance()->setEditState(editor_new_roads_state());
+}
+
+WazeMapEditor::WazeMapEditor(QObject *parent) : QObject(parent)
+{
+
+}
+
+WazeMapEditor* WazeMapEditor::instance()
+{
+    static WazeMapEditor editor;
+    return &editor;
+}
+
+int WazeMapEditor::editType()
+{
+    return _editType;
+}
+
+void WazeMapEditor::setEditType(int editType)
+{
+    if (editType == _editType) return;
+
+    _editType = editType;
+    emit editTypeChanged();
+}
+
+int WazeMapEditor::editState()
+{
+    return _editState;
+}
+
+void WazeMapEditor::setEditState(int editState)
+{
+    if (editState == _editState) return;
+
+    _editState = editState;
+    emit editStateChanged();
+}
+
+
 

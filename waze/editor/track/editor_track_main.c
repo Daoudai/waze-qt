@@ -897,6 +897,10 @@ void editor_track_toggle_new_roads (void) {
    UpdateToggleTimes[NumUpdateToggles++] = LastGpsUpdate;
 
    roadmap_screen_redraw ();
+
+#ifdef QTMOBILTY
+   editor_track_state_changed();
+#endif
 }
 
 int editor_track_get_num_update_toggles (void) {
@@ -919,7 +923,7 @@ void editor_track_reset_update_toggles (void) {
 	NumUpdateToggles = 0;
 }
 
-static int editor_new_roads_state(void){
+int editor_new_roads_state(void){
 #ifdef TOUCH_SCREEN
    if ((EditorAllowNewRoads) && !editor_bar_feature_enabled())
       return 1;
@@ -1155,11 +1159,15 @@ void editor_track_initialize (void) {
    roadmap_config_declare_enumeration
        ("preferences", &RoadMapConfigStartWithRoadRoller, NULL,  "Never", "Always", "Non-random", NULL);
 
+    RoadMapCallback callback = NULL;
+#ifdef QTMOBILTY
+    callback = editor_track_state_changed;
+#endif
    roadmap_config_declare_enumeration
-       ("preferences", &RoadMapConfigStartShortCuts, NULL,  "map-updates", "record", NULL);
+       ("preferences", &RoadMapConfigStartShortCuts, callback,  "map-updates", "record", NULL);
 
    roadmap_config_declare_enumeration
-      ("preferences", &RoadMapConfigEditorGrid, NULL,  "no", "yes", NULL);
+      ("preferences", &RoadMapConfigEditorGrid, callback,  "no", "yes", NULL);
 
    /*
     * Start recording if
@@ -1174,6 +1182,9 @@ void editor_track_initialize (void) {
    	    EditorAllowNewRoads =1;
    	    editor_track_set_fuzzy ();
    		editor_bar_show();
+#ifdef QTMOBILTY
+        editor_track_state_changed();
+#endif
    }
 
    TileCbNext = roadmap_tile_register_callback(on_tile_update);
