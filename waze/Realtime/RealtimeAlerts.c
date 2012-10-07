@@ -909,7 +909,7 @@ BOOL RTAlerts_Add(RTAlert *pAlert)
     gAlertsTable.iCount++;
 
 #ifdef QTMOBILITY
-    RTAlerts_count_changed();
+    RTAlerts_count_changed(RTAlerts_Count_Str());
 #endif
 
     OnAlertAdd(gAlertsTable.alert[gAlertsTable.iCount-1]);

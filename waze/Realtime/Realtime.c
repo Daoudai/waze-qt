@@ -4065,8 +4065,6 @@ void OnDeviceEvent( device_event event, void* context)
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int gNetworkState;
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 int RealTimeLoginState(void){
     int new_state = 0;
@@ -4076,15 +4074,11 @@ int RealTimeLoginState(void){
         new_state = 1;
     }
 
-    if (gNetworkState != new_state)
-    {
-        gNetworkState = new_state;
 #ifdef QTMOBILITY
-        Realtime_login_state_changed(gNetworkState);
+    Realtime_login_state_changed(new_state);
 #endif
-    }
 
-    return gNetworkState;
+    return new_state;
 }
 
 BOOL Realtime_IsLoggedIn( void )

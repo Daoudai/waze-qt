@@ -3903,6 +3903,10 @@ int roadmap_screen_refresh (void) {
 
    roadmap_log_pop ();
 
+#ifdef QTMOBILITY
+    roadmap_screen_compass_state_changed(RoadMapScreenOrientationMode);
+#endif
+
    return refresh;
 }
 
@@ -4048,9 +4052,12 @@ void roadmap_screen_rotate (int delta) {
    }
 
 	if (roadmap_math_set_orientation (calculated_rotation)) {
-      RoadMapScreenRotation = rotation;
-      roadmap_screen_update_center (&RoadMapScreenCenter);
-      roadmap_screen_repaint_fast ();
+        RoadMapScreenRotation = rotation;
+#ifdef QTMOBILITY
+        roadmap_screen_orientation_delta_changed(rotation);
+#endif
+        roadmap_screen_update_center (&RoadMapScreenCenter);
+        roadmap_screen_repaint_fast ();
    }
 }
 

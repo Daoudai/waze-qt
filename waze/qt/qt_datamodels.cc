@@ -10,6 +10,7 @@ extern "C" {
 #include "Realtime/Realtime.h"
 #include "Realtime/RealtimeAlerts.h"
 #include "roadmap_mood.h"
+#include "roadmap_math.h"
 }
 
 void qt_datamodels_register()
@@ -20,6 +21,7 @@ void qt_datamodels_register()
     roadmap_main_set_qml_context_property("__alerts", WazeAlerts::instance());
     roadmap_main_set_qml_context_property("__moods", WazeMoods::instance());
     roadmap_main_set_qml_context_property("__monitor", WazeMonitor::instance());
+    roadmap_main_set_qml_context_property("__compass", WazeCompass::instance());
 }
 
 SpeedometerData::SpeedometerData(QObject* parent) : QObject(parent) {}
@@ -51,6 +53,7 @@ void SpeedometerData::setText(QString text) {
 void roadmap_lang_loaded()
 {
     Translator::instance()->reloadInvoked();
+    QApplication::setLayoutDirection((roadmap_lang_rtl())? Qt::RightToLeft : Qt::LeftToRight);
 }
 
 Translator::Translator(QObject *parent) :
@@ -117,9 +120,9 @@ QString WazeImageProvider::getImage(QString imageName)
     return QString();
 }
 
-void RTAlerts_count_changed()
+void RTAlerts_count_changed(const char* count)
 {
-    WazeAlerts::instance()->setAlertsCount(QString::fromAscii(RTAlerts_Count_Str()));
+    WazeAlerts::instance()->setAlertsCount(QString::fromAscii(count));
 }
 
 WazeAlerts::WazeAlerts(QObject *parent) : QObject(parent)
@@ -199,6 +202,8 @@ int WazeMonitor::gpsState()
 
 void WazeMonitor::setGpsState(int gpsState)
 {
+    if (_gpsState == gpsState) return;
+
     _gpsState = gpsState;
     emit gpsStateChanged();
 }
@@ -210,7 +215,62 @@ int WazeMonitor::netState()
 
 void WazeMonitor::setNetState(int netState)
 {
+    if (_netState == netState) return;
+
     _netState = netState;
     emit netStateChanged();
+}
+
+void roadmap_screen_orientation_delta_changed(int orientationDelta)
+{
+    WazeCompass::instance()->setOrientationDelta(orientationDelta);
+}
+
+void roadmap_screen_compass_state_changed (int state)
+{
+    WazeCompass::instance()->setCompassState(state);
+}
+
+WazeCompass::WazeCompass(QObject *parent) : QObject(parent)
+{
+
+}
+
+WazeCompass* WazeCompass::instance()
+{
+    static WazeCompass compass;
+    return &compass;
+}
+
+int WazeCompass::compassState()
+{
+    return _compassState;
+}
+
+void WazeCompass::setCompassState(int compassState)
+{
+    if (compassState == _compassState) return;
+
+    _compassState = compassState;
+    emit compassStateChanged();
+
+    if(compassState != ORIENTATION_FIXED)
+    {
+        setOrientationDelta(-_orientation);
+    }
+}
+
+int WazeCompass::orientation()
+{
+    return _orientation;
+}
+
+void WazeCompass::setOrientationDelta(int delta)
+{
+    if (delta == 0) return;
+
+    _orientation += delta;
+    _orientation %= 360;
+    emit orientationChanged();
 }
 

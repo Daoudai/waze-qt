@@ -77,13 +77,20 @@ Item {
         property int netState : (typeof(__monitor) === 'undefined')? 0 : __monitor.netState
     }
 
+    Item {
+        id: compass
+
+        property int orientation : (typeof(__compass) === 'undefined')? 0 : __compass.orientation
+        property int compassState : (typeof(__compass) === 'undefined')? 0 : __compass.compassState
+    }
+
     ////////////// End of Context data binding wrappers //////////////
 
     Timer {
         id: sidebar_visibility_timer
         repeat: false
         running: true
-        interval: 4000
+        interval: 5000
         onTriggered: {
             zoomBar.visible = false;
             mapBar.visible = false;
@@ -178,24 +185,39 @@ Item {
             }
         }
 
-        IconButton {
+        Image {
             id: compassButton
             width: 70
             height: 70
-            icon: "north"
 
-            onClicked:  {
-                showSideToolbars();
-                mainView.invokeAction("toggleorientation")
+            source: imageProvider.getImage(compass.compassState == 0? "north_off" : "north")
+
+            MouseArea {
+                z: 2
+                anchors.fill: parent
+                onClicked:  {
+                    showSideToolbars();
+                    mainView.invokeAction("toggleorientation")
+                }
+            }
+
+            Image {
+                rotation: compass.orientation
+                visible:   compass.compassState == 0
+                anchors.fill: parent
+                source: imageProvider.getImage("compass_needle")
+                z: 1
+                fillMode: Image.PreserveAspectCrop
+                smooth: true
             }
         }
     }
 
     IconButton {
         id: minimizeButton
-        width: 70
+        width: 40
         height: 50
-        icon: "menu_page_down"
+        icon: "button_sc_3_mid_s"
         anchors.top: parent.top
         anchors.topMargin: 0
         anchors.right: exitButton.left
@@ -391,8 +413,10 @@ Item {
             function gpsToIcon(state) {
                 switch(state)
                 {
-                case 0: return "TS_top_not_connected";
-                case 1: return "TS_top_connected";
+                case 0: return "TS_top_satellite_off";
+                case 1: return "TS_top_satellite_off";
+                case 2: return "TS_top_satellite_poor";
+                case 3: return "TS_top_satellite_on";
                 }
             }
         }
@@ -410,10 +434,8 @@ Item {
             function netToIcon(state) {
                 switch(state)
                 {
-                case 0: return "TS_top_satellite_off";
-                case 1: return "TS_top_satellite_off";
-                case 2: return "TS_top_satellite_poor";
-                case 3: return "TS_top_satellite_on";
+                case 0: return "TS_top_not_connected";
+                case 1: return "TS_top_connected";
                 }
             }
         }
