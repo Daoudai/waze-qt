@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QGraphicsObject>
 #include "qt_contactslistmodel.h"
+#include "qt_datamodels.h"
 
 extern "C" {
 #include "roadmap_lang.h"
@@ -39,6 +40,7 @@ void RContactsView::initialize()
 #endif
     _contactListModel = new ContactsList(contactManager, this);
     engine()->rootContext()->setContextProperty("contactModel", _contactListModel);
+    engine()->rootContext()->setContextProperty("__translator", Translator::instance());
     setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../qml/Contacts.qml")));
 
     QObject *item = dynamic_cast<QObject*>(rootObject());
@@ -47,7 +49,7 @@ void RContactsView::initialize()
     QObject::connect(item, SIGNAL(cancelPressed()),
                      this, SLOT(cancelPressed()));
     QObject::connect(item, SIGNAL(mouseAreaPressed()),
-                     parent(), SLOT(mouseAreaPressed()));
+                     RCommonApp::instance(), SLOT(mouseAreaPressed()));
 }
 
 void RContactsView::show() {
@@ -56,13 +58,9 @@ void RContactsView::show() {
     item->setProperty("width", width());
     item->setProperty("height", height());
     item->setProperty("color", roadmap_skin_state()? "#74859b" : "#70bfea"); // ssd_container::draw_bg()
-    if (roadmap_lang_rtl())
-    {
-        item->setProperty("isRtl", QVariant(true));
-    }
-    item->setProperty("okButtonText", QString::fromLocal8Bit(roadmap_lang_get("Ok")));
-    item->setProperty("cancelButtonText", QString::fromLocal8Bit(roadmap_lang_get("Back_key")));
-    item->setProperty("title", QString::fromLocal8Bit(roadmap_lang_get("Contacts")));
+    item->setProperty("okButtonText", "Ok");
+    item->setProperty("cancelButtonText", "Back_key");
+    item->setProperty("title", "Contacts");
 
     QDeclarativeView::show();
 }
