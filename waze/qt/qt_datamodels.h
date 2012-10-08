@@ -3,6 +3,12 @@
 
 #include <QObject>
 #include <QString>
+#include <QOrientationSensor>
+#include <QOrientationFilter>
+#include <qplatformdefs.h> // MEEGO_EDITION_HARMATTAN
+
+
+QTM_USE_NAMESPACE
 
 void qt_datamodels_register();
 
@@ -181,6 +187,60 @@ private:
 
     int _editType;
     int _editState;
+};
+
+class OrientationFilter : public QObject, public QOrientationFilter
+{
+    Q_OBJECT
+public:
+    bool filter(QOrientationReading *reading) {
+
+        int orientation = reading->orientation();
+#if defined(MEEGO_EDITION_HARMATTAN) || defined(Q_WS_SYMBIAN)
+        // Nokia N9  & Symbian is portrait by default
+        switch (orientation)
+        {
+        case 1:
+            orientation = 3;
+            break;
+        case 2:
+            orientation = 4;
+            break;
+        case 3:
+            orientation = 2;
+            break;
+        case 4:
+            orientation = 1;
+            break;
+        }
+
+#endif
+        emit orientationChanged(orientation);
+
+        // don't store the reading in the sensor
+        return false;
+    }
+
+signals:
+    void orientationChanged(const QVariant &orientation);
+};
+
+class OrientationSensor : public QObject
+{
+    Q_OBJECT
+
+public:
+    static OrientationSensor* instance();
+
+signals:
+    void orientationChanged(const QVariant &orientation);
+
+private:
+    explicit OrientationSensor(QObject *parent = 0);
+    OrientationSensor& operator =(OrientationSensor&);
+
+    QOrientationSensor _sensor;
+    OrientationFilter _filter;
 };
 
 #endif // QT_DATAMODELS_H

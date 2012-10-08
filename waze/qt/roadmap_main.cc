@@ -39,6 +39,11 @@
 #include <QApplication>
 #include <QtDeclarative>
 #include <QList>
+#include <QDeclarativeItem>
+#include <QDeclarativeEngine>
+#include <QDeclarativeContext>
+#include <QGraphicsObject>
+#include "qmlapplicationviewer.h"
 #include "qt_main.h"
 #include "roadmap_qtbrowser.h"
 #include "qt_network.h"
@@ -463,16 +468,23 @@ int main(int argc, char* argv[]) {
 
    qmlRegisterType<RMapCanvas>("org.waze", 1, 0, "WazeMap");
 
-   mainWindow = new QDeclarativeView(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../qml/MainView.qml")));
+   QMainWindow w(app->desktop());
+   QmlApplicationViewer* appView = new QmlApplicationViewer;
+   mainWindow = appView;
+
+   appView->setOrientation(QmlApplicationViewer::ScreenOrientationLockLandscape);
+
+   appView->setMainQmlFile(QString("/qml/MainView.qml"));
 
    qt_datamodels_register();
 
-   mainWindow->setAttribute(Qt::WA_TranslucentBackground);
-   mainWindow->setResizeMode(QDeclarativeView::SizeRootObjectToView);
-   mainWindow->showFullScreen();
+   appView->setAttribute(Qt::WA_TranslucentBackground);
+   w.setCentralWidget(appView);
+   w.showFullScreen();
 
    QObject *item = dynamic_cast<QObject*>(mainWindow->rootObject());
    QObject::connect(item, SIGNAL(invokeAction(QString)), appUtil, SLOT(invokeAction(QString)));
+   QObject::connect(item, SIGNAL(buttonClicked()), appUtil, SLOT(mouseAreaPressed()));
 
    contactsView = NULL;
 

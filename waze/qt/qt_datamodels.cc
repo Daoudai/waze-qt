@@ -24,6 +24,7 @@ void qt_datamodels_register()
     roadmap_main_set_qml_context_property("__monitor", WazeMonitor::instance());
     roadmap_main_set_qml_context_property("__compass", WazeCompass::instance());
     roadmap_main_set_qml_context_property("__editor", WazeMapEditor::instance());
+    roadmap_main_set_qml_context_property("__orientationSensor", OrientationSensor::instance());
 }
 
 SpeedometerData::SpeedometerData(QObject* parent) : QObject(parent) {}
@@ -324,4 +325,18 @@ void WazeMapEditor::setEditState(int editState)
 }
 
 
+OrientationSensor::OrientationSensor(QObject *parent) : QObject(parent)
+{
+    _sensor.addFilter(&_filter);
+
+    connect(&_filter, SIGNAL(orientationChanged(const QVariant&)), this, SIGNAL(orientationChanged(const QVariant&)));
+
+    _sensor.start();
+}
+
+OrientationSensor* OrientationSensor::instance()
+{
+    static OrientationSensor sensor;
+    return &sensor;
+}
 
