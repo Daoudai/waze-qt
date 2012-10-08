@@ -153,7 +153,8 @@ Item {
 
             onClicked: {
                 showSideToolbars();
-                mainView.invokeAction("zoomin")
+                mainView.invokeAction("zoomin");
+                wazeCanvas.repaint();
             }
         }
 
@@ -165,7 +166,8 @@ Item {
 
             onClicked:  {
                 showSideToolbars();
-                mainView.invokeAction("zoomout")
+                mainView.invokeAction("zoomout");
+                wazeCanvas.repaint();
             }
         }
     }

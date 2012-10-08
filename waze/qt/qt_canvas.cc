@@ -561,6 +561,11 @@ void RMapCanvas::paint( QPainter * painter, const QStyleOptionGraphicsItem * opt
    //bitBlt(this, QPoint(0,0), pixmap, QRect(0, 0, pixmap->width(), pixmap->height()));
 }
 
+void RMapCanvas::repaint()
+{
+    roadmap_screen_redraw();
+}
+
 void RMapCanvas::configure() {
    if (pixmap != 0) {
       delete pixmap;

@@ -68,6 +68,7 @@ public:
    virtual ~RMapCanvas();
 
    void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+   Q_INVOKABLE void repaint();
 
    bool isDialogActive();
 
