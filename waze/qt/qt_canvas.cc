@@ -566,6 +566,12 @@ void RMapCanvas::repaint()
     roadmap_screen_redraw();
 }
 
+void RMapCanvas::repaintAfterResize(void)
+{
+    configure();
+    roadmap_screen_redraw();
+}
+
 void RMapCanvas::configure() {
    if (pixmap != 0) {
       delete pixmap;

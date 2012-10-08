@@ -10,7 +10,19 @@ Rectangle {
     property string selectedAddress
     property string title: "title"
 
-    property bool isRtl: false
+    property bool isRTL: typeof(__translator) === 'undefined'? false : __translator.isRTL
+    property string t: ""
+    function wTr(text) {
+        if (typeof(__translator) === 'undefined') return text;
+
+        return __translator.translate(text);
+    }
+    Connections {
+        target: __translator
+        onTranslationsReloaded: {
+            base.tChanged();
+        }
+    }
 
     signal okPressed(string address)
     signal cancelPressed
@@ -44,8 +56,8 @@ Rectangle {
             Button {
                 id: button
                 width: (button_row.width-button_row.spacing)/2
-                text: ((!isRtl && index === 0) || (isRtl && index === 1))? okButtonText : cancelButtonText
-                onButtonPressed: ((!isRtl && index === 0) || (isRtl && index === 1))? okPressed(selectedAddress) : cancelPressed()
+                text: ((!isRTL && index === 0) || (isRTL && index === 1))? okButtonText : cancelButtonText
+                onButtonPressed: ((!isRTL && index === 0) || (isRTL && index === 1))? okPressed(selectedAddress) : cancelPressed()
             }
         }
     }
@@ -174,7 +186,7 @@ Rectangle {
             states: [
                 State {
                     name: "rtl"
-                    when: isRtl
+                    when: isRTL
 
                     PropertyChanges {
                         target: nameTxt
@@ -193,7 +205,7 @@ Rectangle {
     Text {
         id: titleText
         color: "#ffffff"
-        text: contactsDialog.title
+        text: t+wTr(contactsDialog.title)
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
         anchors.horizontalCenter: parent.horizontalCenter
