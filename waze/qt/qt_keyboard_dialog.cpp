@@ -5,6 +5,7 @@
 #include <QGraphicsObject>
 #include <QObject>
 #include <QApplication>
+#include "qt_datamodels.h"
 
 extern "C" {
 #include "roadmap_lang.h"
@@ -35,10 +36,11 @@ KeyboardDialog::KeyboardDialog(QDeclarativeView *parent) :
 {
     setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../qml/TextBox.qml")));
     setAttribute(Qt::WA_TranslucentBackground);
+    rootContext()->setContextProperty("__translator", Translator::instance());
 
     QObject *item = dynamic_cast<QObject*>(rootObject());
     QObject::connect(item, SIGNAL(mouseAreaPressed()),
-                     mainWindow, SLOT(mouseAreaPressed()));
+                     RCommonApp::instance(), SLOT(mouseAreaPressed()));
     QObject::connect(item, SIGNAL(actionButtonPressed(QString)),
                      this, SLOT(textEditActionPressed(QString)));
     QObject::connect(item, SIGNAL(cancelButtonPressed()),
@@ -66,13 +68,13 @@ void KeyboardDialog::show(QString title, TEditBoxType boxType, QString text, Edi
         actionButtonText = QString("'->");
         break;
     case EEditBoxActionDone:
-        actionButtonText = getFromCharArray(roadmap_lang_get("Done"));
+        actionButtonText = QString::fromAscii("Done");
         break;
     case EEditBoxActionSearch:
-        actionButtonText = getFromCharArray(roadmap_lang_get("Search"));
+        actionButtonText = QString::fromAscii("Search");
         break;
     case EEditBoxActionNext:
-        actionButtonText = getFromCharArray(roadmap_lang_get("Next"));
+        actionButtonText = QString::fromAscii("Next");
         break;
     }
 
@@ -81,13 +83,9 @@ void KeyboardDialog::show(QString title, TEditBoxType boxType, QString text, Edi
     item->setProperty("width", mainWindow->width());
     item->setProperty("height", mainWindow->height());
     item->setProperty("color", roadmap_skin_state()? "#74859b" : "#70bfea"); // ssd_container::draw_bg()
-    if (roadmap_lang_rtl())
-    {
-        item->setProperty("isRtl", QVariant(true));
-    }
     item->setProperty("title", title);
     item->setProperty("actionButtonText", actionButtonText);
-    item->setProperty("cancelButtonText", getFromCharArray(roadmap_lang_get("Back_key")));
+    item->setProperty("cancelButtonText", QString::fromAscii("Back_key"));
     item->setProperty("text", text);
     item->setProperty("isPassword", isPassword);
 
