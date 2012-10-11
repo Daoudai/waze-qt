@@ -284,7 +284,7 @@ HttpAsyncContext* WazeWebAccessor::getRequest(QString url, int flags, RoadMapHtt
     {
         char* timeStr = getTimeStr(QDateTime::fromTime_t(update_time));
         header.setValue(QString::fromAscii("If-Modified-Since"), QString::fromAscii(timeStr));
-        delete timeStr;
+        free(timeStr);
     }
 
     QHttp* http = new QHttp(this);
@@ -442,10 +442,10 @@ void WazeWebAccessor::oldStyleFinished(bool isError)
 
         roadmap_http_comp_close(compressContext);
 
-        if (response.startsWith(HTTP.toAscii()))
+        if (response.startsWith(WazeSocket::HTTP.toAscii()))
         {
-            int index = response.indexOf(DATA_DELIMITER);
-            response.remove(0, index + DATA_DELIMITER_LENGTH);
+            int index = response.indexOf(WazeSocket::DATA_DELIMITER);
+            response.remove(0, index + WazeSocket::DATA_DELIMITER_LENGTH);
         }
     }
     else
