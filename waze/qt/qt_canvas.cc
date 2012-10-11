@@ -28,6 +28,7 @@
 
 #include <QPolygon>
 #include <QPainter>
+#include <QPen>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneWheelEvent>
 #include "qt_canvas.h"
@@ -158,8 +159,7 @@ RoadMapPen RMapCanvas::createPen(const char* name) {
 
    if (p == 0) {
       p = new roadmap_canvas_pen();
-      QPen* pen = new QPen(Qt::SolidLine/*Qt::DotLine*/);
-      p->pen = pen;
+      p->pen = new QPen(Qt::SolidLine/*Qt::DotLine*/);
       p->font = new QFont("Arial",12);
 
       pens.insert(name, p);
@@ -617,8 +617,8 @@ QColor RMapCanvas::getColor(const char* color) {
 }
 
 void RMapCanvas::initColors() {
-   colors.insert("LightSlateBlue", new QColor(132, 112, 255));
-   colors.insert("DarkSeaGreen4", new QColor(105, 139, 105));
+   colors.insert(QString::fromAscii("LightSlateBlue"), new QColor(132, 112, 255));
+   colors.insert(QString::fromAscii("DarkSeaGreen4"), new QColor(105, 139, 105));
 }
 
 void RMapCanvas::drawImage(const RoadMapGuiPoint* pos, const RoadMapImage image, int opacity)

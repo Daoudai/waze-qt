@@ -340,9 +340,7 @@ void roadmap_canvas_copy_image (RoadMapImage dst_image,
         copyRect.setHeight(rect->maxy - rect->miny);
     }
 
-    QImage* img = new QImage(src_image->image->copy(copyRect));
-
-    dst_image->image = img;
+    dst_image->image = new QImage(src_image->image->copy(copyRect));
 
     if (mode == CANVAS_COPY_NORMAL) {
         /* TODO */

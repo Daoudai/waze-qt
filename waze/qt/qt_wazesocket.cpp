@@ -1,5 +1,12 @@
 #include "qt_wazesocket.h"
 
+const QString WazeSocket::ACK = QString::fromAscii("ack\r\n");
+const int WazeSocket::ACK_LENGTH = ACK.length();
+const QString WazeSocket::HTTP = QString::fromAscii("HTTP/1.");
+const int WazeSocket::HTTP_LENGTH = HTTP.length();
+const QString WazeSocket::DATA_DELIMITER = QString::fromAscii("\r\n\r\n");
+const int WazeSocket::DATA_DELIMITER_LENGTH = WazeSocket::DATA_DELIMITER.length();
+
 WazeSocket::WazeSocket(QObject *parent) :
     QSslSocket(parent), _firstRead(true), _hSent(false)
 {
