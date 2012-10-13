@@ -82,6 +82,7 @@ QDeclarativeView* mainWindow;
 RContactsView* contactsView;
 RMapTimers* timers;
 QList<RoadMapIO*> ioList;
+QMainWindow* appWindow;
 
 static int RoadMapMainStatus;
 
@@ -368,9 +369,7 @@ void roadmap_gui_maximize() {
 }
 
 void roadmap_main_minimize (void) {
-    /* TODO */
-
-    //auto_hide_dlg(on_auto_hide_dialog_close);
+    appWindow->showMinimized();
 }
 
 /*************************************************************************************************
@@ -481,6 +480,7 @@ int main(int argc, char* argv[]) {
    appView->setAttribute(Qt::WA_TranslucentBackground);
    w.setCentralWidget(appView);
    w.showFullScreen();
+   appWindow = &w;
 
    QObject *item = dynamic_cast<QObject*>(mainWindow->rootObject());
    QObject::connect(item, SIGNAL(invokeAction(QString)), appUtil, SLOT(invokeAction(QString)));
