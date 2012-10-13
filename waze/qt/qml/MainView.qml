@@ -9,6 +9,37 @@ Item {
     signal invokeAction(string action)
     signal buttonClicked()
 
+    property int deviceOrientation: typeof(__orientationSensor) === 'undefined'? -1 : __orientationSensor.orientation
+    onDeviceOrientationChanged: {
+        console.log("deviceOrientation changed: " + deviceOrientation);
+        if (deviceOrientation == 1)
+        {
+            mainView.rotation = 0;
+            mainView.width = base.width;
+            mainView.height = base.height;
+        }
+        else if (deviceOrientation == 4)
+        {
+            mainView.rotation = 90;
+            mainView.width = base.height;
+            mainView.height = base.width;
+        }
+        else if (deviceOrientation == 2)
+        {
+            mainView.rotation = 180;
+            mainView.width = base.width;
+            mainView.height = base.height;
+        }
+        else if (deviceOrientation == 3)
+        {
+            mainView.rotation = 270;
+            mainView.width = base.height;
+            mainView.height = base.width;
+        }
+
+        rotation_change_timer.start();
+    }
+
     ///////////////// Translations related ///////////////
     property bool isRTL: typeof(__translator) === 'undefined'? false : __translator.isRTL
     property string t: ""
@@ -18,8 +49,8 @@ Item {
         return __translator.translate(text);
     }
     Connections {
-        target: __translator
-        onTranslationsReloaded: {
+        target: base
+        onIsRTLChanged: {
             base.tChanged();
         }
     }
@@ -92,39 +123,6 @@ Item {
         property int editType : (typeof(__editor) === 'undefined')? 0 : __editor.editType
     }
 
-    Connections
-    {
-        target: __orientationSensor
-        onOrientationChanged: {
-            if (orientation == 1)
-            {
-                mainView.rotation = 0;
-                mainView.width = base.width;
-                mainView.height = base.height;
-            }
-            else if (orientation == 4)
-            {
-                mainView.rotation = 90;
-                mainView.width = base.height;
-                mainView.height = base.width;
-            }
-            else if (orientation == 2)
-            {
-                mainView.rotation = 180;
-                mainView.width = base.width;
-                mainView.height = base.height;
-            }
-            else if (orientation == 3)
-            {
-                mainView.rotation = 270;
-                mainView.width = base.height;
-                mainView.height = base.width;
-            }
-
-            rotation_change_timer.start();
-        }
-    }
-
     ////////////// End of Context data binding wrappers //////////////
 
     Timer {
@@ -160,7 +158,10 @@ Item {
 
         WazeMap {
             id: wazeCanvas
-            anchors.fill: parent
+            width: parent.width
+            height: parent.height
+            x: 0
+            y: 0
             z: -1
 
             onIsDialogActiveChanged: {

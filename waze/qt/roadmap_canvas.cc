@@ -96,6 +96,7 @@ void roadmap_canvas_get_formated_text_extents
             int *ascent, int *descent, int *can_tilt, int font_type) {
     roadMapCanvas->setFontSize(size);
     roadMapCanvas->setFontBold(font_type & FONT_TYPE_BOLD);
+    roadMapCanvas->setFontOutlined(font_type & FONT_TYPE_OUTLINE);
     roadMapCanvas->getTextExtents(text, width, ascent, descent, can_tilt);
 }
 
@@ -164,6 +165,7 @@ void roadmap_canvas_draw_formated_string_size (RoadMapGuiPoint *position,
                                                 const char *text) {
     roadMapCanvas->setFontSize(size);
     roadMapCanvas->setFontBold(font_type & FONT_TYPE_BOLD);
+    roadMapCanvas->setFontOutlined(font_type & FONT_TYPE_OUTLINE);
     roadMapCanvas->drawString(position, corner, text);
 }
 
@@ -180,6 +182,7 @@ void roadmap_canvas_draw_formated_string_angle (const RoadMapGuiPoint *position,
                                                 const char *text) {
     roadMapCanvas->setFontSize(size);
     roadMapCanvas->setFontBold(font_type & FONT_TYPE_BOLD);
+    roadMapCanvas->setFontOutlined(font_type & FONT_TYPE_OUTLINE);
     roadMapCanvas->drawStringAngle(position, center, text, angle);
 }
 

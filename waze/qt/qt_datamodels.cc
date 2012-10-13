@@ -329,9 +329,12 @@ OrientationSensor::OrientationSensor(QObject *parent) : QObject(parent)
 {
     _sensor.addFilter(&_filter);
 
-    connect(&_filter, SIGNAL(orientationChanged(const QVariant&)), this, SIGNAL(orientationChanged(const QVariant&)));
+    connect(&_filter, SIGNAL(orientationChanged(const QVariant&)), this, SLOT(onOrientationChanged(const QVariant&)));
 
     _sensor.start();
+
+    _orientation = _sensor.reading()->orientation();
+    emit orientationChanged(_orientation);
 }
 
 OrientationSensor* OrientationSensor::instance()
@@ -340,3 +343,16 @@ OrientationSensor* OrientationSensor::instance()
     return &sensor;
 }
 
+void OrientationSensor::onOrientationChanged(const QVariant &orientation)
+{
+    int newOrientation = orientation.toInt();
+    if (newOrientation == _orientation) return;
+
+    _orientation = newOrientation;
+    emit orientationChanged(_orientation);
+}
+
+int OrientationSensor::orientation()
+{
+    return _orientation;
+}

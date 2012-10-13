@@ -35,6 +35,8 @@
 #include <QDebug>
 #include <QGestureEvent>
 #include <QPinchGesture>
+#include <QFont>
+#include <QPainterPath>
 
 extern "C" {
 #include "roadmap_view.h"
@@ -57,7 +59,7 @@ RMapCanvas::RMapCanvas( QDeclarativeItem* parent )
 
     setFlag(QGraphicsItem::ItemHasNoContents, false);
     setAcceptedMouseButtons(Qt::LeftButton);
-    pixmap = new QPixmap(width(), height());
+    pixmap = new QPixmap(0, 0);
     ignoreClicks = false;
     currentPen = 0;
     roadMapCanvas = this;
@@ -232,10 +234,17 @@ void RMapCanvas::setPenOpacity(int opacity) {
   }
 }
 
-void RMapCanvas::setFontBold(int italic) {
+void RMapCanvas::setFontBold(int bold) {
   if (currentPen != 0) {
-    currentPen->font->setItalic(italic);
+      QFont* font = currentPen->font;
+      font->setBold(bold);
   }
+}
+
+void RMapCanvas::setFontOutlined(int outlined) {
+    if (currentPen != 0) {
+        currentPen->isOutlined = outlined;
+    }
 }
 
 void RMapCanvas::verifyActiveDialog()
@@ -297,6 +306,7 @@ void RMapCanvas::drawString(RoadMapGuiPoint* position,
    }
 
    QPainter p(pixmap);
+   p.setRenderHint(QPainter::Antialiasing);
    if (currentPen != 0) {
      setupPainterPen(p);
    }
@@ -322,8 +332,18 @@ void RMapCanvas::drawString(RoadMapGuiPoint* position,
    else /* TOP */
       y += text_ascent;
 
-
-   p.drawText(x, y, QString::fromUtf8(text));
+   if (!currentPen->isOutlined)
+   {
+       p.drawText(x, y, QString::fromUtf8(text));
+   }
+   else
+   {
+       QFont* font = currentPen->font;
+       font->setStyleStrategy(QFont::ForceOutline);
+       QPainterPath path;
+       path.addText(x, y, *font, QString::fromUtf8(text));
+       p.drawPath(path);
+   }
 }
 
 void RMapCanvas::drawStringAngle(const RoadMapGuiPoint* position,
@@ -334,6 +354,7 @@ void RMapCanvas::drawStringAngle(const RoadMapGuiPoint* position,
     }
 
     QPainter p(pixmap);
+    p.setRenderHint(QPainter::Antialiasing);
     if (currentPen != 0) {
        setupPainterPen(p);
     }
@@ -343,12 +364,23 @@ void RMapCanvas::drawStringAngle(const RoadMapGuiPoint* position,
     int text_descent;
     getTextExtents(text, &text_width, &text_ascent, &text_descent, NULL);
 
-    int x = (center)? -text_width/2 : 0;
+    int x = 0;
     int y = (center)? -text_descent : 0;
 
     p.translate(position->x,position->y);
     p.rotate((double)angle);
-    p.drawText(x, y, QString::fromUtf8(text));
+    if (!currentPen->isOutlined)
+    {
+        p.drawText(x, y, QString::fromUtf8(text));
+    }
+    else
+    {
+        QFont* font = currentPen->font;
+        font->setStyleStrategy(QFont::ForceOutline);
+        QPainterPath path;
+        path.addText(x, y, *font, QString::fromUtf8(text));
+        p.drawPath(path);
+    }
 #endif
 }
 
