@@ -11,7 +11,6 @@ Item {
 
     property int deviceOrientation: typeof(__orientationSensor) === 'undefined'? -1 : __orientationSensor.orientation
     onDeviceOrientationChanged: {
-        console.log("deviceOrientation changed: " + deviceOrientation);
         if (deviceOrientation == 1)
         {
             mainView.rotation = 0;
