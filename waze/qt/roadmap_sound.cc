@@ -77,9 +77,6 @@ void roadmap_sound_initialize ()
         // Set current volume from the configuration
         roadmap_config_declare("user", &RoadMapConfigVolControl, SND_DEFAULT_VOLUME_LVL, NULL );
 
-        mediaPlayer = new Playlist(mainWindow);
-        recorder = new Recorder(mainWindow);
-
         roadmap_sound_set_volume(roadmap_config_get_integer(&RoadMapConfigVolControl));
 }
 
@@ -157,34 +154,37 @@ int roadmap_sound_list_add_buf (RoadMapSoundList list, void* buf, size_t size )
 
 int roadmap_sound_play_list (const RoadMapSoundList list)
 {
-    if (mediaPlayer != NULL)
+    if (mediaPlayer == NULL)
     {
-		int listSize = roadmap_sound_list_count( list );
-		const char *full_name;
-		int i;
-
-        for ( i = 0; i < roadmap_sound_list_count(list); i++) 
-		{
-            const char *name = roadmap_sound_list_get ( list, i );
-
-			if ( (list->flags & SOUND_LIST_BUFFERS) == 0 )
-             {
-                 full_name = get_full_name( name );
-                 // Calling the JNI layer
-                 mediaPlayer->playMedia(QUrl::fromLocalFile(full_name));
-             }
-             else
-             {
-                /*
-                 * Temporary solution - write the buffer to the file for further playing
-                 * AGA
-                 */
-    //            FreeMapNativeSoundManager_PlayFile( roadmap_sound_list_get ( list, i ) );
-             //			   FreeMapNativeSoundManager_PlayBuffer( list->buf_list[i], list->buf_list_sizes[i] );
-    //            free( list->buf_list[i] );
-             }
-        }
+        mediaPlayer = new Playlist(mainWindow);
     }
+
+    int listSize = roadmap_sound_list_count( list );
+    const char *full_name;
+    int i;
+
+    for ( i = 0; i < roadmap_sound_list_count(list); i++)
+    {
+        const char *name = roadmap_sound_list_get ( list, i );
+
+        if ( (list->flags & SOUND_LIST_BUFFERS) == 0 )
+         {
+             full_name = get_full_name( name );
+             // Calling the JNI layer
+             mediaPlayer->playMedia(QUrl::fromLocalFile(full_name));
+         }
+         else
+         {
+            /*
+             * Temporary solution - write the buffer to the file for further playing
+             * AGA
+             */
+//            FreeMapNativeSoundManager_PlayFile( roadmap_sound_list_get ( list, i ) );
+         //			   FreeMapNativeSoundManager_PlayBuffer( list->buf_list[i], list->buf_list_sizes[i] );
+//            free( list->buf_list[i] );
+         }
+    }
+
 	// Deallocation
     if ( (list->flags & SOUND_LIST_NO_FREE) == 0x0 )
 	{
@@ -259,11 +259,16 @@ int roadmap_sound_play_file (const char *file_name) {
 
 
 int roadmap_sound_record (const char *file_name, int seconds) {
+    if (recorder == NULL)
+    {
+        recorder = new Recorder(mainWindow);
+    }
     recorder->recordMedia(QUrl::fromLocalFile(file_name), seconds*1000);
    return 0;
 }
 
 void roadmap_sound_stop_recording (void) {
+    if (recorder == NULL) return;
     recorder->stop();
 }
 
@@ -274,6 +279,10 @@ void roadmap_sound_stop_recording (void) {
  */
 void roadmap_sound_set_volume ( int volLvl )
 {
+    if (mediaPlayer == NULL)
+    {
+        mediaPlayer = new Playlist(mainWindow);
+    }
     mediaPlayer->setVolume(volLvl*100/SND_VOLUME_LVLS_COUNT);
 
     // Update the configuration
