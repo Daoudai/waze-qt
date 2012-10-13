@@ -229,11 +229,17 @@ class OrientationSensor : public QObject
 {
     Q_OBJECT
 
+    Q_PROPERTY(int orientation READ orientation NOTIFY orientationChanged)
 public:
     static OrientationSensor* instance();
 
+    int orientation();
+
 signals:
-    void orientationChanged(const QVariant &orientation);
+    void orientationChanged(int orientation);
+
+private slots:
+    void onOrientationChanged(const QVariant& orientation);
 
 private:
     explicit OrientationSensor(QObject *parent = 0);
@@ -241,6 +247,7 @@ private:
 
     QOrientationSensor _sensor;
     OrientationFilter _filter;
+    int _orientation;
 };
 
 #endif // QT_DATAMODELS_H

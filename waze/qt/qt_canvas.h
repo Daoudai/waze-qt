@@ -49,6 +49,7 @@ extern "C" {
    struct roadmap_canvas_pen {
       QPen* pen;
       QFont* font;
+      bool isOutlined;
    };
 
    struct roadmap_canvas_image {
@@ -85,7 +86,7 @@ public:
    void setPenLineStyle(int style);
    void setBrushOpacity(int opacity);
    void setFontBold(int bold);
-   void setFontCapitalize(int capitalize);
+   void setFontOutlined(int outlined);
    void clearArea(const RoadMapGuiRect *rect);
    void erase(void);
    void setupPainterPen(QPainter &p);
