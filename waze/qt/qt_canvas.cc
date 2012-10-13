@@ -339,7 +339,10 @@ void RMapCanvas::drawString(RoadMapGuiPoint* position,
    else
    {
        QFont* font = currentPen->font;
+       QPen* pen = currentPen->pen;
        font->setStyleStrategy(QFont::ForceOutline);
+       p.setBrush(pen->color());
+       p.setPen(pen->color());
        QPainterPath path;
        path.addText(x, y, *font, QString::fromUtf8(text));
        p.drawPath(path);
@@ -376,7 +379,10 @@ void RMapCanvas::drawStringAngle(const RoadMapGuiPoint* position,
     else
     {
         QFont* font = currentPen->font;
+        QPen* pen = currentPen->pen;
         font->setStyleStrategy(QFont::ForceOutline);
+        p.setBrush(pen->color());
+        p.setPen(pen->color());
         QPainterPath path;
         path.addText(x, y, *font, QString::fromUtf8(text));
         p.drawPath(path);
