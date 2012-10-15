@@ -5,6 +5,9 @@
 #include <QSslError>
 #include <QHttp>
 #include <QBuffer>
+#include <QQueue>
+#include <QTimer>
+#include <QUrl>
 
 extern "C" {
 #include "Realtime/RealtimeNetDefs.h"
@@ -20,15 +23,19 @@ struct HttpAsyncContext_st
     QHttp* http;
     void* context;
     CallbackType type;
+    bool isSecured;
+    bool isPost;
     bool ignoreContentLength;
     qint64 sentBytes;
     qint64 receivedBytes;
     QBuffer* buffer;
     int statusCode;
     QByteArray* bytes;
-    QString url;
+    QUrl url;
     bool decompress;
-    QByteArray* header;
+    QHttpRequestHeader requestHeader;
+    QByteArray* responseHeader;
+    QByteArray* requestData;
 
     union {
         struct {
@@ -74,12 +81,16 @@ public:
 
     void setSecuredResolvedAddress(QString securedAddress);
 
+signals:
+    void requestDone();
+
 private slots:
     void responseHeaderReceived(const QHttpResponseHeader &resp);
     void onIgnoreSSLErrors(QList<QSslError> errorList);
     void oldStyleFinished(bool isError);
     void requestBytesWrittenOld(int bytesSent, int bytesTotal);
     void responseBytesReadOld(int bytesReceived, int bytesTotal);
+    void invokeNextRequest();
 
 private:
     explicit WazeWebAccessor(QObject* parent = 0);
@@ -91,9 +102,11 @@ private:
     char* getTimeStr(QDateTime time);
 
     QHash<QHttp*, HttpAsyncContext> _oldStyleConnectionDataHash;
+    QQueue<HttpAsyncContext> _requestQueue;
     QString _address;
     QString _securedAddress;
     QString _v2Suffix;
+    QTimer _timer;
 };
 
 #endif // QT_WEBACCESSOR_H

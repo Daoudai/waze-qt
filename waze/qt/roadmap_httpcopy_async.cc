@@ -138,7 +138,7 @@ HttpAsyncContext * roadmap_http_async_copy (RoadMapHttpAsyncCallbacks *callbacks
 }
 
 void roadmap_http_async_copy_abort (HttpAsyncContext *context) {
-    roadmap_log(ROADMAP_INFO, "Aborting url request: %s", context->url.toAscii().constData());
+    roadmap_log(ROADMAP_INFO, "Aborting url request: %s", context->url.toString().toAscii().constData());
     context->http->abort();
 }
 
