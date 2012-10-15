@@ -25,7 +25,6 @@
 #include "qt_main.h"
 #include <QWebView>
 #include <QWebFrame>
-#include "qt_webview.h"
 
 extern "C" {
 #include "roadmap_browser.h"
@@ -34,7 +33,7 @@ extern "C" {
 
 extern QDeclarativeView* mainWindow;
 
-static WazeWebView *webview = NULL;
+static QObject *webview = NULL;
 
 static void roadmap_qtbrowser_launcher( RMBrowserContext* context );
 static void roadmap_qtbrowser_close();
@@ -64,9 +63,7 @@ static void roadmap_qtbrowser_launcher( RMBrowserContext* context )
 {
     if (webview == NULL)
     {
-        webview = new WazeWebView(mainWindow);
-        webview->setResizeMode(QDeclarativeView::SizeRootObjectToView);
-        webview->hide();
+        webview = mainWindow->rootObject()->findChild<QObject*>("wazeBrowser");
     }
 
     _resize(&(context->rect));
@@ -79,13 +76,14 @@ static void roadmap_qtbrowser_launcher( RMBrowserContext* context )
         url.remove("&deviceid=90");
     }
 
-    webview->show(QUrl(url), context->flags);
-    webview->setFocus();
+    webview->setProperty("url", url);
+    webview->setProperty("visible", true);
 }
 
 void roadmap_qtbrowser_close()
 {
-    webview->hide();
+    webview->setProperty("visible", false);
+    webview->setProperty("url", "");
 }
 
 /*************************************************************************************************
@@ -113,5 +111,8 @@ void roadmap_groups_browser_btn_back_cb( void )
  */
 static void _resize( const RoadMapGuiRect* rect )
 {
-    webview->setGeometry(rect->minx, rect->miny, rect->maxx - rect->minx, rect->maxy - rect->miny);
+    webview->setProperty("x", rect->minx);
+    webview->setProperty("y", rect->miny);
+    webview->setProperty("width", rect->maxx - rect->minx);
+    webview->setProperty("height", rect->maxy - rect->miny);
 }
