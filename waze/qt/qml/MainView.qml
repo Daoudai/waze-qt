@@ -155,6 +155,16 @@ Item {
             }
         }
 
+        //////////////////////// Multi-duty Web browser ////////////////////
+        WazeBrowser {
+            id: wazeBrowser
+            objectName: "wazeBrowser"
+            visible: false
+            url: ""
+            z: 1
+        }
+        ////////////////////End of Multi-duty Web browser ////////////////////
+
         WazeMap {
             id: wazeCanvas
             width: parent.width
