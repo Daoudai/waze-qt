@@ -261,7 +261,6 @@ SOURCES += \
     navigate/navigate_instr.c \
     navigate/navigate_graph.c \
     navigate/navigate_cost.c \
-    navigate/navigate_bar.c \
     navigate/fib-1.1/fib.c \
     roadmap_dialog.c \
     roadmap_device_array.c \

@@ -60,7 +60,8 @@ SOURCES += \
     qt/roadmap_httpcopy_async.cc \
     qt/qt_wazesocket.cpp \
     qt/roadmap_speedometer.cc \
-    qt/qt_datamodels.cc
+    qt/qt_datamodels.cc \
+    qt/navigate_bar.cc
 
 HEADERS += \
     qt_progress.h \

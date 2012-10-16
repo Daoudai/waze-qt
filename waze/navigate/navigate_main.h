@@ -207,6 +207,8 @@ void navigate_main_start_navigating (void);
 int navigate_main_tts_prepare_route( void );
 void navigate_main_override_nav_settings( void );
 
+BOOL navigate_main_drive_on_left(void);
+
 char *navigate_main_get_dest_str(void);
 
 int navigate_main_visible_route_scale(RoadMapPosition *pos);

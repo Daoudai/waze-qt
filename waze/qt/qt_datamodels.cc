@@ -25,6 +25,7 @@ void qt_datamodels_register()
     roadmap_main_set_qml_context_property("__compass", WazeCompass::instance());
     roadmap_main_set_qml_context_property("__editor", WazeMapEditor::instance());
     roadmap_main_set_qml_context_property("__orientationSensor", OrientationSensor::instance());
+    roadmap_main_set_qml_context_property("__navigationData", NavigationData::instance());
 }
 
 SpeedometerData::SpeedometerData(QObject* parent) : QObject(parent) {}
@@ -355,4 +356,159 @@ void OrientationSensor::onOrientationChanged(const QVariant &orientation)
 int OrientationSensor::orientation()
 {
     return _orientation;
+}
+
+NavigationData::NavigationData(QObject *parent) :
+    QObject(parent)
+{
+
+}
+
+NavigationData* NavigationData::instance()
+{
+    static NavigationData navigationData;
+    return &navigationData;
+}
+
+bool NavigationData::isNavigation()
+{
+    return _isNavigation;
+}
+
+QString NavigationData::eta()
+{
+    return _eta;
+}
+
+QString NavigationData::etaTime()
+{
+    return _etaTime;
+}
+
+QString NavigationData::remainingDistance()
+{
+    return _remainingDistance;
+}
+
+QString NavigationData::currentTurnType()
+{
+    return _currentTurnType;
+}
+
+QString NavigationData::currentTurnDistance()
+{
+    return _currentTurnDistance;
+}
+
+int NavigationData::currentExit()
+{
+    return _currentExit;
+}
+
+QString NavigationData::nextTurnType()
+{
+    return _nextTurnType;
+}
+
+QString NavigationData::nextTurnDistance()
+{
+    return _nextTurnDistance;
+}
+
+int NavigationData::nextExit()
+{
+    return _nextExit;
+}
+
+QString NavigationData::street()
+{
+    return _street;
+}
+
+void NavigationData::setIsNavigation(bool isNavigation)
+{
+    if (_isNavigation == isNavigation) return;
+
+    _isNavigation = isNavigation;
+    emit isNavigationChanged(isNavigation);
+}
+
+void NavigationData::setEta(QString eta)
+{
+    if (eta == _eta) return;
+
+    _eta = eta;
+    emit etaChanged(eta);
+}
+
+void NavigationData::setEtaTime(QString etaTime)
+{
+    if (etaTime == _etaTime) return;
+
+    _etaTime = etaTime;
+    emit etaTimeChanged(etaTime);
+}
+
+void NavigationData::setRemainingDistance(QString remainingDistance)
+{
+    if (remainingDistance == _remainingDistance) return;
+
+    _remainingDistance = remainingDistance;
+    emit remainingDistanceChanged(remainingDistance);
+}
+
+void NavigationData::setCurrentTurnType(QString currentTurnType)
+{
+    if (currentTurnType == _currentTurnType) return;
+
+    _currentTurnType = currentTurnType;
+    emit currentTurnTypeChanged(currentTurnType);
+}
+
+void NavigationData::setCurrentTurnDistance(QString currentTurnDistance)
+{
+    if (currentTurnDistance == _currentTurnDistance) return;
+
+    _currentTurnDistance = currentTurnDistance;
+    emit currentTurnDistanceChanged(currentTurnDistance);
+}
+
+void NavigationData::setCurrentExit(int currentExit)
+{
+    if (currentExit == _currentExit) return;
+
+    _currentExit = currentExit;
+    emit currentExitChanged(currentExit);
+}
+
+void NavigationData::setNextTurnType(QString nextTurnType)
+{
+    if (nextTurnType == _nextTurnType) return;
+
+    _nextTurnType = nextTurnType;
+    emit nextTurnTypeChanged(nextTurnType);
+}
+
+void NavigationData::setNextTurnDistance(QString nextTurnDistance)
+{
+    if (nextTurnDistance == _nextTurnDistance) return;
+
+    _nextTurnDistance = nextTurnDistance;
+    emit nextTurnDistanceChanged(nextTurnDistance);
+}
+
+void NavigationData::setNextExit(int nextExit)
+{
+    if (nextExit == _nextExit) return;
+
+    _nextExit = nextExit;
+    emit nextExitChanged(nextExit);
+}
+
+void NavigationData::setStreet(QString street)
+{
+    if (street == _street) return;
+
+    _street = street;
+    emit streetChanged(street);
 }

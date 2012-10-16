@@ -250,4 +250,76 @@ private:
     int _orientation;
 };
 
+class NavigationData : public QObject
+{
+    Q_OBJECT
+
+    Q_PROPERTY(bool isNavigation READ isNavigation NOTIFY isNavigationChanged)
+    Q_PROPERTY(QString eta READ eta NOTIFY etaChanged)
+    Q_PROPERTY(QString etaTime READ etaTime NOTIFY etaTimeChanged)
+    Q_PROPERTY(QString remainingDistance READ remainingDistance NOTIFY remainingDistanceChanged)
+    Q_PROPERTY(QString currentTurnType READ currentTurnType NOTIFY currentTurnTypeChanged)
+    Q_PROPERTY(QString currentTurnDistance READ currentTurnDistance NOTIFY currentTurnDistanceChanged)
+    Q_PROPERTY(int currentExit READ currentExit NOTIFY currentExitChanged)
+    Q_PROPERTY(QString nextTurnType READ nextTurnType NOTIFY nextTurnTypeChanged)
+    Q_PROPERTY(QString nextTurnDistance READ nextTurnDistance NOTIFY nextTurnDistanceChanged)
+    Q_PROPERTY(int nextExit READ nextExit NOTIFY nextExitChanged)
+    Q_PROPERTY(QString street READ street NOTIFY streetChanged)
+public:
+    static NavigationData* instance();
+
+    bool isNavigation();
+    QString eta();
+    QString etaTime();
+    QString remainingDistance();
+    QString currentTurnType();
+    QString currentTurnDistance();
+    int currentExit();
+    QString nextTurnType();
+    QString nextTurnDistance();
+    int nextExit();
+    QString street();
+
+    void setIsNavigation(bool isNavigation);
+    void setEta(QString eta);
+    void setEtaTime(QString etaTime);
+    void setRemainingDistance(QString remainingDistance);
+    void setCurrentTurnType(QString currentTurnType);
+    void setCurrentTurnDistance(QString currentTurnDistance);
+    void setCurrentExit(int currentExit);
+    void setNextTurnType(QString nextTurnType);
+    void setNextTurnDistance(QString nextTurnDistance);
+    void setNextExit(int currentExit);
+    void setStreet(QString street);
+
+signals:
+    void isNavigationChanged(bool isNavigation);
+    void etaChanged(QString eta);
+    void etaTimeChanged(QString etaTime);
+    void remainingDistanceChanged(QString remainingDistance);
+    void currentTurnTypeChanged(QString currentTurnType);
+    void currentTurnDistanceChanged(QString currentTurnDistance);
+    void currentExitChanged(int currentExit);
+    void nextTurnTypeChanged(QString nextTurnType);
+    void nextTurnDistanceChanged(QString nextTurnDistance);
+    void nextExitChanged(int currentExit);
+    void streetChanged(QString street);
+
+private:
+    explicit NavigationData(QObject *parent = 0);
+    NavigationData& operator =(NavigationData&);
+
+    bool _isNavigation;
+    QString _eta;
+    QString _etaTime;
+    QString _remainingDistance;
+    QString _currentTurnType;
+    QString _currentTurnDistance;
+    int _currentExit;
+    QString _nextTurnType;
+    QString _nextTurnDistance;
+    int _nextExit;
+    QString _street;
+};
+
 #endif // QT_DATAMODELS_H
