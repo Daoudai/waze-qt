@@ -48,6 +48,7 @@
 #include "roadmap_config.h"
 
 
+
 static RoadMapConfigDescriptor RMConfigNavBarDestDistanceFont =
                         ROADMAP_CONFIG_ITEM("Navigation Bar", "Destination Distance Font");
 static RoadMapConfigDescriptor RMConfigNavBarDestTimeFont =
@@ -177,7 +178,7 @@ BOOL navigate_bar_is_hidden(void){
 
 static BOOL show_ETA_box(){
 #ifdef QTMOBILITY
-    return TRUE;
+    return FALSE;
 #elif (defined(__SYMBIAN32__)  && !defined (TOUCH_SCREEN))
   if (is_screen_wide())
     return FALSE;

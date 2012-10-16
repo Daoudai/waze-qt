@@ -122,6 +122,22 @@ Item {
         property int editType : (typeof(__editor) === 'undefined')? 0 : __editor.editType
     }
 
+    Item {
+        id: navigationData
+
+        property bool isNavigation : (typeof(__navigationData === 'undefined'))? false : __navigationData.isNavigation
+        property string eta : (typeof(__navigationData) === 'undefined')? "" : __navigationData.eta
+        property string etaTime : (typeof(__navigationData) === 'undefined')? "" : __navigationData.etaTime
+        property string remainingDistance : (typeof(__navigationData) === 'undefined')? "" : __navigationData.remainingDistance
+        property string currentTurnType : (typeof(__navigationData) === 'undefined')? "" : __navigationData.currentTurnType
+        property string currentTurnDistance : (typeof(__navigationData) === 'undefined')? "" : __navigationData.currentTurnDistance
+        property int currentExit : (typeof(__navigationData) === 'undefined')? 0 : __navigationData.currentExit
+        property string nextTurnType : (typeof(__navigationData) === 'undefined')? "" : __navigationData.nextTurnType
+        property string nextTurnDistance : (typeof(__navigationData) === 'undefined')? "" : __navigationData.nextTurnDistance
+        property int nextExit : (typeof(__navigationData) === 'undefined')? 0 : __navigationData.nextExit
+        property string street : (typeof(__navigationData) === 'undefined')? "" : __navigationData.street
+    }
+
     ////////////// End of Context data binding wrappers //////////////
 
     Timer {
@@ -240,6 +256,101 @@ Item {
             }
         }
 
+        Flow {
+            id: instructionsBar
+
+            visible: navigationData.isNavigation && !wazeCanvas.isDialogActive
+            anchors.left: parent.left
+            anchors.top: zoomBar.bottom
+            anchors.bottom: bottomBar.top
+
+            width: height > 140? 70 : 140
+            z: 1
+
+            IconButton {
+                id: currentTurn
+                width: 70
+                height: 70
+                icon: navigationData.currentTurnType
+                text: navigationData.currentTurnDistance
+
+                z: 1
+
+                Rectangle {
+                    anchors.fill: parent
+                    color: "darkcyan"
+                    radius: 20
+                    border.color: "black"
+                    border.width: 3
+                    z: 1
+                }
+
+                Rectangle {
+                    color: "blue"
+                    width: height
+                    height: parent.height / 2 - 5
+                    anchors.bottom: parent.top
+                    anchors.bottomMargin: -radius*2
+                    anchors.left: parent.right
+                    anchors.leftMargin: -radius
+                    radius: height / 2
+                    visible: nextTurn.visible
+                    z:2
+
+                    Text {
+                        text: "1"
+                        style: Text.Outline
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        anchors.fill: parent
+                        color: "white"
+                        font.pixelSize: height / 2
+                    }
+                }
+            }
+
+            IconButton {
+                id: nextTurn
+                width: 70
+                height: 70
+                icon: navigationData.nextTurnType
+                text: navigationData.nextTurnDistance
+
+                z: 1
+
+                Rectangle {
+                    anchors.fill: parent
+                    color: "darkcyan"
+                    radius: 20
+                    border.color: "black"
+                    border.width: 3
+                    z: 1
+                }
+
+                Rectangle {
+                    color: "blue"
+                    width: height
+                    height: parent.height / 2 - 5
+                    anchors.bottom: parent.top
+                    anchors.bottomMargin: -radius*2
+                    anchors.left: parent.right
+                    anchors.leftMargin: -radius
+                    radius: height / 2
+                    visible: nextTurn.visible
+                    z:2
+
+                    Text {
+                        text: "2"
+                        style: Text.Outline
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        anchors.fill: parent
+                        color: "white"
+                        font.pixelSize: height / 2
+                    }
+                }
+            }
+        }
 
         Column {
             id: mapBar
@@ -360,11 +471,28 @@ Item {
                 text: "Drive_to"
                 fitImage: false
 
-                visible: !wazeCanvas.isDialogActive
+                visible: !wazeCanvas.isDialogActive && !navigationData.isNavigation
 
                 onClicked: {
                     buttonClicked();
                     invokeAction("search_menu");
+                }
+            }
+
+            IconButton {
+                id: navigationOptionsButton
+                width: 140
+                height: 70
+                icon: "More_wide"
+                pressedIcon: "More2_wide"
+                text: "Navigate"
+                fitImage: false
+
+                visible: !wazeCanvas.isDialogActive && navigationData.isNavigation
+
+                onClicked: {
+                    buttonClicked();
+                    invokeAction("nav_menu");
                 }
             }
 
@@ -588,6 +716,31 @@ Item {
                     buttonClicked();
                     invokeAction("settingsmenu");
                 }
+            }
+        }
+
+        Column {
+            id: etaBar
+
+            anchors.right: parent.right
+            anchors.bottom: bottomBar.top
+
+            Button {
+                text: navigationData.eta
+                width: 220
+                height: 70
+            }
+
+            Button {
+                width: 220
+                height: 70
+                text: navigationData.etaTime
+            }
+
+            Button {
+                width: 220
+                height: 70
+                text: navigationData.remainingDistance
             }
         }
     }
