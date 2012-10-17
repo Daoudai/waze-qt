@@ -125,7 +125,7 @@ Item {
     Item {
         id: navigationData
 
-        property bool isNavigation : (typeof(__navigationData === 'undefined'))? false : __navigationData.isNavigation
+        property bool isNavigation : (typeof(__navigationData) === 'undefined')? false : __navigationData.isNavigation
         property string eta : (typeof(__navigationData) === 'undefined')? "" : __navigationData.eta
         property string etaTime : (typeof(__navigationData) === 'undefined')? "" : __navigationData.etaTime
         property string remainingDistance : (typeof(__navigationData) === 'undefined')? "" : __navigationData.remainingDistance
@@ -174,6 +174,8 @@ Item {
         //////////////////////// Multi-duty Web browser ////////////////////
         WazeBrowser {
             id: wazeBrowser
+            width: 0
+            height: 0
             objectName: "wazeBrowser"
             visible: false
             url: ""
@@ -256,25 +258,40 @@ Item {
             }
         }
 
-        Flow {
+        Row {
             id: instructionsBar
+
+            opacity: 0.9
+            spacing: 20
 
             visible: navigationData.isNavigation && !wazeCanvas.isDialogActive
             anchors.left: parent.left
-            anchors.top: zoomBar.bottom
             anchors.bottom: bottomBar.top
 
-            width: height > 140? 70 : 140
             z: 1
 
             IconButton {
                 id: currentTurn
-                width: 70
-                height: 70
+                width: 90
+                height: 120
                 icon: navigationData.currentTurnType
                 text: navigationData.currentTurnDistance
+                needTranslation: false
 
                 z: 1
+
+
+                Text {
+                    text: navigationData.currentExit
+                    style: Text.Outline
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    anchors.centerIn: parent
+                    color: "white"
+                    font.pixelSize: currentTurn.height / 3
+                    visible: navigationData.currentExit > 0
+                    z: 1
+                }
 
                 Rectangle {
                     anchors.fill: parent
@@ -282,7 +299,7 @@ Item {
                     radius: 20
                     border.color: "black"
                     border.width: 3
-                    z: 1
+                    z: -1
                 }
 
                 Rectangle {
@@ -311,12 +328,26 @@ Item {
 
             IconButton {
                 id: nextTurn
-                width: 70
-                height: 70
+                width: 80
+                height: 120
                 icon: navigationData.nextTurnType
                 text: navigationData.nextTurnDistance
+                needTranslation: false
+                visible: navigationData.nextTurnType != ""
 
                 z: 1
+
+                Text {
+                    text: navigationData.nextExit
+                    style: Text.Outline
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    anchors.centerIn: parent
+                    color: "white"
+                    font.pixelSize: nextTurn.height / 3
+                    visible: navigationData.nextExit > 0
+                    z: 1
+                }
 
                 Rectangle {
                     anchors.fill: parent
@@ -324,7 +355,7 @@ Item {
                     radius: 20
                     border.color: "black"
                     border.width: 3
-                    z: 1
+                    z: -1
                 }
 
                 Rectangle {
@@ -350,6 +381,21 @@ Item {
                     }
                 }
             }
+        }
+
+        Button {
+            height: 70
+            opacity: 0.9
+            width: mainView.width/3
+
+            anchors.right: parent.right
+            anchors.leftMargin: 10
+            anchors.bottom: bottomBar.top
+            visible: navigationData.isNavigation && !wazeCanvas.isDialogActive
+
+            text: navigationData.street
+            fontSize: 32
+            needTranslation: false
         }
 
         Column {
@@ -719,28 +765,40 @@ Item {
             }
         }
 
-        Column {
+        Flow {
             id: etaBar
+            visible: !wazeCanvas.isDialogActive && navigationData.isNavigation
+            opacity: 0.9
 
             anchors.right: parent.right
-            anchors.bottom: bottomBar.top
+            anchors.left: parent.left
+            anchors.top: topBar.bottom
 
             Button {
                 text: navigationData.eta
-                width: 220
+                fontSize: 32
+                needTranslation: false
+                width: mainView.width/3
                 height: 70
+                visible: navigationData.eta != ""
             }
 
             Button {
-                width: 220
+                needTranslation: false
+                width: mainView.width/3
                 height: 70
                 text: navigationData.etaTime
+                fontSize: 32
+                visible: navigationData.etaTime != ""
             }
 
             Button {
-                width: 220
+                needTranslation: false
+                width: mainView.width/3
                 height: 70
                 text: navigationData.remainingDistance
+                fontSize: 32
+                visible: navigationData.remainingDistance != ""
             }
         }
     }
