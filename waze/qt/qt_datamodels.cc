@@ -16,6 +16,7 @@ extern "C" {
 
 void qt_datamodels_register()
 {
+    roadmap_main_set_qml_context_property("__navigationData", NavigationData::instance());
     roadmap_main_set_qml_context_property("__speedometerData", SpeedometerData::instance());
     roadmap_main_set_qml_context_property("__translator", Translator::instance());
     roadmap_main_set_qml_context_property("__imageProvider", WazeImageProvider::instance());
@@ -25,7 +26,6 @@ void qt_datamodels_register()
     roadmap_main_set_qml_context_property("__compass", WazeCompass::instance());
     roadmap_main_set_qml_context_property("__editor", WazeMapEditor::instance());
     roadmap_main_set_qml_context_property("__orientationSensor", OrientationSensor::instance());
-    roadmap_main_set_qml_context_property("__navigationData", NavigationData::instance());
 }
 
 SpeedometerData::SpeedometerData(QObject* parent) : QObject(parent) {}

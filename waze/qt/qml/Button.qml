@@ -5,6 +5,7 @@ Rectangle {
     height: buttonText.height
     property string text: ""
     property bool needTranslation: true
+    property int fontSize: 48
 
     signal buttonPressed
 
@@ -36,7 +37,7 @@ Rectangle {
         font.bold: true
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
-        font.pixelSize: 48
+        font.pixelSize: fontSize
     }
 
     Gradient {
