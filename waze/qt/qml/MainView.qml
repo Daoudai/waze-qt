@@ -201,6 +201,18 @@ Item {
             onClicked: showSideToolbars()
         }
 
+        Rectangle {
+            id: topBarBackground
+            color: 'black'
+            opacity: 0.7
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            height: topBar.height
+        }
+
         IconButton {
             id: exitButton
             width: 70
@@ -272,12 +284,13 @@ Item {
 
             IconButton {
                 id: currentTurn
-                width: 90
+                width: 120
                 height: 120
                 icon: navigationData.currentTurnType
+                visible: navigationData.currentTurnType != ""
                 text: navigationData.currentTurnDistance
                 needTranslation: false
-
+                fontSize: 24
                 z: 1
 
 
@@ -328,13 +341,13 @@ Item {
 
             IconButton {
                 id: nextTurn
-                width: 80
+                width: 120
                 height: 120
                 icon: navigationData.nextTurnType
                 text: navigationData.nextTurnDistance
                 needTranslation: false
                 visible: navigationData.nextTurnType != ""
-
+                fontSize: 24
                 z: 1
 
                 Text {
@@ -384,17 +397,18 @@ Item {
         }
 
         Button {
-            height: 70
+            height: 50
             opacity: 0.9
             width: mainView.width/3
 
             anchors.right: parent.right
+            anchors.left: instructionsBar.right
             anchors.leftMargin: 10
             anchors.bottom: bottomBar.top
             visible: navigationData.isNavigation && !wazeCanvas.isDialogActive
 
             text: navigationData.street
-            fontSize: 32
+            fontSize: 24
             needTranslation: false
         }
 
@@ -407,6 +421,20 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
 
             spacing: 10
+
+            IconButton {
+                id: rotateLeftButton
+                width: 70
+                height: 70
+                icon: "nav_turn_left"
+
+                onClicked: {
+                    buttonClicked();
+                    showSideToolbars();
+                    invokeAction("rotate_left")
+                    wazeCanvas.repaint();
+                }
+            }
 
             IconButton {
                 id: mapEditButton1
@@ -461,6 +489,20 @@ Item {
                     z: 1
                     fillMode: Image.PreserveAspectCrop
                     smooth: true
+                }
+            }
+
+            IconButton {
+                id: rotateRightButton
+                width: 70
+                height: 70
+                icon: "nav_turn_right"
+                rotation: 180
+                onClicked: {
+                    buttonClicked();
+                    showSideToolbars();
+                    invokeAction("rotate_right");
+                    wazeCanvas.repaint();
                 }
             }
         }
@@ -779,14 +821,14 @@ Item {
                 fontSize: 32
                 needTranslation: false
                 width: mainView.width/3
-                height: 70
+                height: 50
                 visible: navigationData.eta != ""
             }
 
             Button {
                 needTranslation: false
                 width: mainView.width/3
-                height: 70
+                height: 50
                 text: navigationData.etaTime
                 fontSize: 32
                 visible: navigationData.etaTime != ""
@@ -795,7 +837,7 @@ Item {
             Button {
                 needTranslation: false
                 width: mainView.width/3
-                height: 70
+                height: 50
                 text: navigationData.remainingDistance
                 fontSize: 32
                 visible: navigationData.remainingDistance != ""
