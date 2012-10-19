@@ -11,7 +11,7 @@ MouseArea {
 
     property string text: ""
     property bool needTranslation: true
-
+    property int fontSize: 14
     Image {
         id: iconImage
         visible: !iconButton.pressed || pressedIcon  === ""
@@ -42,6 +42,6 @@ MouseArea {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
         anchors.horizontalCenter: parent.horizontalCenter
-        font.pixelSize: 14
+        font.pixelSize: iconButton.fontSize 
     }
 }
