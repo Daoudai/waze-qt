@@ -178,29 +178,17 @@ void navigate_bar_set_distance (int distance) {
     {
         NavigationData::instance()->setRemainingDistance(QString::fromUtf8(text));
     }
-    else
-    {
-        roadmap_log(ROADMAP_ERROR, "Failed to get remaining distance");
-    }
 
     // update remaining time
     if (roadmap_message_format (text, sizeof(text), "%A|%T"))
     {
         NavigationData::instance()->setEtaTime(QString::fromUtf8(text));
     }
-    else
-    {
-        roadmap_log(ROADMAP_ERROR, "Failed to get remaining time");
-    }
 
     // update eta
     if (roadmap_message_format (text, sizeof(text), "%A|%@"))
     {
         NavigationData::instance()->setEta(QString::fromUtf8(text));
-    }
-    else
-    {
-        roadmap_log(ROADMAP_ERROR, "Failed to get ETA");
     }
 }
 
