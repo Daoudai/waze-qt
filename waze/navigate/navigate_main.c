@@ -1129,11 +1129,17 @@ static void navigate_main_format_messages (void) {
    navigate_main_get_distance_str(distance_to_destination, &str[0], sizeof(str), &unit_str[0], sizeof(unit_str));
 
    roadmap_message_set ('D', "%s %s", str, unit_str);
+#ifndef QTMOBILITY
    if (!showETA){
+#endif QTMOBILITY
  		sprintf (str, "%d %s", ETA /60, roadmap_lang_get("min."));
+#ifndef QTMOBILITY
  		roadmap_message_unset('@');
+#endif
       roadmap_message_set ('T', str);
+#ifndef QTMOBILITY
    }else{
+#endif
    	timeStruct ETA_struct;
    	timeStruct curTime = navigate_main_get_current_time();
    	timeStruct timeToDest;
@@ -1142,10 +1148,13 @@ static void navigate_main_format_messages (void) {
 	   timeToDest.seconds = ETA % 60;
 	   ETA_struct = navigate_main_calculate_eta(curTime,timeToDest);
  	   sprintf (str, "%s %d:%02d",roadmap_lang_get("ETA"), ETA_struct.hours, ETA_struct.minutes);
- 	   roadmap_message_unset('T');
+#ifndef QTMOBILITY
+       roadmap_message_unset('T');
+#endif
  	   roadmap_message_set ('@', str); // 1 hr. 25 min.
-
+#ifndef QTMOBILITY
    }
+#endif
    roadmap_navigate_get_current (&pos, NULL, NULL);
    roadmap_message_set ('S', "%3d %s",
          roadmap_math_to_speed_unit(pos.speed),
