@@ -431,8 +431,14 @@ Item {
                 onClicked: {
                     buttonClicked();
                     showSideToolbars();
-                    invokeAction("rotate_left")
+                    invokeAction("counterclockwise")
                     wazeCanvas.repaint();
+                }
+
+                Image {
+                    source: imageProvider.getImage("north_off")
+                    anchors.fill: parent
+                    z: -1
                 }
             }
 
@@ -501,8 +507,14 @@ Item {
                 onClicked: {
                     buttonClicked();
                     showSideToolbars();
-                    invokeAction("rotate_right");
+                    invokeAction("clockwise");
                     wazeCanvas.repaint();
+                }
+
+                Image {
+                    source: imageProvider.getImage("north_off")
+                    anchors.fill: parent
+                    z: -1
                 }
             }
         }
