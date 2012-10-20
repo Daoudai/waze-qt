@@ -10,6 +10,10 @@ TARGET = wazeqt
 TEMPLATE = lib
 CONFIG += staticlib mobility
 
+maemo5 {
+    CONFIG += qdbus
+}
+
 MOBILITY = location systeminfo multimedia contacts sensors
 
 DEFINES += TOUCH_SCREEN SSD QTMOBILITY FREEMAP_IL PLAY_CLICK LOCALE_SAFE PORT_RELEASE=\'\"v0.0.9-45\"\'

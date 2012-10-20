@@ -50,6 +50,10 @@
 #include "qt_contacts.h"
 #include "qt_datamodels.h"
 
+#ifdef Q_WS_MAEMO_5
+#include <QtDBus/QtDBus>
+#endif
+
 extern "C" {
 #include "roadmap.h"
 #include "roadmap_start.h"
@@ -369,7 +373,13 @@ void roadmap_gui_maximize() {
 }
 
 void roadmap_main_minimize (void) {
+#ifdef Q_WS_MAEMO_5
+    QDBusConnection connection = QDBusConnection::sessionBus();
+    QDBusMessage message = QDBusMessage::createSignal("/","com.nokia.hildon_desktop","exit_app_view");
+    connection.send(message);
+#else
     appWindow->showMinimized();
+#endif
 }
 
 /*************************************************************************************************
