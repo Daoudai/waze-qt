@@ -478,6 +478,9 @@ int main(int argc, char* argv[]) {
    qmlRegisterType<RMapCanvas>("org.waze", 1, 0, "WazeMap");
 
    QMainWindow w(app->desktop());
+   w.setAttribute(Qt::WA_AcceptTouchEvents);
+   w.grabGesture(Qt::PinchGesture);
+
    QmlApplicationViewer* appView = new QmlApplicationViewer;
    mainWindow = appView;
 
