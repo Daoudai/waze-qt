@@ -423,26 +423,6 @@ Item {
             spacing: 10
 
             IconButton {
-                id: rotateLeftButton
-                width: 70
-                height: 70
-                icon: "nav_turn_left"
-
-                onClicked: {
-                    buttonClicked();
-                    showSideToolbars();
-                    invokeAction("counterclockwise")
-                    wazeCanvas.repaint();
-                }
-
-                Image {
-                    source: imageProvider.getImage("north_off")
-                    anchors.fill: parent
-                    z: -1
-                }
-            }
-
-            IconButton {
                 id: mapEditButton1
                 width: 70
                 height: 70
@@ -497,25 +477,52 @@ Item {
                     smooth: true
                 }
             }
+        }
 
-            IconButton {
-                id: rotateRightButton
-                width: 70
-                height: 70
-                icon: "nav_turn_right"
-                rotation: 180
-                onClicked: {
-                    buttonClicked();
-                    showSideToolbars();
-                    invokeAction("clockwise");
-                    wazeCanvas.repaint();
-                }
+        IconButton {
+            id: rotateLeftButton
+            width: 70
+            height: 70
+            anchors.top: mapBar.top
+            anchors.right: mapBar.left
+            anchors.rightMargin: 10
+            visible: mapBar.visible
+            icon: "nav_turn_left"
 
-                Image {
-                    source: imageProvider.getImage("north_off")
-                    anchors.fill: parent
-                    z: -1
-                }
+            onClicked: {
+                buttonClicked();
+                showSideToolbars();
+                invokeAction("counterclockwise")
+                wazeCanvas.repaint();
+            }
+
+            Image {
+                source: imageProvider.getImage("north_off")
+                anchors.fill: parent
+                z: -1
+            }
+        }
+
+        IconButton {
+            id: rotateRightButton
+            width: 70
+            height: 70
+            anchors.top: zoomBar.top
+            anchors.left: zoomBar.right
+            anchors.leftMargin: 10
+            visible: zoomBar.visible
+            icon: "nav_turn_right"
+            onClicked: {
+                buttonClicked();
+                showSideToolbars();
+                invokeAction("clockwise");
+                wazeCanvas.repaint();
+            }
+
+            Image {
+                source: imageProvider.getImage("north_off")
+                anchors.fill: parent
+                z: -1
             }
         }
 
