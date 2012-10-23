@@ -97,7 +97,7 @@ static const char NAVIGATE_UK_DIR_IMG[][40] = {
 
 
 BOOL navigate_bar_is_hidden(void){
-   return NavigationData::instance()->isNavigation();
+   return false;
 }
 
 void navigate_bar_resize(void){
