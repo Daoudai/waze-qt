@@ -1,3 +1,17 @@
+waze (0.0.9-99~precise1) precise; urgency=low
+  * Main view layout change
+  * When navigating, the "Navigate" button allow navigation control
+  * Minimize button added
+  * Browser control orientation fixed
+  * Multitouch on Harmattan fixed
+  * Portrait mode added
+  * Rotate map buttons were added (for platforms without multitouch)
+  * The number of active connections has been limited to ~16
+  * Fix the road signs text (road shields)
+  * Make the map fonts bolder
+
+ -- Assaf Paz (damagedspline) <damagedspline@gmail.com>  Fri, 26 Oct 2012 13:54:00 +0300
+
 waze (0.0.9-5~precise1) precise; urgency=low
   * Added 'backlight stay lit only when plugged' option
   * Fixed the freeze that occured when data was transmitted, so no more 'Close application...' dialog.
