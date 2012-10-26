@@ -1,3 +1,17 @@
+waze (0.0.10) unstable; urgency=low
+  * Main view layout change
+  * When navigating, the "Navigate" button allow navigation control
+  * Minimize button added
+  * Browser control orientation fixed
+  * Multitouch on Harmattan fixed
+  * Portrait mode added
+  * Rotate map buttons were added (for platforms without multitouch)
+  * The number of active connections has been limited to ~16
+  * Fix the road signs text (road shields)
+  * Make the map fonts bolder
+
+ -- Assaf Paz (damagedspline) <damagedspline@gmail.com>  Fri, 26 Oct 2012 13:54:00 +0300
+
 waze (0.0.9-45) unstable; urgency=low
   * Add AMOLED Optimized theme (contribution by ginggs from TMO)
   * Fix routing navigation which sometimes didn't work
