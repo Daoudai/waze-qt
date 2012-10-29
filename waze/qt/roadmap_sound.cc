@@ -35,6 +35,7 @@
 #include <QFile>
 #include <QUrl>
 #include <QFileInfo>
+#include <phonon/MediaSource>
 #include "qt_sound.h"
 #include "qt_main.h"
 
@@ -48,7 +49,7 @@ extern "C" {
 }
 
 typedef struct roadmap_sound_st {
-    QMediaResource *media;
+    Phonon::MediaSource *media;
 } roadmap_sound_st;
 
 extern QDeclarativeView* mainWindow;
@@ -210,7 +211,7 @@ RoadMapSound roadmap_sound_load (const char *path, const char *file, int *mem)
 
    sound = new roadmap_sound_st();
 
-   sound->media = new QMediaResource(QUrl::fromLocalFile(soundFileName));
+   sound->media = new Phonon::MediaSource(QUrl::fromLocalFile(soundFileName));
 
    *mem = QFileInfo(soundFileName).size();
    return sound;

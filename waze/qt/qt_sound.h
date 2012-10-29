@@ -2,14 +2,14 @@
 #define QT_SOUND_H
 
 #include <QObject>
-#include <QMediaPlayer>
-#include <QMediaContent>
 #include <QUrl>
 #include <QList>
 #include <QMutex>
 #include <QAudioCaptureSource>
 #include <QMediaRecorder>
-
+#include <phonon/MediaObject>
+#include <phonon/MediaSource>
+#include <phonon/AudioOutput>
 
 class Playlist : public QObject
 {
@@ -18,19 +18,20 @@ public:
     Playlist(QObject* parent = 0);
     virtual ~Playlist();
 
-    void playMedia(QMediaContent mediaContent);
-    void setVolume(int volume);
+    void playMedia(Phonon::MediaSource mediaContent);
+    void setVolume(qreal volume);
 
 private slots:
-    void mediaStatusChanged(QMediaPlayer::MediaStatus status);
+    void mediaStatusChanged(Phonon::State status);
 
 protected:
     void playFirstInQueue();
 
 private:
-    QMediaPlayer _player;
+    Phonon::MediaObject _player;
+    Phonon::AudioOutput _output;
     QMutex _playlistMutex;
-    QList<QMediaContent> _playlist;
+    QList<Phonon::MediaSource> _playlist;
 };
 
 class Recorder : public QObject

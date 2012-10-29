@@ -7,9 +7,10 @@ extern "C" {
 }
 
 Playlist::Playlist(QObject *parent) :
-    QObject(parent)
+    QObject(parent), _output(Phonon::NotificationCategory)
 { 
-   QObject::connect(&_player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(mediaStatusChanged(QMediaPlayer::MediaStatus)));
+    Phonon::createPath(&_player, &_output);
+    QObject::connect(&_player, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(mediaStatusChanged(Phonon::State)));
 }
 
 Playlist::~Playlist()
@@ -22,16 +23,16 @@ void Playlist::playFirstInQueue()
 {
     if (_playlist.count() > 0)
     {
-        QMediaContent mediaContent = _playlist.first();
-        roadmap_log(ROADMAP_INFO, "Playing %s", mediaContent.canonicalUrl().toString().toAscii().data());
-        _player.setMedia(mediaContent);
+        Phonon::MediaSource& mediaContent = _playlist.first();
+        roadmap_log(ROADMAP_INFO, "Playing %s", mediaContent.url().toString().toAscii().data());
+        _player.setCurrentSource(mediaContent);
         _player.play();
     }
 }
 
-void Playlist::mediaStatusChanged(QMediaPlayer::MediaStatus status)
+void Playlist::mediaStatusChanged(Phonon::State status)
 {
-    if (status == QMediaPlayer::EndOfMedia)
+    if (status == Phonon::StoppedState)
     {
         _playlistMutex.lock();
         _playlist.removeFirst();
@@ -40,7 +41,7 @@ void Playlist::mediaStatusChanged(QMediaPlayer::MediaStatus status)
     }
 }
 
-void Playlist::playMedia(QMediaContent mediaContent)
+void Playlist::playMedia(Phonon::MediaSource mediaContent)
 {
     _playlistMutex.lock();
     _playlist.append(mediaContent);
@@ -49,9 +50,9 @@ void Playlist::playMedia(QMediaContent mediaContent)
 }
 
 
-void Playlist::setVolume(int volume)
+void Playlist::setVolume(qreal volume)
 {
-    _player.setVolume(volume);
+    _output.setVolume(volume);
 }
 
 Recorder::Recorder(QObject* parent) :

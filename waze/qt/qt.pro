@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql declarative network webkit
+QT       += core gui sql declarative network webkit phonon
 
 TARGET = wazeqt
 TEMPLATE = lib
