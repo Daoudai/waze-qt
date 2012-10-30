@@ -201,18 +201,6 @@ Item {
             onClicked: showSideToolbars()
         }
 
-        Rectangle {
-            id: topBarBackground
-            color: 'black'
-            opacity: 0.7
-
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            height: topBar.height
-        }
-
         IconButton {
             id: exitButton
             width: 70
@@ -234,10 +222,9 @@ Item {
         Column {
             id: zoomBar
 
-            anchors.verticalCenterOffset: -mainView.height / 10
-            anchors.left: parent.left
+            anchors.left: instructionsBar.visible? instructionsBar.right : parent.left
             anchors.leftMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.top: nextStreet.bottom
 
             spacing: 10
 
@@ -270,7 +257,7 @@ Item {
             }
         }
 
-        Row {
+        Flow {
             id: instructionsBar
 
             opacity: 0.9
@@ -278,7 +265,26 @@ Item {
 
             visible: navigationData.isNavigation && !wazeCanvas.isDialogActive
             anchors.left: parent.left
-            anchors.bottom: bottomBar.top
+            anchors.top: nextStreet.bottom
+
+            states: [
+                State {
+                    name: "landscape"
+                    when: mainView.width >= mainView.height
+                    PropertyChanges {
+                        target: instructionsBar
+                        width: 120
+                    }
+                },
+                State {
+                    name: "portrait"
+                    when: mainView.width < mainView.height
+                    PropertyChanges {
+                        target: instructionsBar
+                        width: 120
+                    }
+                }
+            ]
 
             z: 1
 
@@ -397,14 +403,15 @@ Item {
         }
 
         Button {
+            id: nextStreet
             height: 50
             opacity: 0.9
-            width: mainView.width/3
 
-            anchors.right: parent.right
-            anchors.left: instructionsBar.right
+            anchors.top: parent.top
+            anchors.right: showTopBarButton.left
+            anchors.rightMargin: 5
+            anchors.left: parent.right
             anchors.leftMargin: 10
-            anchors.bottom: bottomBar.top
             visible: navigationData.isNavigation && !wazeCanvas.isDialogActive
 
             text: navigationData.street
@@ -415,10 +422,9 @@ Item {
         Column {
             id: mapBar
 
-            anchors.verticalCenterOffset: -mainView.height / 10
+            anchors.top: zoomBar.top
             anchors.right: parent.right
             anchors.rightMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
 
             spacing: 10
 
@@ -671,157 +677,199 @@ Item {
             }
         }
 
-        Flow {
-            id: topBar
-            anchors.rightMargin: 10
-            anchors.leftMargin: 10
+        IconButton {
+            id: showTopBarButton
+            anchors.top: parent.top
             anchors.right: minimizeButton.left
-            anchors.left: parent.left
+            anchors.rightMargin: 10
+            width: 70
+            height: 50
+            icon: "general_settings"
 
-            spacing: 10
+            visible: !wazeCanvas.isDialogActive
 
-            IconButton {
-                id: aboutButton
-                width: 70
-                height: 50
-                icon: "about"
-
-                visible: !wazeCanvas.isDialogActive
-
-                onClicked: {
-                    buttonClicked();
-                    invokeAction("about");
-                }
+            onClicked: {
+                buttonClicked();
+                topBar.visible = true;
             }
+        }
 
-            IconButton {
-                id: moodsButton
-                width: 70
-                height: 50
+        Rectangle {
+            id: topBar
 
-                icon: moodToIcon(moods.mood)
+            anchors.fill: parent
 
-                visible: !wazeCanvas.isDialogActive
+            visible: false
 
-                onClicked: {
-                    buttonClicked();
-                    invokeAction("mood_dialog");
-                }
+            Rectangle {
+                color: "#000000"
+                opacity: 0.700
+                anchors.fill: parent
 
-                function moodToIcon(mood)
-                {
-                    switch(mood)
-                    {
-                    case 0 : return "TS_top_mood_disabled";
-                    case 1 : return "TS_top_mood_happy";
-                    case 2 : return "TS_top_mood_sad";
-                    case 3 : return "TS_top_mood_mad";
-                    case 4 : return "TS_top_mood_bored";
-                    case 5 : return "TS_top_mood_speedy";
-                    case 6 : return "TS_top_mood_starving";
-                    case 7 : return "TS_top_mood_sleepy";
-                    case 8 : return "TS_top_mood_cool";
-                    case 9 : return "TS_top_mood_inlove";
-                    case 10 : return "TS_top_mood_LOL";
-                    case 11 : return "TS_top_mood_peaceful2";
-                    case 12 : return "TS_top_mood_singing";
-                    case 13 : return "TS_top_mood_wondering";
-                    case 14 : return "TS_top_mood_happy";
-                    case 15 : return "TS_top_mood_sad";
-                    case 16 : return "TS_top_mood_mad";
-                    case 17 : return "TS_top_mood_bored";
-                    case 18 : return "TS_top_mood_speedy";
-                    case 19 : return "TS_top_mood_starving";
-                    case 20 : return "TS_top_mood_sleepy";
-                    case 21 : return "TS_top_mood_cool";
-                    case 22 : return "TS_top_mood_inlove";
-                    case 23 : return "TS_top_mood_LOL";
-                    case 24 : return "TS_top_mood_peaceful";
-                    case 25 : return "TS_top_mood_singing";
-                    case 26 : return "TS_top_mood_wondering";
-                    case 27 : return "TS_top_mood_bronze";
-                    case 28 : return "TS_top_mood_silver";
-                    case 29 : return "TS_top_mood_gold";
-                    case 30 : return "TS_top_mood_busy";
-                    case 31 : return "TS_top_mood_busy";
-                    case 32 : return "TS_top_mood_in_a_hurry";
-                    case 33 : return "TS_top_mood_in_a_hurry";
-                    case 34 : return "TS_top_mood_baby";
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        topBar.visible = false;
                     }
                 }
             }
 
-            IconButton {
-                id: gpsStatusButton
-                width: 70
-                height: 50
-                icon: gpsToIcon(monitor.gpsState)
+            Flow {
+                anchors.centerIn: parent
+                width: 340
+                z: 1
 
-                visible: !wazeCanvas.isDialogActive
+                spacing: 10
 
-                onClicked: {
-                    buttonClicked();
-                    invokeAction("gps_net_stat");
-                }
+                IconButton {
+                    id: aboutButton
+                    width: 140
+                    height: 100
+                    icon: "about"
 
-                function gpsToIcon(state) {
-                    switch(state)
-                    {
-                    case 0: return "TS_top_satellite_off";
-                    case 1: return "TS_top_satellite_off";
-                    case 2: return "TS_top_satellite_poor";
-                    case 3: return "TS_top_satellite_on";
+                    visible: !wazeCanvas.isDialogActive
+
+                    onClicked: {
+                        buttonClicked();
+                        topBar.visible = false;
+                        invokeAction("about");
                     }
                 }
-            }
 
-            IconButton {
-                id: onlineButton
-                width: 70
-                height: 50
-                icon: netToIcon(monitor.netState)
+                IconButton {
+                    id: moodsButton
+                    width: 140
+                    height: 100
 
-                visible: !wazeCanvas.isDialogActive
+                    icon: moodToIcon(moods.mood)
 
-                onClicked: {
-                    buttonClicked();
-                    invokeAction("gps_net_stat");
-                }
+                    visible: !wazeCanvas.isDialogActive
 
-                function netToIcon(state) {
-                    switch(state)
+                    onClicked: {
+                        buttonClicked();
+                        topBar.visible = false;
+                        invokeAction("mood_dialog");
+                    }
+
+                    function moodToIcon(mood)
                     {
-                    case 0: return "TS_top_not_connected";
-                    case 1: return "TS_top_connected";
+                        switch(mood)
+                        {
+                        case 0 : return "TS_top_mood_disabled";
+                        case 1 : return "TS_top_mood_happy";
+                        case 2 : return "TS_top_mood_sad";
+                        case 3 : return "TS_top_mood_mad";
+                        case 4 : return "TS_top_mood_bored";
+                        case 5 : return "TS_top_mood_speedy";
+                        case 6 : return "TS_top_mood_starving";
+                        case 7 : return "TS_top_mood_sleepy";
+                        case 8 : return "TS_top_mood_cool";
+                        case 9 : return "TS_top_mood_inlove";
+                        case 10 : return "TS_top_mood_LOL";
+                        case 11 : return "TS_top_mood_peaceful2";
+                        case 12 : return "TS_top_mood_singing";
+                        case 13 : return "TS_top_mood_wondering";
+                        case 14 : return "TS_top_mood_happy";
+                        case 15 : return "TS_top_mood_sad";
+                        case 16 : return "TS_top_mood_mad";
+                        case 17 : return "TS_top_mood_bored";
+                        case 18 : return "TS_top_mood_speedy";
+                        case 19 : return "TS_top_mood_starving";
+                        case 20 : return "TS_top_mood_sleepy";
+                        case 21 : return "TS_top_mood_cool";
+                        case 22 : return "TS_top_mood_inlove";
+                        case 23 : return "TS_top_mood_LOL";
+                        case 24 : return "TS_top_mood_peaceful";
+                        case 25 : return "TS_top_mood_singing";
+                        case 26 : return "TS_top_mood_wondering";
+                        case 27 : return "TS_top_mood_bronze";
+                        case 28 : return "TS_top_mood_silver";
+                        case 29 : return "TS_top_mood_gold";
+                        case 30 : return "TS_top_mood_busy";
+                        case 31 : return "TS_top_mood_busy";
+                        case 32 : return "TS_top_mood_in_a_hurry";
+                        case 33 : return "TS_top_mood_in_a_hurry";
+                        case 34 : return "TS_top_mood_baby";
+                        }
                     }
                 }
-            }
 
-            IconButton {
-                id: profileButton
-                width: 70
-                height: 50
-                icon: "general_settings"
+                IconButton {
+                    id: gpsStatusButton
+                    width: 140
+                    height: 100
+                    icon: gpsToIcon(monitor.gpsState)
 
-                visible: !wazeCanvas.isDialogActive
+                    visible: !wazeCanvas.isDialogActive
 
-                onClicked: {
-                    buttonClicked();
-                    invokeAction("mywaze");
+                    onClicked: {
+                        buttonClicked();
+                        topBar.visible = false;
+                        invokeAction("gps_net_stat");
+                    }
+
+                    function gpsToIcon(state) {
+                        switch(state)
+                        {
+                        case 0: return "TS_top_satellite_off";
+                        case 1: return "TS_top_satellite_off";
+                        case 2: return "TS_top_satellite_poor";
+                        case 3: return "TS_top_satellite_on";
+                        }
+                    }
                 }
-            }
 
-            IconButton {
-                id: optionsButton
-                width: 70
-                height: 50
-                icon: "settings_button"
+                IconButton {
+                    id: onlineButton
+                    width: 140
+                    height: 100
+                    icon: netToIcon(monitor.netState)
 
-                visible: !wazeCanvas.isDialogActive
+                    visible: !wazeCanvas.isDialogActive
 
-                onClicked: {
-                    buttonClicked();
-                    invokeAction("settingsmenu");
+                    onClicked: {
+                        buttonClicked();
+                        topBar.visible = false;
+                        invokeAction("gps_net_stat");
+                    }
+
+                    function netToIcon(state) {
+                        switch(state)
+                        {
+                        case 0: return "TS_top_not_connected";
+                        case 1: return "TS_top_connected";
+                        }
+                    }
+                }
+
+                IconButton {
+                    id: profileButton
+                    width: 140
+                    height: 100
+                    icon: "general_settings"
+
+                    visible: !wazeCanvas.isDialogActive
+
+                    onClicked: {
+                        buttonClicked();
+                        topBar.visible = false;
+                        invokeAction("mywaze");
+                    }
+                }
+
+                IconButton {
+                    id: optionsButton
+                    width: 140
+                    height: 100
+                    icon: "settings_button"
+
+                    visible: !wazeCanvas.isDialogActive
+
+                    onClicked: {
+                        buttonClicked();
+                        topBar.visible = false;
+                        invokeAction("settingsmenu");
+                    }
                 }
             }
         }
@@ -831,9 +879,8 @@ Item {
             visible: !wazeCanvas.isDialogActive && navigationData.isNavigation
             opacity: 0.9
 
-            anchors.right: parent.right
             anchors.left: parent.left
-            anchors.top: topBar.bottom
+            anchors.bottom: bottomBar.top
 
             Button {
                 text: navigationData.eta
