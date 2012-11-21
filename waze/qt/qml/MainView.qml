@@ -408,9 +408,9 @@ Item {
             opacity: 0.9
 
             anchors.top: parent.top
-            anchors.right: showTopBarButton.left
-            anchors.rightMargin: 5
-            anchors.left: parent.right
+            anchors.right: minimizeButton.left
+            anchors.rightMargin: 20
+            anchors.left: parent.left
             anchors.leftMargin: 10
             visible: navigationData.isNavigation && !wazeCanvas.isDialogActive
 
@@ -550,90 +550,123 @@ Item {
             }
         }
 
-        Flow {
+        IconButton {
+            id: showMeButton
+            anchors.right: parent.right
+            anchors.bottom: bottomBar.top
+            anchors.bottomMargin: 20
+            width: 70
+            height: 70
+            icon: "location"
+            text: "Me_on_map"
+            fitImage: true
+
+            visible: !wazeCanvas.isDialogActive
+
+            onClicked: {
+                buttonClicked();
+                invokeAction("show_me");
+            }
+        }
+
+        Rectangle {
             id: bottomBar
             anchors.right: parent.right
             anchors.rightMargin: 5
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.bottom: parent.bottom
+            height: 70
+            color: 'transparent'
+            visible: !wazeCanvas.isDialogActive
 
-            IconButton {
-                id: showMeButton
-                width: 140
-                height: 70
-                icon: "me_on_map_wide"
-                pressedIcon: "me_on_map2_wide"
-                text: "Me_on_map"
-                fitImage: false
-
-                visible: !wazeCanvas.isDialogActive
-
-                onClicked: {
-                    buttonClicked();
-                    invokeAction("show_me");
-                }
-            }
 
             IconButton {
                 id: navigateButton
-                width: 140
-                height: 70
-                icon: "Search_wide"
-                pressedIcon: "Search2_wide"
-                text: "Drive_to"
+                width: 70
+                height: parent.height
+                x: 0
+                z: 1
+                icon: "More"
+                text: "Menu"
                 fitImage: false
 
-                visible: !wazeCanvas.isDialogActive && !navigationData.isNavigation
-
-                onClicked: {
-                    buttonClicked();
-                    invokeAction("search_menu");
+                onXChanged: {
+                    if (x === bottomBar.width/2 - width)
+                    {
+                        buttonClicked();
+                        if (!navigationData.isNavigation)
+                        {
+                            invokeAction("search_menu");
+                        }
+                        else
+                        {
+                            invokeAction("nav_menu");
+                        }
+                        x = 0;
+                    }
                 }
-            }
 
-            IconButton {
-                id: navigationOptionsButton
-                width: 140
-                height: 70
-                icon: "More_wide"
-                pressedIcon: "More2_wide"
-                text: "Navigate"
-                fitImage: false
+                MouseArea {
+                    id: navigateDragArea
 
-                visible: !wazeCanvas.isDialogActive && navigationData.isNavigation
+                    anchors.fill: parent
 
-                onClicked: {
-                    buttonClicked();
-                    invokeAction("nav_menu");
+                    drag.target: navigateButton
+                    drag.axis: Drag.XAxis
+                    drag.minimumX: 0
+                    drag.maximumX: bottomBar.width/2 - parent.width
+
+                    onClicked: {
+                        buttonClicked();
+                        topBar.visible = true;
+                    }
+
+                    onReleased: {
+                        navigateButton.x = 0;
+                    }
+
+                    states: [
+                        State {
+                            name: "pressed"
+                            when: navigateDragArea.pressed && navigateButton.x == 0
+                            PropertyChanges {
+                                target: navigateButton
+                                text: "Menu"
+                                icon: "More2"
+                            }
+                        },
+                        State {
+                            name: "dragged"
+                            when: navigateDragArea.pressed && 0 < navigateButton.x && navigateButton.x < bottomBar.width/2 - navigateButton.width
+                            PropertyChanges {
+                                target: navigateButton
+                                text: !navigationData.isNavigation? "Drive_to" : "Navigate"
+                                icon: "Search";
+                            }
+                        }
+                    ]
                 }
             }
 
             IconButton {
                 id: showAlertsButton
-                width: 140
+                x: bottomBar.width - width
+                z: 1
+                width: 70
                 height: 70
-                icon: "Live_event_wide"
-                pressedIcon: "Live_event2_wide"
+                icon: "Live_event"
                 text: "Events"
                 fitImage: false
-
-                visible: !wazeCanvas.isDialogActive
-
-                onClicked: {
-                    buttonClicked();
-                    invokeAction("real_time_alerts_list");
-                }
-                z: 1
 
                 Rectangle {
                     color: "red"
                     width: height
                     height: parent.height / 2 - 5
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 5
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.verticalCenterOffset: -20
                     anchors.right: parent.right
-                    anchors.rightMargin: 10
+                    anchors.rightMargin: -10
                     radius: height / 2
                     visible: typeof(alertsCountText.text) !== 'undefined' && alertsCountText.text !== ""
 
@@ -648,49 +681,117 @@ Item {
                         font.pixelSize: height / 2
                     }
                 }
-            }
 
-            IconButton {
-                id: reportAlertButton
-                width: 140
-                height: 70
-                icon: "Report_wide"
-                pressedIcon: "Report2_wide"
-                text: "Report"
-                fitImage: false
+                onXChanged: {
+                    if (x === bottomBar.width/2)
+                    {
+                        buttonClicked();
+                        invokeAction("alertsmenu");
 
-                visible: !wazeCanvas.isDialogActive
+                        x = bottomBar.width - width;
+                    }
+                }
 
-                onClicked: {
-                    buttonClicked();
-                    invokeAction("alertsmenu");
+                MouseArea {
+                    id: reportDragArea
+
+                    anchors.fill: parent
+
+                    drag.target: showAlertsButton
+                    drag.axis: Drag.XAxis
+                    drag.minimumX: bottomBar.width/2
+                    drag.maximumX: bottomBar.width - parent.width
+
+                    onClicked: {
+                        buttonClicked();
+                        invokeAction("real_time_alerts_list");
+                    }
+
+                    onReleased: {
+                        showAlertsButton.x = bottomBar.width - parent.width;
+                    }
+
+                    states: [
+                        State {
+                            name: "pressed"
+                            when: reportDragArea.pressed && showAlertsButton.x === bottomBar.width - parent.width
+                            PropertyChanges {
+                                target: showAlertsButton
+                                icon: "Live_event2"
+                                text: "Events"
+                            }
+                        },
+                        State {
+                            name: "dragged"
+                            when: reportDragArea.pressed && bottomBar.width / 2 < showAlertsButton.x && showAlertsButton.x < bottomBar.width - parent.width
+                            PropertyChanges {
+                                target: showAlertsButton
+                                text: "Report"
+                                icon: "Report"
+                            }
+                        }
+                    ]
                 }
             }
 
             Button {
-                id: speedometer
-                width: 220
-                height: 70
-                visible: speedometerData.isVisible && !wazeCanvas.isDialogActive && speedometerData.text != ""
-                text: speedometerData.text
-                needTranslation: false
-            }
-        }
+                id: etaBar
+                property bool isEta: true
 
-        IconButton {
-            id: showTopBarButton
-            anchors.top: parent.top
-            anchors.right: minimizeButton.left
-            anchors.rightMargin: 10
-            width: 70
-            height: 50
-            icon: "general_settings"
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                width: 270
+                height: 60
+                visible: navigationData.isNavigation
 
-            visible: !wazeCanvas.isDialogActive
+                Text {
+                    color: "#ffffff"
+                    anchors.right: etaSeperator.left
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
 
-            onClicked: {
-                buttonClicked();
-                topBar.visible = true;
+                    text: (etaBar.isEta)? navigationData.eta : navigationData.etaTime
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    font.pointSize: 20
+                    verticalAlignment: Text.AlignVCenter
+                }
+
+                Text {
+                    id: etaSeperator
+                    color: "#000000"
+                    anchors.centerIn: parent
+
+                    text: "|"
+                    font.bold: true
+                    style: Text.Outline
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    font.pointSize: 30
+                }
+
+                Text {
+                    color: "#ffffff"
+                    anchors.right: parent.right
+                    anchors.left: etaSeperator.right
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    text: (etaBar.isEta)? speedometerData.text : navigationData.remainingDistance
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    font.pointSize: 20
+                    verticalAlignment: Text.AlignVCenter
+                }
+
+                Timer {
+                    id: eta_message_timer
+                    repeat: true
+                    running: etaBar.visible
+                    interval: 5000
+                    onTriggered: {
+                        etaBar.isEta = !etaBar.isEta
+                    }
+                }
             }
         }
 
@@ -726,8 +827,7 @@ Item {
                     width: 140
                     height: 100
                     icon: "about"
-
-                    visible: !wazeCanvas.isDialogActive
+                    text: "About"
 
                     onClicked: {
                         buttonClicked();
@@ -742,8 +842,7 @@ Item {
                     height: 100
 
                     icon: moodToIcon(moods.mood)
-
-                    visible: !wazeCanvas.isDialogActive
+                    text: "Mood"
 
                     onClicked: {
                         buttonClicked();
@@ -799,8 +898,7 @@ Item {
                     width: 140
                     height: 100
                     icon: gpsToIcon(monitor.gpsState)
-
-                    visible: !wazeCanvas.isDialogActive
+                    text: "Status"
 
                     onClicked: {
                         buttonClicked();
@@ -824,8 +922,7 @@ Item {
                     width: 140
                     height: 100
                     icon: netToIcon(monitor.netState)
-
-                    visible: !wazeCanvas.isDialogActive
+                    text: "Status"
 
                     onClicked: {
                         buttonClicked();
@@ -847,8 +944,7 @@ Item {
                     width: 140
                     height: 100
                     icon: "general_settings"
-
-                    visible: !wazeCanvas.isDialogActive
+                    text: "Profile"
 
                     onClicked: {
                         buttonClicked();
@@ -862,8 +958,7 @@ Item {
                     width: 140
                     height: 100
                     icon: "settings_button"
-
-                    visible: !wazeCanvas.isDialogActive
+                    text: "General settings"
 
                     onClicked: {
                         buttonClicked();
@@ -871,42 +966,6 @@ Item {
                         invokeAction("settingsmenu");
                     }
                 }
-            }
-        }
-
-        Flow {
-            id: etaBar
-            visible: !wazeCanvas.isDialogActive && navigationData.isNavigation
-            opacity: 0.9
-
-            anchors.left: parent.left
-            anchors.bottom: bottomBar.top
-
-            Button {
-                text: navigationData.eta
-                fontSize: 32
-                needTranslation: false
-                width: mainView.width/3
-                height: 50
-                visible: navigationData.eta != ""
-            }
-
-            Button {
-                needTranslation: false
-                width: mainView.width/3
-                height: 50
-                text: navigationData.etaTime
-                fontSize: 32
-                visible: navigationData.etaTime != ""
-            }
-
-            Button {
-                needTranslation: false
-                width: mainView.width/3
-                height: 50
-                text: navigationData.remainingDistance
-                fontSize: 32
-                visible: navigationData.remainingDistance != ""
             }
         }
     }
