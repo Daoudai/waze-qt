@@ -138,6 +138,26 @@ Item {
         property string street : (typeof(__navigationData) === 'undefined')? "" : __navigationData.street
     }
 
+    ////// Below is mock data to test the navigation view
+    /*
+    Item {
+        id: navigationData
+
+        property bool isNavigation : true
+        property string eta : "120 דק'"
+        property string etaTime : "23:13"
+        property string remainingDistance : "138 ק\"מ"
+        property string currentTurnType : "nav_turn_right"
+        property string currentTurnDistance : "12 ק\"מ"
+        property int currentExit : 0
+        property string nextTurnType : ""
+        property string nextTurnDistance : ""
+        property int nextExit : 0
+        property string street : "רח' השפשפת"
+    }
+    */
+
+
     ////////////// End of Context data binding wrappers //////////////
 
     Timer {
@@ -408,9 +428,9 @@ Item {
             opacity: 0.9
 
             anchors.top: parent.top
-            anchors.right: minimizeButton.left
-            anchors.rightMargin: 20
-            anchors.left: parent.left
+            anchors.right: exitButton.left
+            anchors.rightMargin: 0
+            anchors.left: minimizeButton.right
             anchors.leftMargin: 10
             visible: navigationData.isNavigation && !wazeCanvas.isDialogActive
 
@@ -539,8 +559,8 @@ Item {
             icon: "button_sc_3_mid_s"
             anchors.top: parent.top
             anchors.topMargin: 0
-            anchors.right: exitButton.left
-            anchors.rightMargin: 10
+            anchors.left: parent.left
+            anchors.leftMargin: 5
 
             visible: !wazeCanvas.isDialogActive
 
@@ -585,14 +605,19 @@ Item {
                 id: navigateButton
                 width: 70
                 height: parent.height
-                x: 0
+                property int originX: 0
+                onOriginXChanged: {
+                    navigateButton.x = navigateButton.originX;
+                }
+                property int targetX: bottomBar.width / 2 - navigateButton.width                
+                x: originX
                 z: 1
                 icon: "More"
                 text: "Menu"
                 fitImage: false
 
                 onXChanged: {
-                    if (x === bottomBar.width/2 - width)
+                    if (x === navigateButton.targetX)
                     {
                         buttonClicked();
                         if (!navigationData.isNavigation)
@@ -603,7 +628,7 @@ Item {
                         {
                             invokeAction("nav_menu");
                         }
-                        x = 0;
+                        x = navigateButton.originX;
                     }
                 }
 
@@ -614,8 +639,8 @@ Item {
 
                     drag.target: navigateButton
                     drag.axis: Drag.XAxis
-                    drag.minimumX: 0
-                    drag.maximumX: bottomBar.width/2 - parent.width
+                    drag.minimumX: navigateButton.originX
+                    drag.maximumX: navigateButton.targetX
 
                     onClicked: {
                         buttonClicked();
@@ -623,13 +648,13 @@ Item {
                     }
 
                     onReleased: {
-                        navigateButton.x = 0;
+                        navigateButton.x = navigateButton.originX;
                     }
 
                     states: [
                         State {
                             name: "pressed"
-                            when: navigateDragArea.pressed && navigateButton.x == 0
+                            when: navigateDragArea.pressed && navigateButton.x == navigateButton.originX
                             PropertyChanges {
                                 target: navigateButton
                                 text: "Menu"
@@ -638,7 +663,7 @@ Item {
                         },
                         State {
                             name: "dragged"
-                            when: navigateDragArea.pressed && 0 < navigateButton.x && navigateButton.x < bottomBar.width/2 - navigateButton.width
+                            when: navigateDragArea.pressed && navigateButton.originX < navigateButton.x && navigateButton.x < navigateButton.targetX
                             PropertyChanges {
                                 target: navigateButton
                                 text: !navigationData.isNavigation? "Drive_to" : "Navigate"
@@ -651,7 +676,12 @@ Item {
 
             IconButton {
                 id: showAlertsButton
-                x: bottomBar.width - width
+                property int originX: bottomBar.width - showAlertsButton.width
+                onOriginXChanged: {
+                    showAlertsButton.x = showAlertsButton.originX;
+                }
+                property int targetX: bottomBar.width / 2                
+                x: originX
                 z: 1
                 width: 70
                 height: 70
@@ -683,12 +713,12 @@ Item {
                 }
 
                 onXChanged: {
-                    if (x === bottomBar.width/2)
+                    if (x === showAlertsButton.targetX)
                     {
                         buttonClicked();
                         invokeAction("alertsmenu");
 
-                        x = bottomBar.width - width;
+                        x = showAlertsButton.originX;
                     }
                 }
 
@@ -699,8 +729,8 @@ Item {
 
                     drag.target: showAlertsButton
                     drag.axis: Drag.XAxis
-                    drag.minimumX: bottomBar.width/2
-                    drag.maximumX: bottomBar.width - parent.width
+                    drag.minimumX: showAlertsButton.targetX
+                    drag.maximumX: showAlertsButton.originX
 
                     onClicked: {
                         buttonClicked();
@@ -708,13 +738,13 @@ Item {
                     }
 
                     onReleased: {
-                        showAlertsButton.x = bottomBar.width - parent.width;
+                        showAlertsButton.x = showAlertsButton.originX;
                     }
 
                     states: [
                         State {
                             name: "pressed"
-                            when: reportDragArea.pressed && showAlertsButton.x === bottomBar.width - parent.width
+                            when: reportDragArea.pressed && showAlertsButton.x === showAlertsButton.originX
                             PropertyChanges {
                                 target: showAlertsButton
                                 icon: "Live_event2"
@@ -723,7 +753,7 @@ Item {
                         },
                         State {
                             name: "dragged"
-                            when: reportDragArea.pressed && bottomBar.width / 2 < showAlertsButton.x && showAlertsButton.x < bottomBar.width - parent.width
+                            when: reportDragArea.pressed && showAlertsButton.targetX < showAlertsButton.x && showAlertsButton.x < showAlertsButton.originX
                             PropertyChanges {
                                 target: showAlertsButton
                                 text: "Report"
