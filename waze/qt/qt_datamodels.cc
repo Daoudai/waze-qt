@@ -334,7 +334,15 @@ OrientationSensor::OrientationSensor(QObject *parent) : QObject(parent)
 
     _sensor.start();
 
-    _orientation = _sensor.reading()->orientation();
+    if (!_sensor.isActive())
+    {
+        // sensor not implemented for the platform
+        _orientation = 1; // regular
+    }
+    else
+    {
+        _orientation = _sensor.reading()->orientation();
+    }
     emit orientationChanged(_orientation);
 }
 
