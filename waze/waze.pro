@@ -46,6 +46,17 @@ maemo5 | !isEmpty(MEEGO_VERSION_MAJOR) {
     DEFINES += HOME_PREFIX=\\\"MyDocs/.waze\\\"
 }
 
+!isEmpty(MEEGO_VERSION_MAJOR) {
+# harmattan pulseaudio policy
+    pulseaudio.files = waze_harmattan.conf
+    pulseaudio.path = /etc/pulse/xpolicy.conf.d
+    export(pulseaudio.files)
+    export(pulseaudio.path)
+    INSTALLS += pulseaudio
+}
+
+
+
 SOURCES += \
     roadmap_tile.c \
     roadmap_gzm.c \
