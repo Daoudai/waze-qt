@@ -22,7 +22,7 @@ public:
     void setVolume(qreal volume);
 
 private slots:
-    void mediaStatusChanged(Phonon::State status);
+    void finished();
 
 protected:
     void playFirstInQueue();
@@ -30,8 +30,6 @@ protected:
 private:
     Phonon::MediaObject _player;
     Phonon::AudioOutput _output;
-    QMutex _playlistMutex;
-    QList<Phonon::MediaSource> _playlist;
 };
 
 class Recorder : public QObject
