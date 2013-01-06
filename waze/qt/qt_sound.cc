@@ -7,7 +7,7 @@ extern "C" {
 }
 
 Playlist::Playlist(QObject *parent) :
-    QObject(parent), _output(Phonon::NotificationCategory)
+    QObject(parent), _output(Phonon::MusicCategory)
 { 
     Phonon::createPath(&_player, &_output);
     QObject::connect(&_player, SIGNAL(finished()), this, SLOT(finished()));
@@ -15,28 +15,38 @@ Playlist::Playlist(QObject *parent) :
 
 Playlist::~Playlist()
 {
+    _playlist.clear();
     _player.stop();
+}
+
+void Playlist::playFirstInQueue()
+{
+    if (_playlist.count() > 0)
+    {
+        Phonon::MediaSource& mediaContent = _playlist.first();
+        roadmap_log(ROADMAP_INFO, "Playing %s", mediaContent.url().toString().toAscii().data());
+        _player.setCurrentSource(mediaContent);
+        _player.play();
+    }
 }
 
 void Playlist::finished()
 {
-    if (!_player.queue().isEmpty() && _player.queue().last() == _player.currentSource())
+    if (!_playlist.isEmpty())
     {
-        _player.clearQueue();
+        _playlistMutex.lock();
+        _playlist.removeFirst();
+        playFirstInQueue();
+        _playlistMutex.unlock();
     }
 }
 
 void Playlist::playMedia(Phonon::MediaSource mediaContent)
 {
-    if (_player.state() == Phonon::PlayingState)
-    {
-        _player.enqueue(mediaContent);
-    }
-    else
-    {
-        _player.setCurrentSource(mediaContent);
-        _player.play();
-    }
+    _playlistMutex.lock();
+    _playlist.append(mediaContent);
+    playFirstInQueue();
+    _playlistMutex.unlock();
 }
 
 
