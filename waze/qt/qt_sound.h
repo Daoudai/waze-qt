@@ -30,6 +30,8 @@ protected:
 private:
     Phonon::MediaObject _player;
     Phonon::AudioOutput _output;
+    QMutex _playlistMutex;
+    QList<Phonon::MediaSource> _playlist;
 };
 
 class Recorder : public QObject
