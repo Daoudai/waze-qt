@@ -7,3 +7,7 @@ if [ -e "${WAZE_TARGET_DIR}" -a -e "${WAZE_TARGET_DIR}/user" ]; then
     rm -Rf ${WAZE_TARGET_DIR}
 fi
 
+if [ "`grep waze /etc/pulse/xpolicy.conf`" = "" ]; then
+    cat /opt/waze/bin/waze_xpolicy.conf >> /etc/pulse/xpolicy.conf
+fi
+
