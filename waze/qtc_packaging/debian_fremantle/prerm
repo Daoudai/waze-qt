@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# remove xpolicy conf rule
+WAZE_RULE=`perl -p -e 's/\n/\\\\n/s;s/([\[\]\/\@])/\\\\\1/sg' /opt/waze/bin/waze_xpolicy.conf`
+perl -pi -e 'undef $/; s/'"$WAZE_RULE"'//sg' /etc/pulse/xpolicy.conf

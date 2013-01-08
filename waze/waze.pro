@@ -48,13 +48,21 @@ maemo5 | !isEmpty(MEEGO_VERSION_MAJOR) {
 
 !isEmpty(MEEGO_VERSION_MAJOR) {
 # harmattan pulseaudio policy
-    pulseaudio.files = waze_harmattan.conf
+    pulseaudio.files = waze_xpolicy.conf
     pulseaudio.path = /etc/pulse/xpolicy.conf.d
     export(pulseaudio.files)
     export(pulseaudio.path)
     INSTALLS += pulseaudio
 }
 
+maemo5 {
+# fremantle pulseaudio policy
+    pulseaudio.files = waze_xpolicy.conf
+    pulseaudio.path = /opt/waze/bin
+    export(pulseaudio.files)
+    export(pulseaudio.path)
+    INSTALLS += pulseaudio
+}
 
 
 SOURCES += \
@@ -682,7 +690,8 @@ OTHER_FILES += \
     qtc_packaging/debian_ubuntu_precise/copyright \
     qtc_packaging/debian_ubuntu_precise/control \
     qtc_packaging/debian_ubuntu_precise/compat \
-    qtc_packaging/debian_ubuntu_precise/changelog
+    qtc_packaging/debian_ubuntu_precise/changelog \
+    qtc_packaging/debian_fremantle/prerm
 
 
 
