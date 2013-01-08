@@ -574,7 +574,7 @@ Item {
             id: showMeButton
             anchors.right: parent.right
             anchors.bottom: bottomBar.top
-            anchors.bottomMargin: 20
+            anchors.bottomMargin: 70
             width: 70
             height: 70
             icon: "location"
@@ -636,6 +636,8 @@ Item {
                     id: navigateDragArea
 
                     anchors.fill: parent
+                    anchors.margins: -60
+
 
                     drag.target: navigateButton
                     drag.axis: Drag.XAxis
@@ -726,6 +728,7 @@ Item {
                     id: reportDragArea
 
                     anchors.fill: parent
+                    anchors.margins: -60
 
                     drag.target: showAlertsButton
                     drag.axis: Drag.XAxis
