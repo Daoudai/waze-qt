@@ -999,6 +999,20 @@ Item {
                         invokeAction("settingsmenu");
                     }
                 }
+
+                IconButton {
+                    id: navigateMenuButton
+                    width: 140
+                    height: 100
+                    icon: "Search"
+                    text: "Drive_to"
+
+                    onClicked: {
+                        buttonClicked();
+                        topBar.visible = false;
+                        invokeAction("search_menu");
+                    }
+                }
             }
         }
     }
