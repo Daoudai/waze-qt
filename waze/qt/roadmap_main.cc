@@ -492,7 +492,11 @@ int main(int argc, char* argv[]) {
 
    appView->setAttribute(Qt::WA_TranslucentBackground);
    w.setCentralWidget(appView);
+#if defined(Q_WS_MAEMO_5) || defined(MEEGO_VERSION_MAJOR)
    w.showFullScreen();
+#else
+   w.showNormal();
+#endif
    appWindow = &w;
 
    QObject *item = dynamic_cast<QObject*>(mainWindow->rootObject());
