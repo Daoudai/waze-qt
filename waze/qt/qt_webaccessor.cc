@@ -130,13 +130,16 @@ HttpAsyncContext* WazeWebAccessor::postRequestParser(
          url.setHost(hi.addresses().first().toString());
     }
 
-    if (isSecured)
+    if (url.port() == -1)
     {
-        url.setPort(443);
-    }
-    else if (url.port() == -1)
-    {
-        url.setPort(80);
+        if (isSecured)
+        {
+            url.setPort(443);
+        }
+        else
+        {
+            url.setPort(80);
+        }
     }
     QByteArray ba = data.toUtf8();
 
