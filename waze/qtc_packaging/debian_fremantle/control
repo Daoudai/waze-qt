@@ -8,7 +8,7 @@ Homepage: http://code.google.com/p/waze-qt
 
 Package: waze
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, qtquickcompat, libqtm-location | libqtm-12, libqtm-contacts | libqtm-12, libqtm-multimedia | libqtm-12, libqtm-systeminfo | libqtm-12, libqtm-sensors | libqtm-12
+Depends: ${shlibs:Depends}, ${misc:Depends}, qtquickcompat, libqtm-location | libqtm-12, libqtm-contacts | libqtm-12, libqtm-multimedia | libqtm-12, libqtm-systeminfo | libqtm-12, libqtm-sensors | libqtm-12, libqt4-phonon
 Description: Waze is a free, community-based traffic & navigation app
  When you download Waze, you not only get free navigation, but also become part of the local driving community in your area, joining forces with other drivers nearby to outsmart traffic, save time and improve everyone's daily commute. All you have to do is drive, so get involved today!
 XB-Maemo-Display-Name: Waze

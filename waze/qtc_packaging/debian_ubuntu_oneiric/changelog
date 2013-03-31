@@ -1,3 +1,9 @@
+waze (0.0.11-1~oneiric1) oneiric; urgency=low
+  * Make UI main view look more like Waze 3.0
+  * Allow Waze to play audio without interrupting other media player
+
+ -- Assaf Paz (damagedspline) <damagedspline@gmail.com>  Wed, 9 Jan 2013 18:22:12 +0300
+
 waze (0.0.9-99~oneiric1) oneiric; urgency=low
   * Main view layout change
   * When navigating, the "Navigate" button allow navigation control

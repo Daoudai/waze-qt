@@ -9,6 +9,8 @@ Item {
     signal invokeAction(string action)
     signal buttonClicked()
 
+    property bool isPortrait: deviceOrientation > 2
+
     property int deviceOrientation: typeof(__orientationSensor) === 'undefined'? -1 : __orientationSensor.orientation
     onDeviceOrientationChanged: {
         if (deviceOrientation == 1)
@@ -139,23 +141,23 @@ Item {
     }
 
     ////// Below is mock data to test the navigation view
-    /*
-    Item {
-        id: navigationData
 
-        property bool isNavigation : true
-        property string eta : "120 דק'"
-        property string etaTime : "23:13"
-        property string remainingDistance : "138 ק\"מ"
-        property string currentTurnType : "nav_turn_right"
-        property string currentTurnDistance : "12 ק\"מ"
-        property int currentExit : 0
-        property string nextTurnType : ""
-        property string nextTurnDistance : ""
-        property int nextExit : 0
-        property string street : "רח' השפשפת"
-    }
-    */
+//    Item {
+//        id: navigationData
+
+//        property bool isNavigation : true
+//        property string eta : "120 דק'"
+//        property string etaTime : "23:13"
+//        property string remainingDistance : "138 ק\"מ"
+//        property string currentTurnType : "big_direction_right"
+//        property string currentTurnDistance : "12 ק\"מ"
+//        property int currentExit : 0
+//        property string nextTurnType : ""
+//        property string nextTurnDistance : ""
+//        property int nextExit : 0
+//        property string street : "רח' השפשפת"
+//    }
+
 
 
     ////////////// End of Context data binding wrappers //////////////
@@ -239,193 +241,26 @@ Item {
             }
         }
 
-        Column {
+        ZoomBar {
             id: zoomBar
 
-            anchors.left: instructionsBar.visible? instructionsBar.right : parent.left
-            anchors.leftMargin: 10
-            anchors.top: nextStreet.bottom
-
-            spacing: 10
-
-            IconButton {
-                id: zoominButton
-                width: 70
-                height: 70
-                icon: "rm_zoomin"
-
-                onClicked: {
-                    buttonClicked();
-                    showSideToolbars();
-                    invokeAction("zoomin");
-                    wazeCanvas.repaint();
-                }
-            }
-
-            IconButton {
-                id: zoomoutButton
-                width: 70
-                height: 70
-                icon: "rm_zoomout"
-
-                onClicked:  {
-                    buttonClicked();
-                    showSideToolbars();
-                    invokeAction("zoomout");
-                    wazeCanvas.repaint();
-                }
-            }
+            anchors.left: isPortrait? parent.left : instructionsBar.right
+            anchors.top: isPortrait? instructionsBar.bottom : nextStreet.bottom
         }
 
-        Flow {
+        InstructionsBar {
             id: instructionsBar
-
-            opacity: 0.9
-            spacing: 20
 
             visible: navigationData.isNavigation && !wazeCanvas.isDialogActive
             anchors.left: parent.left
             anchors.top: nextStreet.bottom
-
-            states: [
-                State {
-                    name: "landscape"
-                    when: mainView.width >= mainView.height
-                    PropertyChanges {
-                        target: instructionsBar
-                        width: 120
-                    }
-                },
-                State {
-                    name: "portrait"
-                    when: mainView.width < mainView.height
-                    PropertyChanges {
-                        target: instructionsBar
-                        width: 120
-                    }
-                }
-            ]
-
-            z: 1
-
-            IconButton {
-                id: currentTurn
-                width: 120
-                height: 120
-                icon: navigationData.currentTurnType
-                visible: navigationData.currentTurnType != ""
-                text: navigationData.currentTurnDistance
-                needTranslation: false
-                fontSize: 24
-                z: 1
-
-
-                Text {
-                    text: navigationData.currentExit
-                    style: Text.Outline
-                    verticalAlignment: Text.AlignVCenter
-                    horizontalAlignment: Text.AlignHCenter
-                    anchors.centerIn: parent
-                    color: "white"
-                    font.pixelSize: currentTurn.height / 3
-                    visible: navigationData.currentExit > 0
-                    z: 1
-                }
-
-                Rectangle {
-                    anchors.fill: parent
-                    color: "darkcyan"
-                    radius: 20
-                    border.color: "black"
-                    border.width: 3
-                    z: -1
-                }
-
-                Rectangle {
-                    color: "blue"
-                    width: height
-                    height: parent.height / 2 - 5
-                    anchors.bottom: parent.top
-                    anchors.bottomMargin: -radius*2
-                    anchors.left: parent.right
-                    anchors.leftMargin: -radius
-                    radius: height / 2
-                    visible: nextTurn.visible
-                    z:2
-
-                    Text {
-                        text: "1"
-                        style: Text.Outline
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors.fill: parent
-                        color: "white"
-                        font.pixelSize: height / 2
-                    }
-                }
-            }
-
-            IconButton {
-                id: nextTurn
-                width: 120
-                height: 120
-                icon: navigationData.nextTurnType
-                text: navigationData.nextTurnDistance
-                needTranslation: false
-                visible: navigationData.nextTurnType != ""
-                fontSize: 24
-                z: 1
-
-                Text {
-                    text: navigationData.nextExit
-                    style: Text.Outline
-                    verticalAlignment: Text.AlignVCenter
-                    horizontalAlignment: Text.AlignHCenter
-                    anchors.centerIn: parent
-                    color: "white"
-                    font.pixelSize: nextTurn.height / 3
-                    visible: navigationData.nextExit > 0
-                    z: 1
-                }
-
-                Rectangle {
-                    anchors.fill: parent
-                    color: "darkcyan"
-                    radius: 20
-                    border.color: "black"
-                    border.width: 3
-                    z: -1
-                }
-
-                Rectangle {
-                    color: "blue"
-                    width: height
-                    height: parent.height / 2 - 5
-                    anchors.bottom: parent.top
-                    anchors.bottomMargin: -radius*2
-                    anchors.left: parent.right
-                    anchors.leftMargin: -radius
-                    radius: height / 2
-                    visible: nextTurn.visible
-                    z:2
-
-                    Text {
-                        text: "2"
-                        style: Text.Outline
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors.fill: parent
-                        color: "white"
-                        font.pixelSize: height / 2
-                    }
-                }
-            }
         }
 
         Button {
             id: nextStreet
-            height: 50
             opacity: 0.9
+
+            radius: 10
 
             anchors.top: parent.top
             anchors.right: exitButton.left
@@ -434,84 +269,27 @@ Item {
             anchors.leftMargin: 10
             visible: navigationData.isNavigation && !wazeCanvas.isDialogActive
 
+            wrapText: true
+
             text: navigationData.street
-            fontSize: 24
+            fontSize: 48
             needTranslation: false
         }
 
-        Column {
+        MapBar {
             id: mapBar
 
             anchors.top: zoomBar.top
             anchors.right: parent.right
             anchors.rightMargin: 10
-
-            spacing: 10
-
-            IconButton {
-                id: mapEditButton1
-                width: 70
-                height: 70
-                icon: editor.editState === 0? "update_map_button" : "update_map_button_recording"
-                visible: editor.editType === 0
-
-                onClicked: {
-                    buttonClicked();
-                    showSideToolbars();
-                    invokeAction("map_updates_menu")
-                }
-            }
-
-            IconButton {
-                id: mapEditButton2
-                width: 70
-                height: 70
-                icon: editor.editState === 0? "record_new_roads" : "update_map_button_recording"
-                visible: editor.editType === 1
-
-                onClicked: {
-                    buttonClicked();
-                    showSideToolbars();
-                    invokeAction("togglenewroads")
-                }
-            }
-
-            Image {
-                id: compassButton
-                width: 70
-                height: 70
-
-                source: imageProvider.getImage(compass.compassState == 0? "north_off" : "north")
-
-                MouseArea {
-                    z: 2
-                    anchors.fill: parent
-                    onClicked:  {
-                        buttonClicked();
-                        showSideToolbars();
-                        invokeAction("toggleorientation")
-                    }
-                }
-
-                Image {
-                    rotation: compass.orientation
-                    visible:   compass.compassState == 0
-                    anchors.fill: parent
-                    source: imageProvider.getImage("compass_needle")
-                    z: 1
-                    fillMode: Image.PreserveAspectCrop
-                    smooth: true
-                }
-            }
         }
 
         IconButton {
             id: rotateLeftButton
-            width: 70
-            height: 70
-            anchors.top: mapBar.top
-            anchors.right: mapBar.left
-            anchors.rightMargin: 10
+            width: 120
+            height: 120
+            anchors.top: rotateRightButton.top
+            anchors.right: isPortrait? parent.right : mapBar.left
             visible: mapBar.visible
             icon: "nav_turn_left"
 
@@ -523,7 +301,7 @@ Item {
             }
 
             Image {
-                source: imageProvider.getImage("north_off")
+                source: imageProvider.getImage("controler_day_blank@2x")
                 anchors.fill: parent
                 z: -1
             }
@@ -531,11 +309,10 @@ Item {
 
         IconButton {
             id: rotateRightButton
-            width: 70
-            height: 70
-            anchors.top: zoomBar.top
-            anchors.left: zoomBar.right
-            anchors.leftMargin: 10
+            width: 120
+            height: 120
+            anchors.top: isPortrait? zoomBar.bottom : zoomBar.top
+            anchors.left: isPortrait? parent.left : zoomBar.right
             visible: zoomBar.visible
             icon: "nav_turn_right"
             onClicked: {
@@ -546,7 +323,7 @@ Item {
             }
 
             Image {
-                source: imageProvider.getImage("north_off")
+                source: imageProvider.getImage("controler_day_blank@2x")
                 anchors.fill: parent
                 z: -1
             }
@@ -574,10 +351,10 @@ Item {
             id: showMeButton
             anchors.right: parent.right
             anchors.bottom: bottomBar.top
-            anchors.bottomMargin: 70
-            width: 70
-            height: 70
-            icon: "location"
+            anchors.bottomMargin: 5
+            width: 120
+            height: 120
+            icon: "controler_meOnMap_day@2x"
             text: "Me_on_map"
             fitImage: true
 
@@ -596,14 +373,14 @@ Item {
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.bottom: parent.bottom
-            height: 70
+            height: 120
             color: 'transparent'
             visible: !wazeCanvas.isDialogActive
 
 
             IconButton {
                 id: navigateButton
-                width: 70
+                width: 120
                 height: parent.height
                 property int originX: 0
                 onOriginXChanged: {
@@ -612,7 +389,7 @@ Item {
                 property int targetX: bottomBar.width / 2 - navigateButton.width                
                 x: originX
                 z: 1
-                icon: "More"
+                icon: "icon_menu"
                 text: "Menu"
                 fitImage: false
 
@@ -646,7 +423,7 @@ Item {
 
                     onClicked: {
                         buttonClicked();
-                        topBar.visible = true;
+                        mainMenu.visible = true;
                     }
 
                     onReleased: {
@@ -660,7 +437,7 @@ Item {
                             PropertyChanges {
                                 target: navigateButton
                                 text: "Menu"
-                                icon: "More2"
+                                icon: "icon_menu_press"
                             }
                         },
                         State {
@@ -669,7 +446,7 @@ Item {
                             PropertyChanges {
                                 target: navigateButton
                                 text: !navigationData.isNavigation? "Drive_to" : "Navigate"
-                                icon: "Search";
+                                //icon: "Search";
                             }
                         }
                     ]
@@ -685,9 +462,9 @@ Item {
                 property int targetX: bottomBar.width / 2                
                 x: originX
                 z: 1
-                width: 70
-                height: 70
-                icon: "Live_event"
+                width: 120
+                height: 120
+                icon: "icon_report"
                 text: "Events"
                 fitImage: false
 
@@ -750,7 +527,7 @@ Item {
                             when: reportDragArea.pressed && showAlertsButton.x === showAlertsButton.originX
                             PropertyChanges {
                                 target: showAlertsButton
-                                icon: "Live_event2"
+                                icon: "icon_report_press"
                                 text: "Events"
                             }
                         },
@@ -760,260 +537,41 @@ Item {
                             PropertyChanges {
                                 target: showAlertsButton
                                 text: "Report"
-                                icon: "Report"
+                                //icon: "Report"
                             }
                         }
                     ]
                 }
             }
 
-            Button {
-                id: etaBar
-                property bool isEta: true
+            LandscapeEtaBar {
+                id: landscapeEtaBar
 
+                visible: !isPortrait && navigationData.isNavigation
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: parent.bottom
-                width: 270
-                height: 60
-                visible: navigationData.isNavigation
+                width: parent.width - navigateButton.width - showAlertsButton.width - 10
+            }
 
-                Text {
-                    color: "#ffffff"
-                    anchors.right: etaSeperator.left
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
+            PortraitEtaBar {
+                id: portraitEtaBar
 
-                    text: (etaBar.isEta)? navigationData.eta : navigationData.etaTime
-                    font.bold: true
-                    horizontalAlignment: Text.AlignHCenter
-                    font.pointSize: 20
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                Text {
-                    id: etaSeperator
-                    color: "#000000"
-                    anchors.centerIn: parent
-
-                    text: "|"
-                    font.bold: true
-                    style: Text.Outline
-                    verticalAlignment: Text.AlignVCenter
-                    horizontalAlignment: Text.AlignHCenter
-                    font.pointSize: 30
-                }
-
-                Text {
-                    color: "#ffffff"
-                    anchors.right: parent.right
-                    anchors.left: etaSeperator.right
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    text: (etaBar.isEta)? speedometerData.text : navigationData.remainingDistance
-                    font.bold: true
-                    horizontalAlignment: Text.AlignHCenter
-                    font.pointSize: 20
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                Timer {
-                    id: eta_message_timer
-                    repeat: true
-                    running: etaBar.visible
-                    interval: 5000
-                    onTriggered: {
-                        etaBar.isEta = !etaBar.isEta
-                    }
-                }
+                visible: isPortrait && navigationData.isNavigation
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                width: parent.width - navigateButton.width - showAlertsButton.width - 10
             }
         }
 
-        Rectangle {
-            id: topBar
+        MainMenu {
+            id: mainMenu
 
             anchors.fill: parent
-
             visible: false
 
-            Rectangle {
-                color: "#000000"
-                opacity: 0.700
-                anchors.fill: parent
+            flowWidth: mainView.width - 30
 
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        topBar.visible = false;
-                    }
-                }
-            }
-
-            Flow {
-                anchors.centerIn: parent
-                width: 340
-                z: 1
-
-                spacing: 10
-
-                IconButton {
-                    id: aboutButton
-                    width: 140
-                    height: 100
-                    icon: "about"
-                    text: "About"
-
-                    onClicked: {
-                        buttonClicked();
-                        topBar.visible = false;
-                        invokeAction("about");
-                    }
-                }
-
-                IconButton {
-                    id: moodsButton
-                    width: 140
-                    height: 100
-
-                    icon: moodToIcon(moods.mood)
-                    text: "Mood"
-
-                    onClicked: {
-                        buttonClicked();
-                        topBar.visible = false;
-                        invokeAction("mood_dialog");
-                    }
-
-                    function moodToIcon(mood)
-                    {
-                        switch(mood)
-                        {
-                        case 0 : return "TS_top_mood_disabled";
-                        case 1 : return "TS_top_mood_happy";
-                        case 2 : return "TS_top_mood_sad";
-                        case 3 : return "TS_top_mood_mad";
-                        case 4 : return "TS_top_mood_bored";
-                        case 5 : return "TS_top_mood_speedy";
-                        case 6 : return "TS_top_mood_starving";
-                        case 7 : return "TS_top_mood_sleepy";
-                        case 8 : return "TS_top_mood_cool";
-                        case 9 : return "TS_top_mood_inlove";
-                        case 10 : return "TS_top_mood_LOL";
-                        case 11 : return "TS_top_mood_peaceful2";
-                        case 12 : return "TS_top_mood_singing";
-                        case 13 : return "TS_top_mood_wondering";
-                        case 14 : return "TS_top_mood_happy";
-                        case 15 : return "TS_top_mood_sad";
-                        case 16 : return "TS_top_mood_mad";
-                        case 17 : return "TS_top_mood_bored";
-                        case 18 : return "TS_top_mood_speedy";
-                        case 19 : return "TS_top_mood_starving";
-                        case 20 : return "TS_top_mood_sleepy";
-                        case 21 : return "TS_top_mood_cool";
-                        case 22 : return "TS_top_mood_inlove";
-                        case 23 : return "TS_top_mood_LOL";
-                        case 24 : return "TS_top_mood_peaceful";
-                        case 25 : return "TS_top_mood_singing";
-                        case 26 : return "TS_top_mood_wondering";
-                        case 27 : return "TS_top_mood_bronze";
-                        case 28 : return "TS_top_mood_silver";
-                        case 29 : return "TS_top_mood_gold";
-                        case 30 : return "TS_top_mood_busy";
-                        case 31 : return "TS_top_mood_busy";
-                        case 32 : return "TS_top_mood_in_a_hurry";
-                        case 33 : return "TS_top_mood_in_a_hurry";
-                        case 34 : return "TS_top_mood_baby";
-                        }
-                    }
-                }
-
-                IconButton {
-                    id: gpsStatusButton
-                    width: 140
-                    height: 100
-                    icon: gpsToIcon(monitor.gpsState)
-                    text: "Status"
-
-                    onClicked: {
-                        buttonClicked();
-                        topBar.visible = false;
-                        invokeAction("gps_net_stat");
-                    }
-
-                    function gpsToIcon(state) {
-                        switch(state)
-                        {
-                        case 0: return "TS_top_satellite_off";
-                        case 1: return "TS_top_satellite_off";
-                        case 2: return "TS_top_satellite_poor";
-                        case 3: return "TS_top_satellite_on";
-                        }
-                    }
-                }
-
-                IconButton {
-                    id: onlineButton
-                    width: 140
-                    height: 100
-                    icon: netToIcon(monitor.netState)
-                    text: "Status"
-
-                    onClicked: {
-                        buttonClicked();
-                        topBar.visible = false;
-                        invokeAction("gps_net_stat");
-                    }
-
-                    function netToIcon(state) {
-                        switch(state)
-                        {
-                        case 0: return "TS_top_not_connected";
-                        case 1: return "TS_top_connected";
-                        }
-                    }
-                }
-
-                IconButton {
-                    id: profileButton
-                    width: 140
-                    height: 100
-                    icon: "general_settings"
-                    text: "Profile"
-
-                    onClicked: {
-                        buttonClicked();
-                        topBar.visible = false;
-                        invokeAction("mywaze");
-                    }
-                }
-
-                IconButton {
-                    id: optionsButton
-                    width: 140
-                    height: 100
-                    icon: "settings_button"
-                    text: "General settings"
-
-                    onClicked: {
-                        buttonClicked();
-                        topBar.visible = false;
-                        invokeAction("settingsmenu");
-                    }
-                }
-
-                IconButton {
-                    id: navigateMenuButton
-                    width: 140
-                    height: 100
-                    icon: "Search"
-                    text: "Drive_to"
-
-                    onClicked: {
-                        buttonClicked();
-                        topBar.visible = false;
-                        invokeAction("search_menu");
-                    }
-                }
-            }
+            z: 3
         }
     }
 }
