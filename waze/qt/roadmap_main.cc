@@ -490,9 +490,14 @@ int main(int argc, char* argv[]) {
 
    qt_datamodels_register();
 
+#ifdef Q_WS_MAEMO_5
+    // Lock orientation to portrait in Maemo
+    appView->setAttribute(Qt::WA_Maemo5PortraitOrientation, true);
+#endif
+
    appView->setAttribute(Qt::WA_TranslucentBackground);
    w.setCentralWidget(appView);
-#if defined(Q_WS_MAEMO_5) || defined(MEEGO_VERSION_MAJOR)
+#if defined(Q_WS_MAEMO_5) || defined(MEEGO_VERSION_MAJOR) || defined(Q_WS_SIMULATOR)
    w.showFullScreen();
 #else
    w.showNormal();

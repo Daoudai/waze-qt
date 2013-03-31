@@ -7,9 +7,10 @@ Rectangle {
     property bool needTranslation: true
     property int fontSize: 48
 
+    property bool wrapText: false
+
     signal buttonPressed
 
-    width: buttonText.width*2
     radius: height/3
     border.color: "#696969"
     gradient: Gradient {
@@ -33,11 +34,14 @@ Rectangle {
     Text {
         id: buttonText
         color: "#ffffff"
+        width: button.width - (button.radius*2)
+        wrapMode: (wrapText)? Text.WrapAtWordBoundaryOrAnywhere : Text.NoWrap
         text: needTranslation? t+wTr(button.text) : button.text
         font.bold: true
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
         font.pixelSize: fontSize
+        horizontalAlignment: Text.AlignHCenter
     }
 
     Gradient {
