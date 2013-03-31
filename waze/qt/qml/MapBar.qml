@@ -5,6 +5,7 @@ Column {
 
     spacing: 10
 
+    /*
     IconButton {
         id: mapEditButton1
         width: 70
@@ -31,7 +32,7 @@ Column {
             showSideToolbars();
             invokeAction("togglenewroads")
         }
-    }
+    }  */
 
     Image {
         id: compassButton
