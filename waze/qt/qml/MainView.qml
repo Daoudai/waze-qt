@@ -223,29 +223,11 @@ Item {
             onClicked: showSideToolbars()
         }
 
-        IconButton {
-            id: exitButton
-            width: 70
-            height: 50
-            icon: "exit_button"
-            anchors.right: parent.right
-            anchors.rightMargin: 0
-            anchors.top: parent.top
-            anchors.topMargin: 0
-
-            visible: !wazeCanvas.isDialogActive
-
-            onClicked: {
-                buttonClicked();
-                invokeAction("quit");
-            }
-        }
-
         ZoomBar {
             id: zoomBar
 
-            anchors.left: isPortrait? parent.left : instructionsBar.right
-            anchors.top: isPortrait? instructionsBar.bottom : nextStreet.bottom
+            anchors.left: (isPortrait || !instructionsBar.visible)? parent.left : instructionsBar.right
+            anchors.top: isPortrait? instructionsBar.top : nextStreet.bottom
         }
 
         InstructionsBar {
@@ -263,8 +245,7 @@ Item {
             radius: 10
 
             anchors.top: parent.top
-            anchors.right: exitButton.left
-            anchors.rightMargin: 0
+            anchors.right: parent.right
             anchors.left: minimizeButton.right
             anchors.leftMargin: 10
             visible: navigationData.isNavigation && !wazeCanvas.isDialogActive
@@ -279,9 +260,8 @@ Item {
         MapBar {
             id: mapBar
 
-            anchors.top: zoomBar.top
+            anchors.top: nextStreet.bottom
             anchors.right: parent.right
-            anchors.rightMargin: 10
         }
 
         IconButton {
@@ -568,8 +548,6 @@ Item {
 
             anchors.fill: parent
             visible: false
-
-            flowWidth: mainView.width - 30
 
             z: 3
         }

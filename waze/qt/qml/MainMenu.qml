@@ -5,8 +5,8 @@ Rectangle {
 
     color: "transparent"
 
-    property int flowWidth: 340
-    property int buttonWidth: flowWidth / 3 - 30
+    property int flowWidth: buttonWidth * 3 + 20
+    property int buttonWidth: 120
 
     MouseArea {
         anchors.fill: parent
@@ -24,7 +24,7 @@ Rectangle {
         height: menuFlow.height
 
         border.color: "black"
-        border.width: 5
+        border.width: 10
     }
 
     Flow {
@@ -39,7 +39,7 @@ Rectangle {
             id: aboutButton
             width: buttonWidth
             height: 100
-            icon: "about"
+            icon: "button_info"
             text: "About"
 
             onClicked: {
@@ -184,13 +184,26 @@ Rectangle {
             id: navigateMenuButton
             width: buttonWidth
             height: 100
-            icon: "icon_navigate"
+            icon: "menu_navigate"
             text: "Drive_to"
 
             onClicked: {
                 buttonClicked();
                 mainMenu.visible = false;
                 invokeAction("search_menu");
+            }
+        }
+
+        IconButton {
+            id: exitButton
+            width: buttonWidth
+            height: 100
+            icon: "icon_menu_switchoff"
+
+            onClicked: {
+                buttonClicked();
+                mainMenu.visible = false;
+                invokeAction("quit");
             }
         }
     }
