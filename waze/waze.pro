@@ -691,7 +691,13 @@ OTHER_FILES += \
     qtc_packaging/debian_ubuntu_precise/control \
     qtc_packaging/debian_ubuntu_precise/compat \
     qtc_packaging/debian_ubuntu_precise/changelog \
-    qtc_packaging/debian_fremantle/prerm
+    qtc_packaging/debian_fremantle/prerm \
+    qtc_packaging/debian_ubuntu_quantal/rules \
+    qtc_packaging/debian_ubuntu_quantal/README \
+    qtc_packaging/debian_ubuntu_quantal/copyright \
+    qtc_packaging/debian_ubuntu_quantal/control \
+    qtc_packaging/debian_ubuntu_quantal/compat \
+    qtc_packaging/debian_ubuntu_quantal/changelog
 
 
 
