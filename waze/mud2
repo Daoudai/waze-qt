@@ -60,6 +60,8 @@ my $pkgMeeGo           = 0;
 
 &createNativeDebian('ubuntu_precise');
 
+&createNativeDebian('ubuntu_quantal');
+
 &createDebian('fremantle', '1.0', 0, sub {
   my ($version) = @_;
   &write('5', "$dir/fremantle/debian/compat");
