@@ -1,3 +1,17 @@
+waze (0.0.12~oneiric1) oneiric; urgency=low
+  * Don't force ports - this will allow using the Waze site servers
+  * Comment the map editing feature
+  * Don't force full screen when running on desktop
+  * Start using Waze v3 icons
+  * Improve the main menu looks
+  * Add a navigate button to the main menu
+  * Move the exit button from the main view to the main menu
+  * Reorganize the buttons in the main view
+  * Remake the ETA bar to be specific for protrait and landscape
+  * Make the next street name bigger
+
+ -- Assaf Paz (damagedspline) <damagedspline@gmail.com>  Sun, 31 Mar 2013 19:35:36 +0300
+
 waze (0.0.11-1~oneiric1) oneiric; urgency=low
   * Make UI main view look more like Waze 3.0
   * Allow Waze to play audio without interrupting other media player
