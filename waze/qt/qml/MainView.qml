@@ -141,25 +141,29 @@ Item {
     }
 
     ////// Below is mock data to test the navigation view
+         /*
+    Item {
+        id: navigationData
 
-//    Item {
-//        id: navigationData
+        property bool isNavigation : true
+        property string eta : "120 דק'"
+        property string etaTime : "23:13"
+        property string remainingDistance : "138 ק\"מ"
+        property string currentTurnType : "big_direction_right"
+        property string currentTurnDistance : "12 ק\"מ"
+        property int currentExit : 0
+        property string nextTurnType : "big_direction_left"
+        property string nextTurnDistance : "30 מ'"
+        property int nextExit : 0
+        property string street : "רח' השפשפת"
+    }
+           */
 
-//        property bool isNavigation : true
-//        property string eta : "120 דק'"
-//        property string etaTime : "23:13"
-//        property string remainingDistance : "138 ק\"מ"
-//        property string currentTurnType : "big_direction_right"
-//        property string currentTurnDistance : "12 ק\"מ"
-//        property int currentExit : 0
-//        property string nextTurnType : ""
-//        property string nextTurnDistance : ""
-//        property int nextExit : 0
-//        property string street : "רח' השפשפת"
-//    }
-
-
-
+	
+      Item {
+          id: message
+          property string message: (typeof(__messageData) === 'undefined')? "" : __messageData
+      }
     ////////////// End of Context data binding wrappers //////////////
 
     Timer {
@@ -227,7 +231,7 @@ Item {
             id: zoomBar
 
             anchors.left: (isPortrait || !instructionsBar.visible)? parent.left : instructionsBar.right
-            anchors.top: isPortrait? instructionsBar.top : nextStreet.bottom
+            anchors.top: isPortrait? instructionsBar.bottom : nextStreet.bottom
         }
 
         InstructionsBar {
@@ -235,7 +239,27 @@ Item {
 
             visible: navigationData.isNavigation && !wazeCanvas.isDialogActive
             anchors.left: parent.left
-            anchors.top: nextStreet.bottom
+            anchors.top: isPortrait? nextStreet.bottom : parent.top
+        }
+        
+        Rectangle {
+            id: messageBar
+            
+            anchors.top: parent.top
+            anchors.left: !isPortrait && instructionsBar.visible? instructionsBar.right : parent.left 
+            anchors.right: parent.right
+            height: 32 
+            color: 'black'
+            visible: message.message !== '' && !wazeCanvas.isDialogActive
+
+            Text {
+                id: messageText
+                text: message.message
+                font.pixelSize:28
+                font.bold: true
+                anchors.centerIn: parent
+                color: 'white'
+            }
         }
 
         Button {
@@ -244,15 +268,13 @@ Item {
 
             radius: 10
 
-            anchors.top: parent.top
+            anchors.top: messageBar.visible? messageBar.bottom : parent.top
             anchors.right: parent.right
-            anchors.left: minimizeButton.right
-            anchors.leftMargin: 10
+            anchors.left: !isPortrait && instructionsBar.visible? instructionsBar.right : parent.left 
             visible: navigationData.isNavigation && !wazeCanvas.isDialogActive
-
             wrapText: true
 
-            text: navigationData.street
+            text: '<a style="color:lightgreen">' + navigationData.currentTurnDistance + '</a> ' + navigationData.street
             fontSize: 48
             needTranslation: false
         }
@@ -306,24 +328,6 @@ Item {
                 source: imageProvider.getImage("controler_day_blank@2x")
                 anchors.fill: parent
                 z: -1
-            }
-        }
-
-        IconButton {
-            id: minimizeButton
-            width: 40
-            height: 50
-            icon: "button_sc_3_mid_s"
-            anchors.top: parent.top
-            anchors.topMargin: 0
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-
-            visible: !wazeCanvas.isDialogActive
-
-            onClicked: {
-                buttonClicked();
-                invokeAction("minimize");
             }
         }
 
@@ -393,7 +397,7 @@ Item {
                     id: navigateDragArea
 
                     anchors.fill: parent
-                    anchors.margins: -60
+                    anchors.margins: -10
 
 
                     drag.target: navigateButton
@@ -485,7 +489,7 @@ Item {
                     id: reportDragArea
 
                     anchors.fill: parent
-                    anchors.margins: -60
+                    anchors.margins: -10
 
                     drag.target: showAlertsButton
                     drag.axis: Drag.XAxis
@@ -530,6 +534,7 @@ Item {
                 visible: !isPortrait && navigationData.isNavigation
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: parent.bottom
+                anchors.bottomMargin: 10
                 width: parent.width - navigateButton.width - showAlertsButton.width - 10
             }
 

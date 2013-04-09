@@ -4,7 +4,6 @@ Flow {
     id: instructionsBar
 
     opacity: 0.9
-    spacing: 20
 
     states: [
         State {
@@ -33,11 +32,9 @@ Flow {
         height: 120
         icon: navigationData.currentTurnType
         visible: navigationData.currentTurnType != ""
-        text: navigationData.currentTurnDistance
         needTranslation: false
         fontSize: 24
         z: 1
-
 
         Text {
             text: navigationData.currentExit
@@ -54,45 +51,21 @@ Flow {
         Rectangle {
             anchors.fill: parent
             color: "darkcyan"
-            radius: 20
             border.color: "black"
             border.width: 3
             z: -1
-        }
-
-        Rectangle {
-            color: "blue"
-            width: height
-            height: parent.height / 2 - 5
-            anchors.bottom: parent.top
-            anchors.bottomMargin: -radius*2
-            anchors.left: parent.right
-            anchors.leftMargin: -radius
-            radius: height / 2
-            visible: nextTurn.visible
-            z:2
-
-            Text {
-                text: "1"
-                style: Text.Outline
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-                anchors.fill: parent
-                color: "white"
-                font.pixelSize: height / 2
-            }
         }
     }
 
     IconButton {
         id: nextTurn
-        width: 120
-        height: 120
+        width: 80
+        height: 80
         icon: navigationData.nextTurnType
         text: navigationData.nextTurnDistance
         needTranslation: false
         visible: navigationData.nextTurnType != ""
-        fontSize: 24
+        fontSize: 18
         z: 1
 
         Text {
@@ -110,33 +83,9 @@ Flow {
         Rectangle {
             anchors.fill: parent
             color: "darkcyan"
-            radius: 20
             border.color: "black"
             border.width: 3
             z: -1
-        }
-
-        Rectangle {
-            color: "blue"
-            width: height
-            height: parent.height / 2 - 5
-            anchors.bottom: parent.top
-            anchors.bottomMargin: -radius*2
-            anchors.left: parent.right
-            anchors.leftMargin: -radius
-            radius: height / 2
-            visible: nextTurn.visible
-            z:2
-
-            Text {
-                text: "2"
-                style: Text.Outline
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-                anchors.fill: parent
-                color: "white"
-                font.pixelSize: height / 2
-            }
         }
     }
 }
