@@ -162,7 +162,7 @@ Item {
 	
       Item {
           id: message
-          property string message: (typeof(__messageData) === 'undefined')? "" : __messageData
+          property string message: (typeof(__message) === 'undefined')? "" : __message.text
       }
     ////////////// End of Context data binding wrappers //////////////
 
@@ -250,15 +250,32 @@ Item {
             anchors.right: parent.right
             height: 32 
             color: 'black'
-            visible: message.message !== '' && !wazeCanvas.isDialogActive
+            visible: messageText.text !== '' && !wazeCanvas.isDialogActive
 
             Text {
                 id: messageText
                 text: message.message
+                onTextChanged: {
+                    if (text != '')
+                    {
+                        messageResetTimer.restart();
+                    }
+                }
+
                 font.pixelSize:28
                 font.bold: true
                 anchors.centerIn: parent
                 color: 'white'
+            }
+
+            Timer {
+                id: messageResetTimer
+                interval: 5000
+                repeat: false
+
+                onTriggered: {
+                    messageText.text = '';
+                }
             }
         }
 

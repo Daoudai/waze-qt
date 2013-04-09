@@ -61,4 +61,8 @@ void roadmap_display_signs (void);
 
 const char *roadmap_display_get_id (const char *title);
 
+#ifdef QTMOBILITY
+void roadmap_display_set_message(const char* message);
+#endif
+
 #endif // INCLUDE__ROADMAP_DISPLAY__H

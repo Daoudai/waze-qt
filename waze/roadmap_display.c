@@ -1027,6 +1027,14 @@ static void roadmap_display_console_box
     if (! roadmap_message_format (text, sizeof(text), format)) {
         return;
     }
+
+#ifdef QTMOBILITY
+    {
+        roadmap_display_set_message(text);
+        return;
+    }
+#endif
+
     if ( type == ROADMAP_CONSOLE_WARNING ){
         	roadmap_canvas_get_text_extents (text, warning_font_size, &width, &ascent, &descent, NULL);
         	while (width > (roadmap_canvas_width()-10)){
