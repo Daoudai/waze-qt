@@ -12,6 +12,7 @@ extern "C" {
 #include "roadmap_mood.h"
 #include "roadmap_math.h"
 #include "editor/track/editor_track_main.h"
+#include "roadmap_display.h"
 }
 
 void qt_datamodels_register()
@@ -26,6 +27,7 @@ void qt_datamodels_register()
     roadmap_main_set_qml_context_property("__compass", WazeCompass::instance());
     roadmap_main_set_qml_context_property("__editor", WazeMapEditor::instance());
     roadmap_main_set_qml_context_property("__orientationSensor", OrientationSensor::instance());
+    roadmap_main_set_qml_context_property("__message", WazeMessage::instance());
 }
 
 SpeedometerData::SpeedometerData(QObject* parent) : QObject(parent) {}
@@ -50,6 +52,8 @@ QString SpeedometerData::text() {
 }
 
 void SpeedometerData::setText(QString text) {
+    if (_text == text) return;
+
     _text = text;
     emit textChanged();
 }
@@ -520,3 +524,27 @@ void NavigationData::setStreet(QString street)
     _street = street;
     emit streetChanged(street);
 }
+
+void roadmap_display_set_message(const char *message)
+{
+    WazeMessage::instance()->setText(QString::fromLocal8Bit(message));
+}
+
+WazeMessage::WazeMessage(QObject* parent) : QObject(parent) {}
+
+ WazeMessage* WazeMessage::instance()
+ {
+     static WazeMessage message;
+     return &message;
+ }
+
+ QString WazeMessage::text() {
+     return _text;
+ }
+
+ void WazeMessage::setText(QString text) {
+     if (_text == text) return;
+
+     _text = text;
+     emit textChanged();
+ }

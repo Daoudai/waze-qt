@@ -322,4 +322,27 @@ private:
     QString _street;
 };
 
+class WazeMessage : public QObject {
+    Q_OBJECT
+
+    Q_PROPERTY(QString text READ text NOTIFY textChanged)
+
+public:
+
+    QString text();
+
+    void setText(QString text);
+
+    static WazeMessage* instance();
+
+signals:
+    void textChanged();
+
+private:
+   explicit WazeMessage(QObject* parent = 0);
+   WazeMessage& operator =(WazeMessage&);
+
+   QString _text;
+};
+
 #endif // QT_DATAMODELS_H
