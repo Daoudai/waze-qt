@@ -2,27 +2,78 @@ import QtQuick 1.0
 
 Button {
     id: etaBar
-    property bool isEta: true
 
-    height: 100
+    height: 60
 
     Text {
         color: "#ffffff"
-        anchors.right: etaSeperator.left
+        anchors.right: etaSeperator1.left
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
 
-        text: (etaBar.isEta)? navigationData.eta : navigationData.etaTime
+        text: navigationData.etaTime
         font.bold: true
         horizontalAlignment: Text.AlignHCenter
-        font.pointSize: 32
+        font.pointSize: 22
         verticalAlignment: Text.AlignVCenter
     }
 
     Text {
-        id: etaSeperator
+        id: etaSeperator1
         color: "#000000"
-        anchors.centerIn: parent
+        x: parent.width / 4
+
+        text: "|"
+        font.bold: true
+        style: Text.Outline
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        font.pointSize: 30
+    }
+
+    Text {
+        color: "#ffffff"
+        anchors.right: etaSeperator2.left
+        anchors.left: etaSeperator1.right
+        anchors.verticalCenter: parent.verticalCenter
+
+        text: navigationData.eta
+        font.bold: true
+        horizontalAlignment: Text.AlignHCenter
+        font.pointSize: 22
+        verticalAlignment: Text.AlignVCenter
+    }
+
+    Text {
+        id: etaSeperator2
+        color: "#000000"
+        x: parent.width * 2 / 4
+
+        text: "|"
+        font.bold: true
+        style: Text.Outline
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        font.pointSize: 30
+    }
+
+    Text {
+        color: "#ffffff"
+        anchors.right: etaSeperator3.left
+        anchors.left: etaSeperator2.right
+        anchors.verticalCenter: parent.verticalCenter
+
+        text: speedometerData.text
+        font.bold: true
+        horizontalAlignment: Text.AlignHCenter
+        font.pointSize: 22
+        verticalAlignment: Text.AlignVCenter
+    }
+
+    Text {
+        id: etaSeperator3
+        color: "#000000"
+        x: parent.width * 3 / 4
 
         text: "|"
         font.bold: true
@@ -35,23 +86,13 @@ Button {
     Text {
         color: "#ffffff"
         anchors.right: parent.right
-        anchors.left: etaSeperator.right
+        anchors.left: etaSeperator3.right
         anchors.verticalCenter: parent.verticalCenter
 
-        text: (etaBar.isEta)? speedometerData.text : navigationData.remainingDistance
+        text: navigationData.remainingDistance
         font.bold: true
         horizontalAlignment: Text.AlignHCenter
-        font.pointSize: 32
+        font.pointSize: 22
         verticalAlignment: Text.AlignVCenter
-    }
-
-    Timer {
-        id: eta_message_timer
-        repeat: true
-        running: etaBar.visible
-        interval: 5000
-        onTriggered: {
-            etaBar.isEta = !etaBar.isEta
-        }
     }
 }

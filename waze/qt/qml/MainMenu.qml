@@ -195,6 +195,19 @@ Rectangle {
         }
 
         IconButton {
+            id: minimizeButton
+            width: buttonWidth
+            height: 100
+            icon: "button_sc_3_mid_s"
+
+            onClicked: {
+                buttonClicked();
+                mainMenu.visible = false;
+                invokeAction("minimize");
+            }
+        }
+
+        IconButton {
             id: exitButton
             width: buttonWidth
             height: 100
