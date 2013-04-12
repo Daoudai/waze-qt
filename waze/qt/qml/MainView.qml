@@ -9,7 +9,7 @@ Item {
     signal invokeAction(string action)
     signal buttonClicked()
 
-    property bool isPortrait: deviceOrientation > 2
+    property bool isPortrait: deviceOrientation == 3 || deviceOrientation == 4
 
     property int deviceOrientation: typeof(__orientationSensor) === 'undefined'? -1 : __orientationSensor.orientation
     onDeviceOrientationChanged: {
@@ -141,7 +141,7 @@ Item {
     }
 
     ////// Below is mock data to test the navigation view
-         /*
+    /*
     Item {
         id: navigationData
 
@@ -149,15 +149,15 @@ Item {
         property string eta : "120 דק'"
         property string etaTime : "23:13"
         property string remainingDistance : "138 ק\"מ"
-        property string currentTurnType : "big_direction_right"
+        property string currentTurnType : "big_directions_roundabout"
         property string currentTurnDistance : "12 ק\"מ"
-        property int currentExit : 0
-        property string nextTurnType : "big_direction_left"
+        property int currentExit : 2
+        property string nextTurnType : "big_directions_roundabout"
         property string nextTurnDistance : "30 מ'"
-        property int nextExit : 0
+        property int nextExit : 3
         property string street : "רח' השפשפת"
     }
-           */
+    */
 
 	
       Item {

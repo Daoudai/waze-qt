@@ -8,6 +8,13 @@ Rectangle {
     property int flowWidth: buttonWidth * 3 + 20
     property int buttonWidth: 120
 
+    function iconClicked(action)
+    {
+     	buttonClicked();
+    	mainMenu.visible = false;
+    	invokeAction(action);
+    }
+
     MouseArea {
         anchors.fill: parent
         onClicked: {
@@ -27,13 +34,21 @@ Rectangle {
         border.width: 10
     }
 
-    Flow {
-        id: menuFlow
+    GridView {
+    	id: menuFlow
         anchors.centerIn: parent
         width: flowWidth
+        height: flowWidth
+        cellWidth:  buttonWidth + 5
+        cellHeight: 105
+        clip: true
         z: 1
 
-        spacing: 10
+        model: menuFlowItems
+    }
+
+    VisualItemModel {
+        id: menuFlowItems
 
         IconButton {
             id: aboutButton
@@ -43,9 +58,7 @@ Rectangle {
             text: "About"
 
             onClicked: {
-                buttonClicked();
-                mainMenu.visible = false;
-                invokeAction("about");
+                iconClicked('about');
             }
         }
 
@@ -58,9 +71,7 @@ Rectangle {
             text: "Mood"
 
             onClicked: {
-                buttonClicked();
-                mainMenu.visible = false;
-                invokeAction("mood_dialog");
+                iconClicked("mood_dialog");
             }
 
             function moodToIcon(mood)
@@ -114,9 +125,7 @@ Rectangle {
             text: "Status"
 
             onClicked: {
-                buttonClicked();
-                mainMenu.visible = false;
-                invokeAction("gps_net_stat");
+                iconClicked("gps_net_stat");
             }
 
             function gpsToIcon(state) {
@@ -138,9 +147,7 @@ Rectangle {
             text: "Status"
 
             onClicked: {
-                buttonClicked();
-                mainMenu.visible = false;
-                invokeAction("gps_net_stat");
+                iconClicked("gps_net_stat");
             }
 
             function netToIcon(state) {
@@ -160,9 +167,7 @@ Rectangle {
             text: "Profile"
 
             onClicked: {
-                buttonClicked();
-                mainMenu.visible = false;
-                invokeAction("mywaze");
+                iconClicked("mywaze");
             }
         }
 
@@ -174,9 +179,7 @@ Rectangle {
             text: "General settings"
 
             onClicked: {
-                buttonClicked();
-                mainMenu.visible = false;
-                invokeAction("settingsmenu");
+                iconClicked("settingsmenu");
             }
         }
 
@@ -188,9 +191,7 @@ Rectangle {
             text: "Drive_to"
 
             onClicked: {
-                buttonClicked();
-                mainMenu.visible = false;
-                invokeAction("search_menu");
+                iconClicked("search_menu");
             }
         }
 
@@ -201,9 +202,7 @@ Rectangle {
             icon: "button_sc_3_mid_s"
 
             onClicked: {
-                buttonClicked();
-                mainMenu.visible = false;
-                invokeAction("minimize");
+                iconClicked("minimize");
             }
         }
 
@@ -214,9 +213,7 @@ Rectangle {
             icon: "icon_menu_switchoff"
 
             onClicked: {
-                buttonClicked();
-                mainMenu.visible = false;
-                invokeAction("quit");
+                iconClicked("quit");
             }
         }
     }
