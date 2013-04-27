@@ -398,14 +398,7 @@ Item {
                     if (x === navigateButton.targetX)
                     {
                         buttonClicked();
-                        if (!navigationData.isNavigation)
-                        {
-                            invokeAction("search_menu");
-                        }
-                        else
-                        {
-                            invokeAction("nav_menu");
-                        }
+                        invokeAction("search_menu");
                         x = navigateButton.originX;
                     }
                 }
