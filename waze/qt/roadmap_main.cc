@@ -487,13 +487,10 @@ int main(int argc, char* argv[]) {
    appView->setOrientation(QmlApplicationViewer::ScreenOrientationLockLandscape);
 
    appView->setMainQmlFile(QString("/qml/MainView.qml"));
+   appView->engine()->setProperty("width", app->desktop()->width());
+   appView->engine()->setProperty("height", app->desktop()->height());
 
    qt_datamodels_register();
-
-#ifdef Q_WS_MAEMO_5
-    // Lock orientation to portrait in Maemo
-    appView->setAttribute(Qt::WA_Maemo5PortraitOrientation, true);
-#endif
 
    appView->setAttribute(Qt::WA_TranslucentBackground);
    w.setCentralWidget(appView);

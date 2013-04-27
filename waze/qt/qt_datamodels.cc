@@ -2,6 +2,7 @@
 
 #include <QtGui/QApplication>
 #include <QFile>
+#include <QTimer>
 #include "qt_global.h"
 
 extern "C" {
@@ -338,6 +339,17 @@ OrientationSensor::OrientationSensor(QObject *parent) : QObject(parent)
 
     _sensor.start();
 
+    QTimer::singleShot(100, this, SLOT(delayedSet()));
+}
+
+OrientationSensor* OrientationSensor::instance()
+{
+    static OrientationSensor sensor;
+    return &sensor;
+}
+
+void OrientationSensor::delayedSet()
+{
     if (!_sensor.isActive())
     {
         // sensor not implemented for the platform
@@ -347,13 +359,8 @@ OrientationSensor::OrientationSensor(QObject *parent) : QObject(parent)
     {
         _orientation = _sensor.reading()->orientation();
     }
-    emit orientationChanged(_orientation);
-}
 
-OrientationSensor* OrientationSensor::instance()
-{
-    static OrientationSensor sensor;
-    return &sensor;
+    emit orientationChanged(_orientation);
 }
 
 void OrientationSensor::onOrientationChanged(const QVariant &orientation)
