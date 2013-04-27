@@ -240,6 +240,7 @@ signals:
 
 private slots:
     void onOrientationChanged(const QVariant& orientation);
+    void delayedSet();
 
 private:
     explicit OrientationSensor(QObject *parent = 0);
