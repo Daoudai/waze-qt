@@ -34,7 +34,7 @@ QString getFromCharArray(const char* value)
 KeyboardDialog::KeyboardDialog(QDeclarativeView *parent) :
     QDeclarativeView(parent), mainWindow(parent)
 {
-    setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../qml/TextBox.qml")));
+    setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString(APP_PATH_PREFIX "/qml/TextBox.qml")));
     setAttribute(Qt::WA_TranslucentBackground);
     rootContext()->setContextProperty("__translator", Translator::instance());
 

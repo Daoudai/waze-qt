@@ -339,5 +339,11 @@ double atof_locale_safe(const char* str);
 
 #define waze_assert(condition) { if(!(condition)){ roadmap_log(ROADMAP_FATAL, "ASSERT FAILED: %s @ (%s:%s)", #condition, __FILE__, __LINE__); } }
 
+#ifdef Q_WS_SIMULATOR
+#define APP_PATH_PREFIX "/"
+#else
+#define APP_PATH_PREFIX "/.."
+#endif
+
 #endif // INCLUDE__ROADMAP__H
 

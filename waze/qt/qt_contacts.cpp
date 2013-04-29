@@ -41,7 +41,7 @@ void RContactsView::initialize()
     _contactListModel = new ContactsList(contactManager, this);
     engine()->rootContext()->setContextProperty("contactModel", _contactListModel);
     engine()->rootContext()->setContextProperty("__translator", Translator::instance());
-    setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../qml/Contacts.qml")));
+    setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString(APP_PATH_PREFIX "/qml/Contacts.qml")));
 
     QObject *item = dynamic_cast<QObject*>(rootObject());
     QObject::connect(item, SIGNAL(okPressed(QString)),
