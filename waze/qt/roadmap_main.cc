@@ -486,7 +486,7 @@ int main(int argc, char* argv[]) {
 
    appView->setOrientation(QmlApplicationViewer::ScreenOrientationLockLandscape);
 
-   appView->setMainQmlFile(QApplication::applicationDirPath() + QString("/qml/MainView.qml"));
+   appView->setMainQmlFile(QApplication::applicationDirPath() + QString(APP_PATH_PREFIX "/qml/MainView.qml"));
    appView->engine()->setProperty("width", app->desktop()->width());
    appView->engine()->setProperty("height", app->desktop()->height());
 
