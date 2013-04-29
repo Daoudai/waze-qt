@@ -71,7 +71,7 @@ void WazeWebAccessor::invokeNextRequest()
 
 QString WazeWebAccessor::buildHeader(RequestType type, QUrl url, QString additional)
 {
-    static QString HEADER_TEMPLATE = QString::fromAscii("%1 %2 HTTP/1.0\r\n"
+    static QString HEADER_TEMPLATE = QString::fromAscii("%1 %2 HTTP/1.1\r\n"
                                                         "Host: %3:%4\r\n"
                                                         "User-Agent: FreeMap/%5\r\n"
                                                         "%6\r\n");
@@ -123,12 +123,6 @@ HttpAsyncContext* WazeWebAccessor::postRequestParser(
                .arg(address.isEmpty()? ((isSecured)? _securedAddress : _address) :  address)
                .arg((flags & WEBSVC_FLAG_V2)? _v2Suffix : QString())
                .arg(QString::fromAscii(action)));
-
-    QHostInfo hi = QHostInfo::fromName(url.host());
-    if (!hi.addresses().isEmpty())
-    {
-         url.setHost(hi.addresses().first().toString());
-    }
 
     if (url.port() == -1)
     {
@@ -296,12 +290,6 @@ HttpAsyncContext* WazeWebAccessor::getRequest(QString url, int flags, RoadMapHtt
 {
     QUrl encodedUrl = QUrl::fromEncoded(url.toAscii());
 
-    QHostInfo hi = QHostInfo::fromName(encodedUrl.host());
-    if (!hi.addresses().isEmpty())
-    {
-         encodedUrl.setHost(hi.addresses().first().toString());
-    }
-
     if (encodedUrl.port() == -1)
     {
         encodedUrl.setPort(80);
@@ -355,17 +343,20 @@ HttpAsyncContext* WazeWebAccessor::getRequest(QString url, int flags, RoadMapHtt
 HttpAsyncContext* WazeWebAccessor::postRequestProgress(QString url, int flags, RoadMapHttpAsyncCallbacks *callbacks, void *context, const char* req_header, const void* data, int data_length)
 {
     QUrl encodedUrl = QUrl::fromEncoded(url.toAscii());
-
-    QHostInfo hi = QHostInfo::fromName(encodedUrl.host());
-    if (!hi.addresses().isEmpty())
-    {
-         encodedUrl.setHost(hi.addresses().first().toString());
-    }
+    bool isSecured = flags & WEBSVC_FLAG_SECURED;
 
     if (encodedUrl.port() == -1)
     {
-        encodedUrl.setPort(80);
+        if (isSecured)
+        {
+            encodedUrl.setPort(443);
+        }
+        else
+        {
+            encodedUrl.setPort(80);
+        }
     }
+
     QByteArray ba((const char*) data, data_length);
 
     QString headerStr = buildHeader(Post, encodedUrl, QString::fromAscii(req_header));
@@ -381,7 +372,7 @@ HttpAsyncContext* WazeWebAccessor::postRequestProgress(QString url, int flags, R
 
     HttpAsyncContext cd;
     cd.type = ProgressBased;
-    cd.isSecured = false;
+    cd.isSecured = isSecured;
     cd.isPost = true;
     cd.callback.callbacks = callbacks;
     cd.context = context;
