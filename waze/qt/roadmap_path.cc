@@ -58,6 +58,7 @@ static RoadMapPathList RoadMapPaths;
 #ifndef HOME_PREFIX
 #define HOME_PREFIX ".waze"
 #endif
+
 static char path_separator = '/';
 
 static char *roadmap_path_expand (const char *item, size_t length);
@@ -70,7 +71,7 @@ static RoadMapPathRecord roadmap_path_find (const char *name) {
 
         /* Add the hardcoded configuration. */
 
-        QString appDataPath = QApplication::applicationDirPath() + QString("/../data");
+        QString appDataPath = QApplication::applicationDirPath() + QString(APP_PATH_PREFIX "/data");
         QString userDataPath = QDir::homePath().append("/").append(QString(HOME_PREFIX));
 
         QList<WazeString> userPaths;

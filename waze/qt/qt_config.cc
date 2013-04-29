@@ -10,7 +10,7 @@ extern "C" {
 RMapConfig::RMapConfig(QObject *parent) :
     QObject(parent)
 {
-    QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, QApplication::applicationDirPath()+ QString("/.."));
+    QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, QApplication::applicationDirPath()+ QString(APP_PATH_PREFIX));
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, roadmap_path_user());
 
     DataStr = QString::fromLocal8Bit("data");
